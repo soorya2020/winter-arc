@@ -6,7 +6,8 @@ import { inviteLink } from "@/lib/reminders";
 import { EVENTS } from "@/lib/season.ts";
 import { formatValue, points } from "@/lib/scoring.ts";
 import { loadBoard } from "@/lib/board";
-import { AddForm, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell } from "./ui";
+import { allQuotes, quoteOfTheDay } from "@/lib/quotes";
+import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell } from "./ui";
 import { logout } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +18,7 @@ const TABS = [
   { id: "strength", label: "Strength weekend" },
   { id: "baseline", label: "Baseline test" },
   { id: "broadcast", label: "Broadcast email" },
+  { id: "quotes", label: "Bro talk" },
   { id: "awards", label: "Certificates & posters" },
 ];
 
@@ -116,6 +118,8 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
           </div>
         )}
 
+        {tab === "quotes" && <Quotes />}
+
         {tab === "awards" && <Awards />}
       </section>
     </div>
@@ -150,6 +154,26 @@ async function Awards() {
         </table>
       </div>
       <p className="note">Group poster for the chat: <a href="/api/poster/board">leaderboard poster</a>. Certificates open as a page you can print or save as PDF.</p>
+    </div>
+  );
+}
+
+async function Quotes() {
+  const [list, todayQ] = await Promise.all([allQuotes(), quoteOfTheDay()]);
+  return (
+    <div style={{ display: "grid", gap: "1.25rem" }}>
+      <p className="note">One quote shows per day: in a single strip above the arena and at the bottom of the daily email. Friends can add their own from the arena page too.</p>
+      <p><span className="label">Showing today</span><br /><b>“{todayQ.text}”</b>{todayQ.author ? ` · ${todayQ.author}` : ""}</p>
+      <QuoteForm />
+      <div className="tablewrap">
+        <table>
+          <thead><tr><th>Quote</th><th>By</th><th /></tr></thead>
+          <tbody>
+            {list.map((q) => <tr key={q.id}><td>{q.text}</td><td className="note">{q.author ?? "–"}</td><td><RemoveQuote id={q.id} /></td></tr>)}
+            {!list.length && <tr><td colSpan={3} className="note">No quotes yet. Three built-in starters rotate until you add the first one.</td></tr>}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

@@ -63,3 +63,15 @@ export async function saveProfile(_: unknown, form: FormData) {
   revalidatePath("/board");
   return { ok: "Saved. Your fighter has a new attitude." };
 }
+
+export async function submitQuote(_: unknown, form: FormData) {
+  const me = await currentParticipant();
+  if (!me?.accepted_at) return { error: "Accept your invite first." };
+  const text = String(form.get("quote") ?? "").replace(/\s+/g, " ").trim().slice(0, 220);
+  if (text.length < 3) return { error: "Write your bro talk first." };
+  const { count } = await db().from("quotes").select("id", { count: "exact", head: true }).eq("participant_id", me.id);
+  if ((count ?? 0) >= 10) return { error: "That's 10 from you already. Leave some for the others." };
+  const { error } = await db().from("quotes").insert({ text, author: me.nickname || me.name, participant_id: me.id });
+  if (error) return { error: "Couldn't save it. Try again." };
+  return { ok: "Added. It'll show up on one of the coming days." };
+}

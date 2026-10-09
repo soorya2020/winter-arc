@@ -5,6 +5,8 @@ import Confetti from "@/components/Confetti";
 import Countdown from "@/components/Countdown";
 import Live from "./Live";
 import PracticeForm from "./PracticeForm";
+import QuoteStrip from "./QuoteStrip";
+import { quoteOfTheDay } from "@/lib/quotes";
 import { currentParticipant, isAdmin } from "@/lib/auth";
 import { loadBoard } from "@/lib/board";
 import { recentTaunts } from "@/lib/db";
@@ -17,7 +19,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
   const me = await currentParticipant();
   const admin = isAdmin();
   if (!me?.accepted_at && !admin) redirect("/");
-  const [rows, taunts] = await Promise.all([loadBoard(), recentTaunts()]);
+  const [rows, taunts, quote] = await Promise.all([loadBoard(), recentTaunts(), quoteOfTheDay()]);
   const mine = rows.find((r) => r.id === me?.id);
   const ms = nextMilestone();
   const when = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(ms.at));
@@ -28,7 +30,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
       <Confetti onLoad={searchParams.joined === "1"} />
       <div className="wrap">
         <Header right={<>{admin && <Link href="/admin">Admin</Link>}<Link href="/">Home</Link><span className="pill">{me ? `You: #${mine?.rank ?? "–"}` : "Admin view"}</span></>} />
-        <div style={{ height: "1.25rem" }} />
+        <QuoteStrip text={quote.text} author={quote.author} canAdd={!!me} />
         <Live rows={rows} taunts={taunts} meId={me?.id ?? null} events={EVENTS.map((e) => ({ id: e.id, name: e.name, weekend: e.weekend }))} />
 
         {me && (

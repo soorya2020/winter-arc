@@ -100,3 +100,20 @@ export async function broadcast(audience: Audience, subject: string, message: st
     return { error: `Email failed: ${(e as Error).message}` };
   }
 }
+
+export async function addQuote(_: Msg, form: FormData): Promise<Msg> {
+  requireAdmin();
+  const text = String(form.get("text") ?? "").replace(/\s+/g, " ").trim().slice(0, 220);
+  const author = String(form.get("author") ?? "").trim().slice(0, 40) || null;
+  if (text.length < 3) return { error: "Write the quote first." };
+  const { error } = await db().from("quotes").insert({ text, author });
+  if (error) return { error: "Couldn't save it. Try again." };
+  revalidatePath("/admin");
+  return { ok: "Added to the rotation." };
+}
+
+export async function removeQuote(id: number) {
+  requireAdmin();
+  await db().from("quotes").delete().eq("id", id);
+  revalidatePath("/admin");
+}

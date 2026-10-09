@@ -155,7 +155,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 
 /* arena */
 .arena { background: var(--night); color: #fff; padding: clamp(14px, 3vw, 24px); display: grid; gap: .9rem; margin-inline: calc(-1 * clamp(16px, 4vw, 48px)); }
-.arena-top { display: flex; justify-content: space-between; align-items: end; gap: .5rem 1rem; flex-wrap: wrap; }
+.arena-top { display: flex; justify-content: space-between; align-items: flex-end; gap: .5rem 1rem; flex-wrap: wrap; }
 .arena-top h2 { font-size: clamp(2.4rem, 7vw, 4rem); }
 .arena-top h2 em { font-style: normal; color: var(--accent); }
 .arena-top p { color: var(--night-muted); font-size: .9rem; max-width: 34rem; }
@@ -209,3 +209,12 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
   @keyframes up { from { transform: translateY(16px); opacity: .2; } to { transform: none; opacity: 1; } }
 }
 @media print { #fx, .noprint { display: none !important; } body { background: var(--paper); -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+
+/* bro talk strip */
+.quote { display: grid; gap: .3rem; padding-block: 1rem; border-bottom: 2px solid var(--ink); margin-bottom: 1.25rem; }
+.quote > p { font-family: var(--display); font-size: clamp(1.4rem, 3.4vw, 2.2rem); line-height: 1.05; text-transform: uppercase; text-wrap: balance; }
+.quote > p span { font-family: var(--body); font-size: .85rem; text-transform: none; color: var(--muted); font-weight: 600; }
+.quote details { font-size: .85rem; }
+.quote summary { cursor: pointer; color: var(--accent); font-weight: 800; text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; }
+.quote form { display: flex; gap: .5rem; margin-top: .5rem; flex-wrap: wrap; }
+.quote form input { flex: 1 1 16rem; min-width: 0; }

@@ -48,6 +48,12 @@ most push-ups) and optional fun ones (tone, fighter name, signature move, excuse
 song, early bird or night owl, rival). Friends roast each other with those answers plus real stats. Lines live in [`lib/trash.ts`](lib/trash.ts),
 questions in [`lib/profile.ts`](lib/profile.ts). Anyone can change their answers at `/profile`.
 
+## Bro talk
+
+One quote shows per day, in a strip above the arena and in the daily email. Add or remove quotes in
+*Admin > Bro talk*; friends can add their own (up to 10 each) from the arena page. Three built-in
+starters rotate until the first quote is added.
+
 ## Pages
 
 | Page | Who | What |

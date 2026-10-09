@@ -4,6 +4,7 @@ import { displayName, type Participant } from "./db";
 import { loadBoard } from "./board";
 import { SEASON, WEEK_PLAN, nextMilestone } from "./season.ts";
 import { weekday } from "./streak.ts";
+import { quoteOfTheDay } from "./quotes";
 
 export const inviteLink = (p: Participant) => `${siteUrl()}/i/${p.token}`;
 
@@ -35,6 +36,8 @@ export async function sendDailyReminders(people: Participant[]) {
   const plan = WEEK_PLAN[weekday()];
   const ms = nextMilestone();
   const days = daysUntil(ms.at);
+  const quote = await quoteOfTheDay();
+  const quoteHtml = `<span style="display:block;border-left:4px solid #ff4d00;padding-left:12px;font-weight:700">“${esc(quote.text)}”${quote.author ? `<br><span style="font-weight:400;color:#6b6f68">${esc(quote.author)}</span>` : ""}</span>`;
   let sent = 0;
   const failed: string[] = [];
   for (const p of people.filter((x) => x.accepted_at)) {
@@ -51,10 +54,10 @@ export async function sendDailyReminders(people: Participant[]) {
           kicker: `${ms.label} in ${days} days`,
           title: `Today: ${plan.title}`,
           stats: [[String(days), "days left"], [String(row?.streak ?? 0), "day streak"], [row ? `#${row.rank}` : "–", "your rank"]],
-          body: [`${esc(name)}, ${esc(plan.detail)}`, streakLine],
+          body: [`${esc(name)}, ${esc(plan.detail)}`, streakLine, quoteHtml],
           cta: { label: "Log it", href: `${siteUrl()}/board#you` },
         }),
-        `${days} days to ${ms.label}. Today: ${plan.title}. ${plan.detail} Log it: ${siteUrl()}/board`,
+        `${days} days to ${ms.label}. Today: ${plan.title}. ${plan.detail}\n\n"${quote.text}"${quote.author ? ` (${quote.author})` : ""}\n\nLog it: ${siteUrl()}/board`,
       );
       sent++;
     } catch {

@@ -52,3 +52,13 @@ alter table taunts enable row level security;
 
 -- Personality questionnaire answers that power the arena trash talk.
 alter table participants add column if not exists profile jsonb not null default '{}'::jsonb;
+
+-- Bro talk: quotes the organiser or friends add. One is shown per day.
+create table if not exists quotes (
+  id bigserial primary key,
+  text text not null check (char_length(text) between 3 and 220),
+  author text,
+  participant_id uuid references participants(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+alter table quotes enable row level security;

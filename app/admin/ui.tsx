@@ -1,7 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { addParticipant, broadcast, emailInvite, login, removeParticipant, saveResult, sendRemindersNow } from "./actions";
+import { addParticipant, addQuote, removeQuote, broadcast, emailInvite, login, removeParticipant, saveResult, sendRemindersNow } from "./actions";
 
 type Msg = { ok?: string; error?: string } | null;
 const Note = ({ m }: { m: Msg }) => (m?.error ? <p className="err">{m.error}</p> : m?.ok ? <p className="ok">{m.ok}</p> : null);
@@ -148,4 +148,25 @@ export function Broadcast({ counts }: { counts: { accepted: number; pending: num
       <Note m={m} />
     </div>
   );
+}
+
+export function QuoteForm() {
+  const [m, action] = useFormState(async (p: Msg, fd: FormData) => {
+    const r = await addQuote(p, fd);
+    if (r?.ok) (document.getElementById("quote-form") as HTMLFormElement | null)?.reset();
+    return r;
+  }, null as Msg);
+  return (
+    <form id="quote-form" className="card" action={action} style={{ maxWidth: "44rem" }}>
+      <div className="field"><label htmlFor="q-text">Bro talk</label><textarea id="q-text" name="text" maxLength={220} rows={3} required style={{ borderRadius: 14 }} placeholder="Abs are made in the kitchen, but you're still doing the planks." /></div>
+      <div className="field"><label htmlFor="q-author">Who said it (optional)</label><input id="q-author" name="author" maxLength={40} placeholder="Rahul, 2am, after biryani" /></div>
+      <Submit>Add to the rotation</Submit>
+      <Note m={m} />
+    </form>
+  );
+}
+
+export function RemoveQuote({ id }: { id: number }) {
+  const [pending, start] = useTransition();
+  return <button className="ghost small" disabled={pending} onClick={() => start(() => removeQuote(id))}>Remove</button>;
 }
