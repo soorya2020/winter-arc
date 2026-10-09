@@ -1,0 +1,72 @@
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import Header from "@/components/Header";
+import Confetti from "@/components/Confetti";
+import Countdown from "@/components/Countdown";
+import BoardLive from "./BoardLive";
+import PracticeForm from "./PracticeForm";
+import { currentParticipant, isAdmin } from "@/lib/auth";
+import { loadBoard } from "@/lib/board";
+import { EVENTS, TZ, WEEK_PLAN, nextMilestone } from "@/lib/season.ts";
+import { weekday } from "@/lib/streak.ts";
+
+export const dynamic = "force-dynamic";
+
+export default async function Board({ searchParams }: { searchParams: { joined?: string } }) {
+  const me = await currentParticipant();
+  const admin = isAdmin();
+  if (!me?.accepted_at && !admin) redirect("/");
+  const rows = await loadBoard();
+  const mine = rows.find((r) => r.id === me?.id);
+  const ms = nextMilestone();
+  const when = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(ms.at));
+  const todayPlan = WEEK_PLAN[weekday()];
+
+  return (
+    <>
+      <Confetti onLoad={searchParams.joined === "1"} />
+      <div className="wrap">
+        <div className="glow" />
+        <Header right={<>{admin && <Link href="/admin">Admin</Link>}<Link href="/">Home</Link><span className="pill">{me ? `You: #${mine?.rank ?? "–"}` : "Admin view"}</span></>} />
+
+        <section style={{ paddingTop: "1.5rem" }}>
+          <div className="head">
+            <span className="live">Live</span>
+            <h2>The leaderboard</h2>
+            <p>Points update here the moment the admin enters a result. Bars show how close each person got to the cap in every event.</p>
+          </div>
+          <BoardLive initial={rows} meId={me?.id ?? null} events={EVENTS.map((e) => ({ id: e.id, name: e.name }))} />
+        </section>
+
+        {me && (
+          <section id="you">
+            <div className="head">
+              <span className="label">Your corner</span>
+              <h2>Keep the streak</h2>
+            </div>
+            <div className="split">
+              <div className="box">
+                <h3>Today: {todayPlan.title}</h3>
+                <p className="note">{todayPlan.detail}</p>
+                <PracticeForm />
+              </div>
+              <div className="box">
+                <h3>Next up</h3>
+                <Countdown to={ms.at} label={ms.label} when={when} />
+                <p className="note">
+                  Streak: <b style={{ color: "var(--cyan)" }}>{mine?.streak ?? 0} days</b> · Sessions logged: {mine?.sessions ?? 0}
+                  {mine?.limit ? <> · Your limit right now: <b style={{ color: "var(--pink)" }}>{mine.limit}</b></> : null}
+                </p>
+                {mine && mine.total > 0 && (
+                  <p className="note">
+                    <Link href={`/certificate/${me.id}`}>Your certificate</Link> · <a href={`/api/poster/${me.id}`}>Your poster</a>
+                  </p>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+      </div>
+    </>
+  );
+}
