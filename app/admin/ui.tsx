@@ -80,7 +80,7 @@ export function ReminderButton() {
   );
 }
 
-export function ResultCell(props: { participantId: string; eventId: string; baseline: boolean; initial: string; initialPoints: number | null; placeholder: string }) {
+export function ResultCell(props: { participantId: string; eventId: string; baseline: boolean; initial: string; initialPoints: number | null; placeholder: string; label?: string }) {
   const [value, setValue] = useState(props.initial);
   const [saved, setSaved] = useState(props.initial);
   const [pts, setPts] = useState(props.initialPoints);
@@ -94,11 +94,19 @@ export function ResultCell(props: { participantId: string; eventId: string; base
       setErr(null); setSaved(value); setPts(r.points ?? null);
     });
   };
+  // Enter (Next on a phone keyboard) saves and moves to the next person's box.
+  const next = (el: HTMLInputElement) => {
+    const all = [...document.querySelectorAll<HTMLInputElement>("input[data-result]")];
+    const n = all[all.indexOf(el) + 1];
+    if (n) n.focus(); else el.blur();
+  };
+  const state = pending ? "Saving…" : err ?? (pts != null ? `${pts} pts` : value !== saved ? "Not saved" : "");
   return (
-    <div style={{ display: "grid", gap: ".2rem" }}>
-      <input value={value} placeholder={props.placeholder} inputMode="decimal" aria-label="Result"
-        onChange={(e) => setValue(e.target.value)} onBlur={save} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
-      <span className={err ? "err" : "pts"} style={{ fontSize: ".72rem" }}>{pending ? "Saving…" : err ?? (pts != null ? `${pts} pts` : value !== saved ? "Not saved" : "")}</span>
+    <div className="rcell">
+      <input data-result value={value} placeholder={props.placeholder} inputMode="decimal" enterKeyHint="next" aria-label={props.label ?? "Result"}
+        className={pts != null && value === saved && !err ? "done" : undefined}
+        onChange={(e) => setValue(e.target.value)} onBlur={save} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); next(e.target as HTMLInputElement); } }} />
+      <span className={err ? "err" : "pts"} aria-live="polite">{state}</span>
     </div>
   );
 }
