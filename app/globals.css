@@ -166,7 +166,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .arena .taunt button { background: var(--accent); }
 .arena .taunt button:hover { background: #fff; color: var(--ink); }
 .arena .taunt button.ghost { background: transparent; color: #fff; border-color: var(--night-line); }
-.arena .feed { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; max-height: 9.5rem; overflow-y: auto; font-size: .9rem; }
+.arena .feed { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; max-height: 14rem; overflow-y: auto; font-size: .95rem; }
+.arena .feed-label { margin: .8rem 0 .4rem; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 800; color: var(--night-muted); }
 .arena .feed li { color: var(--night-muted); }
 .arena .feed b { color: #fff; }
 .arena .feed li.mine b { color: var(--accent); }

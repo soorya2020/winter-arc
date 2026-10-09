@@ -88,7 +88,7 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
     const ctx = cv.getContext("2d")!;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const w = world.current;
-    let W = 0, H = 0, raf = 0, last = performance.now(), lastAuto = 0;
+    let W = 0, H = 0, raf = 0, last = performance.now(), lastAuto = 0, lastSay = 0;
     // next/font renames families, so read the real names from the CSS variables.
     const css = getComputedStyle(document.documentElement);
     const DISPLAY = (css.getPropertyValue("--font-display").trim() || "Anton") + ", Impact, sans-serif";
@@ -110,7 +110,7 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
     layout();
     const ro = new ResizeObserver(layout); ro.observe(cv);
 
-    const say = (f: Fighter, text: string, now: number) => { w.bubbles = w.bubbles.filter((b) => b.f !== f).slice(-1); w.bubbles.push({ f, text, t0: now }); };
+    const say = (f: Fighter, text: string, now: number) => { lastSay = now; w.bubbles = w.bubbles.filter((b) => b.f !== f).slice(-1); w.bubbles.push({ f, text, t0: now }); };
     const start = (a: Fighter, b: Fighter, text: string, now: number, toFeed: boolean) => {
       if (a.busy || b.busy || a === b) return false;
       a.busy = b.busy = true; a.state = "walk"; a.face = b.x > a.x ? 1 : -1;
@@ -140,7 +140,7 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
           w.pops.push({ x: b.x, y: b.y - 125 * b.s, text: pick(HITS), t0: now, big: true }, { x: b.x + 32 * b.s, y: b.y - 85 * b.s, text: `-${dmg}`, t0: now, big: false });
         } else if (f.step === "react" && now - f.t0 > 650) {
           f.step = "back"; f.t0 = now; a.state = "walk";
-          say(b, comeback(b.row, a.row), now);
+          { const back = comeback(b.row, a.row); say(b, back, now); addFeedRef.current(b.name, back, b.me); }
         } else if (f.step === "back") {
           const hx = a.homeX - a.x, hy = a.homeY - a.y, hd = Math.hypot(hx, hy), sp = 0.3 * dt;
           a.face = hx > 0 ? 1 : -1;
@@ -153,7 +153,7 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
       for (const f of w.fighters) if (!f.busy && f.hp < 100) f.hp = Math.min(100, f.hp + dt * 0.004);
       // free-for-all: keep up to two scraps going at once
       const free = w.fighters.filter((f) => !f.busy);
-      if (!reduce && free.length >= 2 && w.fights.length < (W < 520 ? 1 : Math.min(2, Math.floor(w.fighters.length / 2))) && now - lastAuto > 1300) {
+      if (!reduce && free.length >= 2 && w.fights.length < 1 && w.bubbles.length < 2 && now - lastSay > 3500 && now - lastAuto > 4000) {
         lastAuto = now;
         const a = pick(free), b = pickTarget(talker(a.row), free.filter((f) => f !== a));
         if (b) start(a, b, lineFor(a.row, b.row), now, true);
@@ -216,7 +216,8 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
       if (cur) out.push(cur); return out.slice(0, 6);
     };
     const drawBubble = (b: Bubble, now: number) => {
-      const age = now - b.t0, dur = 2400 + b.text.length * 25;
+      // Long enough to read: about 4.5 s for a short line, up to 8 s for a long one.
+      const age = now - b.t0, dur = Math.min(8000, 4000 + b.text.length * 45);
       if (age > dur) return false;
       const f = b.f;
       ctx.save(); ctx.globalAlpha = Math.min(1, age / 120, (dur - age) / 250);
@@ -304,6 +305,7 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
         </form>
       )}
       {msg && <p className="err">{msg}</p>}
+      <p className="feed-label">Trash talk feed</p>
       <ul className="feed" aria-label="Trash talk">
         {feed.map((f) => <li key={f.key} className={f.mine ? "mine" : ""}><b>{f.who}:</b> {f.text}</li>)}
       </ul>
