@@ -273,3 +273,39 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
   .wrap > section:nth-of-type(2) { animation-delay: .1s; } .wrap > section:nth-of-type(3) { animation-delay: .2s; }
   .lb { transition: background .2s ease; } .lb:hover { background: rgba(255, 77, 0, .04); }
 }
+
+/* hero hype words: six words, one every 1.8 s, each animation spans the full 10.8 s loop */
+.hero-top { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 1.5rem; align-items: center; }
+.hype { position: relative; min-height: clamp(8rem, 22vw, 17rem); display: grid; place-items: center; }
+.hype span { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; opacity: 0; }
+.hype span:first-child { opacity: 1; }
+.hype b { position: relative; font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: clamp(2.6rem, 7.5vw, 6.2rem); line-height: .88; text-wrap: balance; max-width: 6.5em; color: var(--ink); }
+.hype span:nth-child(odd) b { color: var(--accent); }
+@media (max-width: 760px) {
+  .hero-top { grid-template-columns: minmax(0, 1fr); gap: .5rem; }
+  .hype { min-height: 7.5rem; justify-items: start; }
+  .hype span { justify-items: start; text-align: left; }
+  .hype b { font-size: clamp(2.4rem, 12vw, 3.6rem); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hype span { opacity: 0; animation: 10.8s linear infinite both; animation-delay: calc(var(--n) * 1.8s + 1s); }
+  .hype b { animation: inherit; animation-name: none; }
+  /* burst: pops out of a starburst */
+  .hype--burst span { animation-name: hype-burst; }
+  .hype--burst b::before { content: ""; position: absolute; inset: -45% -20%; z-index: -1; background: repeating-conic-gradient(from 0deg, rgba(255, 77, 0, .18) 0 6deg, transparent 6deg 18deg); border-radius: 50%; -webkit-mask: radial-gradient(closest-side, #000 55%, transparent); mask: radial-gradient(closest-side, #000 55%, transparent); animation: inherit; animation-name: hype-rays; }
+  @keyframes hype-burst { 0% { opacity: 0; transform: scale(.2) rotate(-14deg); } 2.2% { opacity: 1; transform: scale(1.18) rotate(-3deg); } 3.6% { transform: scale(.96) rotate(-4deg); } 4.6%, 14% { opacity: 1; transform: scale(1) rotate(-4deg); } 16.4% { opacity: 0; transform: scale(1.35) rotate(-4deg); } 100% { opacity: 0; } }
+  @keyframes hype-rays { 0% { transform: scale(.3) rotate(0); } 4% { transform: scale(1.1) rotate(20deg); } 16.4% { transform: scale(1.2) rotate(60deg); } 100% { transform: scale(1.2) rotate(60deg); } }
+  /* slam: drops in heavy and shakes */
+  .hype--slam span { animation-name: hype-slam; }
+  @keyframes hype-slam { 0% { opacity: 0; transform: translateY(-70%) scale(1.6); } 2.4% { opacity: 1; transform: none; } 3% { transform: translate(-6px, 3px) rotate(-1.5deg); } 3.6% { transform: translate(5px, -2px) rotate(1deg); } 4.2%, 14.4% { opacity: 1; transform: none; } 16.4% { opacity: 0; transform: translateY(40%); } 100% { opacity: 0; } }
+  /* flip: rolls up behind an orange wipe */
+  .hype i { font-style: normal; display: block; }
+  .hype--flip span { animation-name: hype-vis; }
+  .hype--flip b { overflow: hidden; padding-block: .06em; }
+  .hype--flip i { animation: inherit; animation-name: hype-roll; }
+  .hype--flip b::after { content: ""; position: absolute; inset: 0 -2%; background: var(--accent); transform-origin: left; animation: inherit; animation-name: hype-wipe; }
+  .hype--flip span:nth-child(odd) b::after { background: var(--ink); }
+  @keyframes hype-vis { 0% { opacity: 0; } 0.1%, 16.4% { opacity: 1; } 16.5%, 100% { opacity: 0; } }
+  @keyframes hype-roll { 0%, 2% { transform: translateY(105%); } 4.5%, 14.4% { transform: none; } 16.4%, 100% { transform: translateY(-105%); } }
+  @keyframes hype-wipe { 0% { transform: scaleX(0); transform-origin: left; } 2% { transform: scaleX(1); transform-origin: left; } 2.01% { transform: scaleX(1); transform-origin: right; } 4.5%, 100% { transform: scaleX(0); transform-origin: right; } }
+}
