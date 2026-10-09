@@ -85,7 +85,7 @@ export default async function Home() {
           <label htmlFor="why-more" className="why-more">Read the rest</label>
         </section>
 
-        <section className="orgs" id="organizers" data-o="cards" data-reveal>
+        <section className="orgs" id="organizers" data-reveal>
           <span className="label">The organizers</span>
           <h2>Blame <em>these two.</em></h2>
           <div className="org-grid">

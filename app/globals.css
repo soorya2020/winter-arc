@@ -363,7 +363,7 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
   .home[data-m="b"] .strip { margin-top: 1.5rem; }
 }
 
-/* home: organizers, drawn as arena fighters. data-o picks the layout: cards, stage or big. */
+/* home: organizers, drawn as arena fighters. */
 .orgs { display: grid; gap: .8rem; border-top: 2px solid var(--ink); margin-top: clamp(3rem, 7vw, 5rem); padding-top: 1rem; }
 .orgs h2 { font-size: clamp(2.6rem, 7vw, 4.5rem); }
 .orgs h2 em { font-style: normal; color: var(--accent); }
@@ -376,31 +376,10 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 .org h3 { font-size: 2rem; }
 .org-role { display: block; margin-top: .2rem; font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
 .org p { margin-top: .5rem; color: var(--muted); max-width: 40ch; }
-/* stage: both fighters share one dark gym floor */
-.orgs[data-o="stage"] .org-grid { gap: 0 0; }
-.orgs[data-o="stage"] .org { grid-template-columns: minmax(0, 1fr); border: 0; padding: 0; align-items: start; align-content: start; }
-.orgs[data-o="stage"] .org-ava { width: 100%; aspect-ratio: auto; height: 15rem; border-radius: 0; background: linear-gradient(to bottom, var(--ink) 82%, #ff4d00 82%, #ff4d00 84%, #1b1d1f 84%); }
-.orgs[data-o="stage"] .org:first-child .org-ava { border-radius: 1rem 0 0 1rem; }
-.orgs[data-o="stage"] .org:last-child .org-ava { border-radius: 0 1rem 1rem 0; }
-.orgs[data-o="stage"] .org-ava svg { width: auto; height: 82%; margin-bottom: 5%; }
-.orgs[data-o="stage"] .org-ava .tag { display: block; bottom: .5rem; }
-.orgs[data-o="stage"] .org-text { padding: 1rem 1rem 0 0; }
-/* big: tall poster cards */
-.orgs[data-o="big"] .org { grid-template-columns: minmax(0, 1fr); border: 2px solid var(--ink); padding: 0; gap: 0; align-items: start; align-content: start; }
-.orgs[data-o="big"] .org-ava { width: 100%; aspect-ratio: 4 / 3; border-radius: 0; background: repeating-linear-gradient(-45deg, #ecede7 0 14px, #e3e4dd 14px 28px); }
-.orgs[data-o="big"] .org:nth-child(1) .org-ava { background: repeating-linear-gradient(-45deg, #ffe1d3 0 14px, #ffd4c0 14px 28px); }
-.orgs[data-o="big"] .org-ava svg { width: auto; height: 90%; }
-.orgs[data-o="big"] .org-text { padding: 1rem; }
 @media (max-width: 560px) {
   .org-grid { grid-template-columns: minmax(0, 1fr); }
   .org-ava { width: 6.5rem; }
-  .orgs[data-o="stage"] .org-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .orgs[data-o="stage"] .org-ava { height: 11rem; }
-  .orgs[data-o="stage"] .org-text { padding-right: .6rem; }
-  .orgs[data-o="stage"] .org h3 { font-size: 1.6rem; }
-  .orgs[data-o="stage"] .org p { font-size: .9rem; }
-  .orgs[data-o="big"] .org-grid { gap: 1rem; }
-}
+            }
 .ava .curl, .ava .leg, .ava .arm { transform-box: view-box; }
 .ava .curl-l { transform-origin: 34px 94px; } .ava .curl-r { transform-origin: 86px 94px; }
 .ava .leg { transform-origin: 61px 102px; } .ava .arm { transform-origin: 61px 70px; }
