@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import { isAdmin } from "@/lib/auth";
 import { allParticipants, allResults, displayName } from "@/lib/db";
 import { inviteLink } from "@/lib/reminders";
+import { siteUrl } from "@/lib/email";
 import { EVENTS } from "@/lib/season.ts";
 import { formatValue, points } from "@/lib/scoring.ts";
 import { loadBoard } from "@/lib/board";
@@ -119,10 +120,11 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
                     <b>{p.name}</b>{p.nickname && p.nickname !== p.name ? <span className="note"> “{p.nickname}”</span> : null}
                     <div className="copy">{p.email}</div>
                   </div>
-                  <span className="adm-tags">{pushOn.has(p.id) && <span className="tag" title="Notifications on">🔔</span>}<span className={`tag${p.accepted_at ? " on" : ""}`}>{p.accepted_at ? "In" : p.invited_at ? "Invited" : "Not sent"}</span></span>
+                  <span className="adm-tags">{p.profile?.installedAt && <span className="tag" title="App installed">📲</span>}{pushOn.has(p.id) && <span className="tag" title="Notifications on">🔔</span>}{p.profile?.lockedInAt && <span className="tag on" title="Locked in">🔒</span>}<span className={`tag${p.accepted_at ? " on" : ""}`}>{p.accepted_at ? "In" : p.invited_at ? "Invited" : "Not sent"}</span></span>
                 </div>
                 <div className="adm-actions">
                   <InviteControls id={p.id} name={p.name} link={inviteLink(p)} sent={!!p.invited_at} />
+                  {p.accepted_at && !p.profile?.lockedInAt && <a className="btn ghost small nudge" href={`https://wa.me/?text=${encodeURIComponent(`${p.name.split(" ")[0]} machane, gear up cheyyu 🔒 Open Winter Arc, install the app and turn on notifications. 2 minutes. No excuses: ${siteUrl()}/board#gear`)}`} target="_blank" rel="noopener">Nudge to gear up</a>}
                   <RemoveButton id={p.id} name={p.name} />
                 </div>
               </li>
@@ -133,7 +135,7 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
             <b>Phone notifications</b>
             {noPush
               ? <><p className="note">Daily reminders can go to phones as notifications instead of email. The database needs one update first. In Supabase, open SQL Editor, paste this and press Run:</p><code className="adm-code">{PUSH_SQL}</code></>
-              : <><p className="note"><b>{pushOn.size}</b> of {counts.accepted} have them on. Members tap "Turn on" in their arena page (on iPhone, after adding Winter Arc to the home screen). Everyone else still gets the email.</p><TestPushButton /></>}
+              : <><p className="note"><b>{pushOn.size}</b> of {counts.accepted} have them on, <b>{accepted.filter((p) => p.profile?.lockedInAt).length}</b> fully Locked In 🔒. Members tap "Turn on" in their arena page (on iPhone, after adding Winter Arc to the home screen). Everyone else still gets the email.</p><TestPushButton /></>}
           </div>
           <div className="panel adm-card">
             <b>Email check</b>

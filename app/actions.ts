@@ -19,7 +19,8 @@ export async function acceptInvite(_: unknown, form: FormData) {
   if (nickname.length < 2) return { error: "Pick a leaderboard name with at least 2 characters." };
   const password = String(form.get("password") ?? "");
   if (password.length < MIN_PASSWORD) return { error: `Pick a password with at least ${MIN_PASSWORD} characters. You'll use it to sign in.` };
-  const profile = profileFromForm(form);
+  // Keep what the site itself stored (gear-up progress) when the form saves.
+  const profile = { ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt };
   const missing = missingPersonal(profile);
   if (missing) return { error: missing };
   const { error } = await db().from("participants")
@@ -142,7 +143,6 @@ export async function subscribePush(sub: PushSub): Promise<{ ok?: boolean; error
   } catch {
     return { error: "Notifications aren't set up on the site yet. Ask the organizer." };
   }
-  await pushTo(me.id, { title: "You're set 💪", body: "Your daily Winter Arc reminder will land here at 6 AM.", url: "/board#you", tag: "welcome" });
   return { ok: true };
 }
 
@@ -151,3 +151,22 @@ export async function unsubscribePush(endpoint: string) {
   if (!me) return;
   await removeSubscription(endpoint);
 }
+
+async function setGear(key: "installedAt" | "lockedInAt") {
+  const me = await currentParticipant();
+  if (!me?.accepted_at || me.profile?.[key]) return;
+  await db().from("participants").update({ profile: { ...(me.profile ?? {}), [key]: new Date().toISOString() } }).eq("id", me.id);
+  revalidatePath("/board");
+}
+
+/** Called when the member opens Winter Arc from their home screen. */
+export async function markInstalled() { await setGear("installedAt"); }
+
+export async function buzzMe(): Promise<{ ok?: boolean; error?: string }> {
+  const me = await currentParticipant();
+  if (!me?.accepted_at) return { error: "Sign in first." };
+  const n = await pushTo(me.id, { title: "Bzzz 🔔 Winter Arc", body: "Test buzz. If you can read this, you're wired in. Tap Got it.", url: "/board#gear", tag: "buzz" }).catch(() => 0);
+  return n ? { ok: true } : { error: "Couldn't reach your phone. Turn notifications off and on again." };
+}
+
+export async function lockIn() { await setGear("lockedInAt"); }

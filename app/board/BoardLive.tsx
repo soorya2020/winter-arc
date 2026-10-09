@@ -44,7 +44,7 @@ export default function BoardLive({ rows, at, meId, events }: { rows: BoardRow[]
                 <span className="trail" />
                 <span className={`tok${x > 62 ? " flip" : ""}`}>
                   <span className="av">{r.name.slice(0, 1).toUpperCase()}</span>
-                  <span className="tok-nm">{me ? "You" : r.name.split(" ")[0]}{r.streak > 0 ? <small> 🔥{r.streak}</small> : null}</span>
+                  <span className="tok-nm">{me ? "You" : r.name.split(" ")[0]}{r.profile?.lockedInAt ? <span className="lock" title="Locked in" aria-label="Locked in"> 🔒</span> : null}{r.streak > 0 ? <small> 🔥{r.streak}</small> : null}</span>
                 </span>
               </span>
               <span className="tot"><CountUp value={r.total} run={seen} /></span>

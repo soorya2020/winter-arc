@@ -7,14 +7,13 @@ import Live from "./Live";
 import PracticeForm from "./PracticeForm";
 import QuoteStrip from "./QuoteStrip";
 import ShareButtons from "./ShareButtons";
-import InstallHint from "./InstallHint";
-import PushToggle from "./PushToggle";
+import GearUp from "./GearUp";
 import { siteUrl } from "@/lib/email";
 import { quoteOfTheDay } from "@/lib/quotes";
 import { signOut } from "../actions";
 import { currentParticipant, isAdmin } from "@/lib/auth";
 import { loadBoard } from "@/lib/board";
-import { recentTaunts } from "@/lib/db";
+import { displayName, recentTaunts } from "@/lib/db";
 import { EVENTS, WEEK_PLAN } from "@/lib/season.ts";
 import { fmtWhen, upcoming } from "@/lib/schedule";
 import { weekday } from "@/lib/streak.ts";
@@ -37,8 +36,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
       <div className="wrap">
         <Header right={<>{admin && <Link href="/admin">Admin</Link>}<Link href="/">Home</Link><span className="pill">{me ? `You: #${mine?.rank ?? "–"}` : "Admin view"}</span>{me && <form action={signOut}><button className="ghost small" type="submit">Sign out</button></form>}</>} />
         <QuoteStrip text={quote.text} author={quote.author} canAdd={!!me} />
-        {me && <InstallHint />}
-        {me && <PushToggle />}
+        {me && <GearUp installed={!!me.profile?.installedAt} lockedIn={!!me.profile?.lockedInAt} name={displayName(me).split(" ")[0]} />}
         {me && mine && <ShareButtons id={me.id} rank={mine.rank} total={mine.total} streak={mine.streak} site={siteUrl()} />}
         <Live rows={rows} taunts={taunts} meId={me?.id ?? null} events={EVENTS.map((e) => ({ id: e.id, name: e.name, weekend: e.weekend }))} />
 

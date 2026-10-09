@@ -8,6 +8,9 @@ export const TRAINING_SINCE = ["Not started yet", "Under 6 months", "6 to 12 mon
 export type TrainingSince = (typeof TRAINING_SINCE)[number];
 
 export type Profile = {
+  // Gear up checklist, set by the site
+  installedAt?: string;
+  lockedInAt?: string;
   // About you: honest answers, required
   trainingSince?: TrainingSince;
   toughest?: string;   // "The toughest challenge you've ever faced"
