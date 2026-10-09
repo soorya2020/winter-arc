@@ -12,7 +12,14 @@ export function db(): SupabaseClient {
     // Never let Next.js cache database reads: scores and taunts change constantly.
     client = createClient(url, key, {
       auth: { persistSession: false },
-      global: { fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }) },
+      global: {
+        fetch: (input, init) => {
+          // Supabase's newer sb_secret_ keys go in the apikey header only, never as a Bearer token.
+          const headers = new Headers(init?.headers);
+          if (key.startsWith("sb_")) headers.delete("Authorization");
+          return fetch(input, { ...init, headers, cache: "no-store" });
+        },
+      },
     });
   }
   return client;

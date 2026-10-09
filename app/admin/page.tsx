@@ -9,6 +9,7 @@ import { loadBoard } from "@/lib/board";
 import { allQuotes, quoteOfTheDay } from "@/lib/quotes";
 import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell } from "./ui";
 import { logout } from "./actions";
+import { setupProblems } from "@/lib/health";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,24 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
     );
   }
   const tab = TABS.some((t) => t.id === searchParams.tab) ? searchParams.tab! : "people";
-  const [people, results] = await Promise.all([allParticipants(), allResults()]);
+  let people: Awaited<ReturnType<typeof allParticipants>>, results: Awaited<ReturnType<typeof allResults>>;
+  try {
+    [people, results] = await Promise.all([allParticipants(), allResults()]);
+  } catch {
+    const problems = await setupProblems();
+    return (
+      <div className="wrap">
+        <Header right={<form action={logout}><button className="ghost small" type="submit">Sign out</button></form>} />
+        <section style={{ paddingTop: "1rem", maxWidth: "44rem" }}>
+          <div className="head"><span className="label">Organizer panel</span><h2>Almost there</h2>
+            <p>You're signed in, but the site can't read the database yet. Fix what's listed below, redeploy in Vercel, then reload this page.</p></div>
+          <div className="panel">
+            {(problems.length ? problems : ["The database didn't answer. Check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel, then redeploy."]).map((p) => <p key={p} className="err" style={{ fontWeight: 600 }}>{p}</p>)}
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="wrap">
