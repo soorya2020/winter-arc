@@ -6,7 +6,8 @@ let client: SupabaseClient | null = null;
 
 export function db(): SupabaseClient {
   if (!client) {
-    const url = process.env.SUPABASE_URL;
+    // People often paste the REST URL; the client wants just https://<project>.supabase.co.
+    const url = process.env.SUPABASE_URL?.trim().replace(/\/(rest\/v1\/?)?$/, "").replace(/\/+$/, "");
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!url || !key) throw new Error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set");
     // Never let Next.js cache database reads: scores and taunts change constantly.

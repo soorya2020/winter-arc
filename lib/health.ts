@@ -20,7 +20,7 @@ export async function setupProblems(): Promise<string[]> {
   const missing = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "ADMIN_PASSWORD", "SESSION_SECRET", "SITE_URL", "SMTP_USER", "SMTP_PASS"].filter((k) => !has(k));
   if (missing.length) out.push(`These settings are missing in Vercel: ${missing.join(", ")}. Add them under Settings > Environment Variables, then redeploy.`);
 
-  const url = process.env.SUPABASE_URL?.trim() ?? "";
+  const url = process.env.SUPABASE_URL?.trim().replace(/\/(rest\/v1\/?)?$/, "").replace(/\/+$/, "") ?? "";
   if (url && !/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(url) && !url.startsWith("http://127.0.0.1"))
     out.push(`SUPABASE_URL should look like https://abcdefgh.supabase.co with nothing after .co. Yours is "${url}". Copy the Project URL from Supabase > Project Settings > Data API.`);
 
