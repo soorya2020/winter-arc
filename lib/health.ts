@@ -17,7 +17,7 @@ function keyKind(key: string) {
 
 export async function setupProblems(): Promise<string[]> {
   const out: string[] = [];
-  const missing = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "ADMIN_PASSWORD", "SESSION_SECRET", "SITE_URL", "SMTP_USER", "SMTP_PASS"].filter((k) => !has(k));
+  const missing = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "ADMIN_PASSWORD", "SESSION_SECRET", "SMTP_USER", "SMTP_PASS"].filter((k) => !has(k));
   if (missing.length) out.push(`These settings are missing in Vercel: ${missing.join(", ")}. Add them under Settings > Environment Variables, then redeploy.`);
 
   const url = process.env.SUPABASE_URL?.trim().replace(/\/(rest\/v1\/?)?$/, "").replace(/\/+$/, "") ?? "";

@@ -30,7 +30,7 @@ Every event is worth 100, so nobody's specialty outweighs the rest.
    a day, plenty for 7 people.
 3. **Hosting (Vercel).** At vercel.com, *Add New > Project*, import this GitHub repo, and add the
    environment variables from [`.env.example`](.env.example):
-   - `SITE_URL`: your Vercel address, e.g. `https://winter-arc.vercel.app`
+   - `SITE_URL`: only needed outside Vercel; on Vercel, links use the project's production address automatically
    - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
    - `ADMIN_PASSWORD`: what you'll type to open `/admin`
    - `SESSION_SECRET`, `CRON_SECRET`: any long random strings

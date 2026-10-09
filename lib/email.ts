@@ -13,7 +13,11 @@ function mailer() {
   return transport;
 }
 
-export const siteUrl = () => (process.env.SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+// On Vercel, use the project's real production address so links can't point at the wrong site.
+export const siteUrl = () => {
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  return (vercel ? `https://${vercel}` : process.env.SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+};
 
 export async function sendMail(to: string, subject: string, html: string, text: string) {
   await mailer().sendMail({ from: process.env.MAIL_FROM || process.env.SMTP_USER, to, subject, html, text });
