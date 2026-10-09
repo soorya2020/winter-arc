@@ -1,5 +1,7 @@
+import Hype from "./Hype";
+
 /** Something funny for the empty right side of the hero. Pure SVG and CSS, so it costs nothing on phones. */
-export type FunStyle = "rejected" | "pushups" | "reality";
+export type FunStyle = "rejected" | "pushups" | "reality" | "flip";
 
 const EXCUSES = ["Mazha aanu machane", "Kaalu vedana, sathyam", "Naale muthal pakka", "Office-il bhayankara work", "Ammede veettil function"];
 const GRUNTS = ["Ithu last one aanu…", "Ente kai poyi!", "Adutha varsham six pack", "Oru 5 minute break?"];
@@ -115,7 +117,7 @@ function Reality() {
 export default function HeroFun({ style = "rejected" }: { style?: FunStyle }) {
   return (
     <div className="hero-fun" data-fun={style}>
-      {style === "rejected" ? <Rejected /> : style === "pushups" ? <Pushups /> : <Reality />}
+      {style === "rejected" ? <Rejected /> : style === "pushups" ? <Pushups /> : style === "flip" ? <Hype style="flip" /> : <Reality />}
     </div>
   );
 }
@@ -127,6 +129,7 @@ export function HeroFunAll() {
       <div className="fun-slot" data-s="rejected"><Rejected /></div>
       <div className="fun-slot" data-s="pushups" hidden><Pushups /></div>
       <div className="fun-slot" data-s="reality" hidden><Reality /></div>
+      <div className="fun-slot" data-s="flip" hidden><Hype style="flip" /></div>
     </div>
   );
 }
