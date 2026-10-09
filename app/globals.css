@@ -423,3 +423,4 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
   .ava .speed { animation: speed .5s linear infinite; }
   @keyframes speed { from { transform: translateX(12px); opacity: 0; } 40% { opacity: 1; } to { transform: translateX(-10px); opacity: 0; } }
 }
+.org-note { margin-top: 1rem; font-weight: 700; font-size: 1.05rem; max-width: 60ch; }

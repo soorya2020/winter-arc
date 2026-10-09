@@ -14,8 +14,8 @@ import { EVENTS, SEASON, TZ, nextMilestone } from "@/lib/season.ts";
 export const dynamic = "force-dynamic";
 
 const ORGANIZERS = [
-  { name: "Soorya", kind: "lift" as const, jersey: "#ff4d00", num: "1", role: "Organizer · built the site", line: "Wrote the rules, built the arena, and still has to do every push-up like the rest of you." },
-  { name: "Sanat", kind: "run" as const, jersey: "#2f6fed", num: "2", role: "Organizer · keeps everyone honest", line: "Holds the stopwatch on test day. Your excuses go to him, and he has heard them all." },
+  { name: "Soorya", kind: "lift" as const, jersey: "#ff4d00", num: "1", role: "Organizer · built this website", line: "Built the whole site, from the arena to the roasts. Now he has to survive the leaderboard he made." },
+  { name: "Sanat", kind: "run" as const, jersey: "#2f6fed", num: "2", role: "Organizer · started it all", line: "Said \"let's make it a competition\". It was supposed to be casual. It ended up being serious stuff like this." },
 ];
 
 export default async function Home() {
@@ -100,6 +100,7 @@ export default async function Home() {
               </div>
             ))}
           </div>
+          <p className="org-note">We both coordinate the event, but every participant is part of the management too. Want your pic up here? Let us know, shutumanis.</p>
         </section>
 
         {/* phones only: the main button stays in reach at the bottom */}
