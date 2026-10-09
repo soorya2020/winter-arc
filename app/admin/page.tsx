@@ -7,9 +7,11 @@ import { EVENTS } from "@/lib/season.ts";
 import { formatValue, points } from "@/lib/scoring.ts";
 import { loadBoard } from "@/lib/board";
 import { allQuotes, quoteOfTheDay } from "@/lib/quotes";
-import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell, TestEmailButton } from "./ui";
+import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell, TestEmailButton, ScheduleForm, ScheduleActions, ImportSeasonDates } from "./ui";
 import { logout } from "./actions";
 import { passwordColumnMissing, setupProblems } from "@/lib/health";
+import { DEFAULTS, SCHEDULE_SQL, allScheduled, fmtWhen, scheduleMissing, upcoming } from "@/lib/schedule";
+import { TZ } from "@/lib/season.ts";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +20,7 @@ export const dynamic = "force-dynamic";
 const ICONS: Record<string, React.ReactNode> = {
   people: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>,
   results: <><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2 2" /><path d="M10 2h4" /><path d="M12 2v3" /></>,
+  schedule: <><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4" /><path d="M8 2v4" /><path d="M3 10h18" /><path d="M8 15h3" /></>,
   broadcast: <><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-10 6L2 7" /></>,
   quotes: <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z" />,
   awards: <><path d="M8 21h8" /><path d="M12 17v4" /><path d="M7 4h10v5a5 5 0 0 1-10 0z" /><path d="M17 5h3v2a3 3 0 0 1-3 3" /><path d="M7 5H4v2a3 3 0 0 0 3 3" /></>,
@@ -25,6 +28,7 @@ const ICONS: Record<string, React.ReactNode> = {
 const TABS = [
   { id: "people", label: "People" },
   { id: "results", label: "Results" },
+  { id: "schedule", label: "Events" },
   { id: "broadcast", label: "Email" },
   { id: "quotes", label: "Bro talk" },
   { id: "awards", label: "Awards" },
@@ -180,6 +184,8 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
         </div>
       )}
 
+      {tab === "schedule" && <Schedule />}
+
       {tab === "quotes" && <Quotes />}
 
       {tab === "awards" && <Awards />}
@@ -210,6 +216,60 @@ async function Awards() {
         ))}
       </ul>
       <p className="note">Group poster for the chat: <a href="/api/poster/board">leaderboard poster</a>. Certificates open as a page you can print or save as PDF.</p>
+    </div>
+  );
+}
+
+async function Schedule() {
+  const [missing, rows, up] = await Promise.all([scheduleMissing(), allScheduled().catch(() => []), upcoming()]);
+  const ist = (at: string) => {
+    const p = Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(at)).map((x) => [x.type, x.value]));
+    return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}` };
+  };
+  return (
+    <div className="adm-body">
+      <div className="sched-now">
+        <span className="label">Home page countdown right now</span>
+        <b>{up.next.label}</b>
+        <span className="note">{fmtWhen(up.next.at, true)}{up.custom ? "" : " · built-in date"}</span>
+      </div>
+      {missing ? (
+        <div className="panel adm-alert">
+          <h3>One database update needed</h3>
+          <p className="note">To schedule events, the database needs one new table. In Supabase, open SQL Editor, paste this and press Run, then reload this page:</p>
+          <code>{SCHEDULE_SQL}</code>
+        </div>
+      ) : (
+        <>
+          <details className="adm-fold" open={!rows.length}>
+            <summary>+ Schedule an event</summary>
+            <ScheduleForm />
+          </details>
+          {!rows.length && (
+            <div className="panel adm-card">
+              <b>Using the built-in season dates</b>
+              <ul className="sched-defaults">{DEFAULTS.map((d) => <li key={d.label}><b>{d.label}</b> · {fmtWhen(d.at, true)}</li>)}</ul>
+              <p className="note">Copy them into the schedule to move or rename them, or just add your own events above.</p>
+              <ImportSeasonDates />
+            </div>
+          )}
+          <ul className="adm-list">
+            {rows.map((r) => {
+              const past = new Date(r.starts_at).getTime() < Date.now();
+              const isNext = up.custom && r.title === up.next.label && r.starts_at === up.next.at;
+              return (
+                <li key={r.id} className={`adm-card sched-item${past ? " past" : ""}`}>
+                  <div className="adm-card-top">
+                    <div style={{ minWidth: 0 }}><b>{r.title}</b><div className="note">{fmtWhen(r.starts_at, true)}{r.note ? ` · ${r.note}` : ""}</div></div>
+                    <span className={`tag${isNext ? " on" : ""}`}>{isNext ? "Counting down" : past ? "Done" : r.on_home ? "On home" : "Hidden"}</span>
+                  </div>
+                  <div className="adm-actions"><ScheduleForm edit={{ id: r.id, title: r.title, note: r.note, on_home: r.on_home, ...ist(r.starts_at) }} /><ScheduleActions id={r.id} onHome={r.on_home} /></div>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
     </div>
   );
 }

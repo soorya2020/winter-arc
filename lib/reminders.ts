@@ -2,7 +2,8 @@ import "server-only";
 import { emailLayout, esc, sendMail, siteUrl } from "./email";
 import { displayName, type Participant } from "./db";
 import { loadBoard } from "./board";
-import { SEASON, WEEK_PLAN, nextMilestone } from "./season.ts";
+import { SEASON, WEEK_PLAN } from "./season.ts";
+import { upcoming } from "./schedule";
 import { weekday } from "./streak.ts";
 import { quoteOfTheDay } from "./quotes";
 
@@ -34,7 +35,7 @@ const daysUntil = (iso: string, now = new Date()) => Math.max(0, Math.ceil((new 
 export async function sendDailyReminders(people: Participant[]) {
   const board = await loadBoard();
   const plan = WEEK_PLAN[weekday()];
-  const ms = nextMilestone();
+  const { next: ms } = await upcoming();
   const days = daysUntil(ms.at);
   const quote = await quoteOfTheDay();
   const quoteHtml = `<span style="display:block;border-left:4px solid #ff4d00;padding-left:12px;font-weight:700">“${esc(quote.text)}”${quote.author ? `<br><span style="font-weight:400;color:#6b6f68">${esc(quote.author)}</span>` : ""}</span>`;

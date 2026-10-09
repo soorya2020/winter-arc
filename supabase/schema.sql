@@ -65,3 +65,14 @@ alter table quotes enable row level security;
 
 -- Members sign in with email and password (set when they accept their invite).
 alter table participants add column if not exists password_hash text;
+
+-- Events the organizer schedules from the admin panel. The next one drives the home countdown.
+create table if not exists schedule (
+  id bigserial primary key,
+  title text not null check (char_length(title) between 2 and 60),
+  starts_at timestamptz not null,
+  note text,
+  on_home boolean not null default true,
+  created_at timestamptz not null default now()
+);
+alter table schedule enable row level security;

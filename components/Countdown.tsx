@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export default function Countdown({ to, label, when }: { to: string; label: string; when: string }) {
+export default function Countdown({ to, label, when, note, then }: { to: string; label: string; when: string; note?: string | null; then?: string | null }) {
   const target = new Date(to).getTime();
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function Countdown({ to, label, when }: { to: string; label: stri
       {parts.map(([v, l]) => (
         <div className="unit" key={l}><b key={now == null ? "x" : v}>{now == null ? "--" : pad(v)}</b><span>{l}</span></div>
       ))}
-      <p className="count-note"><b>Until {label}</b> · {when}</p>
+      <p className="count-note"><b>Until {label}</b> · {when}{note ? <span className="count-extra">{note}</span> : null}{then ? <span className="count-extra">Then: {then}</span> : null}</p>
     </div>
   );
 }

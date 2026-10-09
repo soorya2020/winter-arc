@@ -10,7 +10,8 @@ import AcceptForm from "./AcceptForm";
 import LinkForm from "./LinkForm";
 import { currentParticipant } from "@/lib/auth";
 import { allParticipants, displayName } from "@/lib/db";
-import { EVENTS, SEASON, TZ, nextMilestone } from "@/lib/season.ts";
+import { EVENTS, SEASON } from "@/lib/season.ts";
+import { fmtWhen, upcoming } from "@/lib/schedule";
 
 export const dynamic = "force-dynamic";
 
@@ -21,8 +22,8 @@ const ORGANIZERS = [
 
 export default async function Home() {
   const me = await currentParticipant().catch(() => null);
-  const ms = nextMilestone();
-  const when = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(ms.at));
+  const { next: ms, then } = await upcoming();
+  const when = fmtWhen(ms.at, true);
   const first = me ? displayName(me).split(" ")[0] : null;
   const rivals = me && !me.accepted_at
     ? (await allParticipants()).filter((p) => p.accepted_at && p.id !== me.id).map((p) => ({ id: p.id, name: displayName(p) }))
@@ -45,7 +46,7 @@ export default async function Home() {
           <div className="hero-row">
             <p className="lede">{SEASON.spots} athletes. {EVENTS.length} events. Two weekends. <b>No excuses accepted.</b></p>
             <div style={{ display: "grid", gap: "1.25rem" }}>
-              <Countdown to={ms.at} label={ms.label} when={when} />
+              <Countdown to={ms.at} label={ms.label} when={when} note={ms.note} then={then ? `${then.label} · ${fmtWhen(then.at)}` : null} />
               {me?.accepted_at
                 ? <Link className="cta" href="/board">Enter the arena <span>→</span></Link>
                 : me

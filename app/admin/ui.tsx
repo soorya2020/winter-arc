@@ -1,7 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { addParticipant, addQuote, removeQuote, broadcast, emailInvite, login, removeParticipant, saveResult, sendRemindersNow, testEmail } from "./actions";
+import { addParticipant, addQuote, removeQuote, broadcast, emailInvite, login, removeParticipant, saveResult, sendRemindersNow, testEmail, saveSchedule, removeSchedule, toggleSchedule, importSeasonDates } from "./actions";
 
 type Msg = { ok?: string; error?: string } | null;
 const Note = ({ m }: { m: Msg }) => (m?.error ? <p className="err">{m.error}</p> : m?.ok ? <p className="ok">{m.ok}</p> : null);
@@ -188,4 +188,52 @@ export function QuoteForm() {
 export function RemoveQuote({ id }: { id: number }) {
   const [pending, start] = useTransition();
   return <button className="ghost small" disabled={pending} onClick={() => start(() => removeQuote(id))}>Remove</button>;
+}
+
+export function ScheduleForm({ edit }: { edit?: { id: number; title: string; date: string; time: string; note: string | null; on_home: boolean } }) {
+  const [open, setOpen] = useState(false);
+  const [m, action] = useFormState(async (p: Msg, fd: FormData) => {
+    const r = await saveSchedule(p, fd);
+    if (r?.ok) { if (edit) setOpen(false); else (document.getElementById("sched-form") as HTMLFormElement | null)?.reset(); }
+    return r;
+  }, null as Msg);
+  if (edit && !open) return <button type="button" className="ghost small" onClick={() => setOpen(true)}>Edit</button>;
+  return (
+    <form id={edit ? undefined : "sched-form"} className="card sched-form" action={action}>
+      {edit && <input type="hidden" name="id" value={edit.id} />}
+      <div className="field"><label htmlFor={`s-title-${edit?.id ?? "new"}`}>What's happening</label><input id={`s-title-${edit?.id ?? "new"}`} name="title" maxLength={60} required defaultValue={edit?.title} placeholder="Baseline test" /></div>
+      <div className="sched-when">
+        <div className="field"><label htmlFor={`s-date-${edit?.id ?? "new"}`}>Date</label><input id={`s-date-${edit?.id ?? "new"}`} name="date" type="date" required defaultValue={edit?.date} /></div>
+        <div className="field"><label htmlFor={`s-time-${edit?.id ?? "new"}`}>Time (IST)</label><input id={`s-time-${edit?.id ?? "new"}`} name="time" type="time" required defaultValue={edit?.time ?? "07:00"} /></div>
+      </div>
+      <div className="field"><label htmlFor={`s-note-${edit?.id ?? "new"}`}>Note (optional)</label><input id={`s-note-${edit?.id ?? "new"}`} name="note" maxLength={140} defaultValue={edit?.note ?? ""} placeholder="Meet at the ground, 6:45 am" /></div>
+      <label className="sched-check"><input type="checkbox" name="on_home" defaultChecked={edit ? edit.on_home : true} /> Show on the home page countdown</label>
+      <div className="sched-btns"><Submit>{edit ? "Save changes" : "Add to schedule"}</Submit>{edit && <button type="button" className="ghost" onClick={() => setOpen(false)}>Cancel</button>}</div>
+      <Note m={m} />
+    </form>
+  );
+}
+
+export function ScheduleActions({ id, onHome }: { id: number; onHome: boolean }) {
+  const [confirm, setConfirm] = useState(false);
+  const [pending, start] = useTransition();
+  return (
+    <>
+      <button type="button" className="ghost small" disabled={pending} onClick={() => start(() => toggleSchedule(id, !onHome))}>{onHome ? "Hide from home" : "Show on home"}</button>
+      {confirm
+        ? <button type="button" className="small" style={{ background: "var(--bad)" }} disabled={pending} onClick={() => start(() => removeSchedule(id))}>Yes, delete</button>
+        : <button type="button" className="ghost small" onClick={() => setConfirm(true)}>Delete</button>}
+    </>
+  );
+}
+
+export function ImportSeasonDates() {
+  const [m, setM] = useState<Msg>(null);
+  const [pending, start] = useTransition();
+  return (
+    <>
+      <button type="button" className="ghost" disabled={pending} onClick={() => start(async () => setM(await importSeasonDates()))}>{pending ? "Copying…" : "Start from these dates"}</button>
+      <Note m={m} />
+    </>
+  );
 }

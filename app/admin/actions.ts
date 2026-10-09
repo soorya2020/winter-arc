@@ -5,6 +5,7 @@ import { allParticipants, db, type Participant } from "@/lib/db";
 import { sendBroadcast, sendDailyReminders, sendInvite, type Audience } from "@/lib/reminders";
 import { EVENTS } from "@/lib/season.ts";
 import { mailCheck, mailError } from "@/lib/email";
+import { DEFAULTS } from "@/lib/schedule";
 import { parseValue, points } from "@/lib/scoring.ts";
 
 type Msg = { ok?: string; error?: string } | null;
@@ -50,6 +51,48 @@ export async function emailInvite(id: string): Promise<Msg> {
   await db().from("participants").update({ invited_at: new Date().toISOString() }).eq("id", id);
   revalidatePath("/admin");
   return { ok: `Invite sent to ${data.email}.` };
+}
+
+// Dates are typed in India time; stored as an exact moment.
+const istMoment = (date: string, time: string) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) return null;
+  const d = new Date(`${date}T${time}:00+05:30`);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+};
+
+export async function saveSchedule(_: Msg, form: FormData): Promise<Msg> {
+  requireAdmin();
+  const id = Number(form.get("id") || 0);
+  const title = String(form.get("title") ?? "").trim().slice(0, 60);
+  const note = String(form.get("note") ?? "").trim().slice(0, 140) || null;
+  const at = istMoment(String(form.get("date") ?? ""), String(form.get("time") ?? "") || "07:00");
+  if (title.length < 2) return { error: "Give the event a name." };
+  if (!at) return { error: "Pick a date and time." };
+  const row = { title, starts_at: at, note, on_home: form.get("on_home") === "on" };
+  const { error } = id ? await db().from("schedule").update(row).eq("id", id) : await db().from("schedule").insert(row);
+  if (error) return { error: /schedule/i.test(error.message) ? "The schedule table isn't in the database yet. Run the one line shown above in Supabase first." : "Couldn't save it. Try again." };
+  revalidatePath("/admin"); revalidatePath("/"); revalidatePath("/board");
+  return { ok: id ? `Updated ${title}.` : `Scheduled ${title}.` };
+}
+
+export async function removeSchedule(id: number) {
+  requireAdmin();
+  await db().from("schedule").delete().eq("id", id);
+  revalidatePath("/admin"); revalidatePath("/"); revalidatePath("/board");
+}
+
+export async function toggleSchedule(id: number, onHome: boolean) {
+  requireAdmin();
+  await db().from("schedule").update({ on_home: onHome }).eq("id", id);
+  revalidatePath("/admin"); revalidatePath("/"); revalidatePath("/board");
+}
+
+export async function importSeasonDates(): Promise<Msg> {
+  requireAdmin();
+  const { error } = await db().from("schedule").insert(DEFAULTS.map((d) => ({ title: d.label, starts_at: d.at, on_home: true })));
+  if (error) return { error: "Couldn't copy them. Is the schedule table set up?" };
+  revalidatePath("/admin");
+  return { ok: "Copied. Edit them below." };
 }
 
 export async function testEmail(): Promise<Msg> {

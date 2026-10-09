@@ -14,7 +14,8 @@ import { signOut } from "../actions";
 import { currentParticipant, isAdmin } from "@/lib/auth";
 import { loadBoard } from "@/lib/board";
 import { recentTaunts } from "@/lib/db";
-import { EVENTS, TZ, WEEK_PLAN, nextMilestone } from "@/lib/season.ts";
+import { EVENTS, WEEK_PLAN } from "@/lib/season.ts";
+import { fmtWhen, upcoming } from "@/lib/schedule";
 import { weekday } from "@/lib/streak.ts";
 
 export const dynamic = "force-dynamic";
@@ -25,8 +26,8 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
   if (!me?.accepted_at && !admin) redirect("/");
   const [rows, taunts, quote] = await Promise.all([loadBoard(), recentTaunts(), quoteOfTheDay()]);
   const mine = rows.find((r) => r.id === me?.id);
-  const ms = nextMilestone();
-  const when = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(ms.at));
+  const { next: ms } = await upcoming();
+  const when = fmtWhen(ms.at);
   const todayPlan = WEEK_PLAN[weekday()];
 
   return (
@@ -53,7 +54,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
               </div>
               <div className="box">
                 <h3>Next up</h3>
-                <Countdown to={ms.at} label={ms.label} when={when} />
+                <Countdown to={ms.at} label={ms.label} when={when} note={ms.note} />
                 <p className="note">
                   Streak: <b style={{ color: "var(--accent)" }}>{mine?.streak ?? 0} days</b> · Sessions logged: {mine?.sessions ?? 0}
                   {mine?.limit ? <> · Your limit right now: <b style={{ color: "var(--accent)" }}>{mine.limit}</b></> : null}
