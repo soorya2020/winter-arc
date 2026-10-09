@@ -14,8 +14,8 @@ import { EVENTS, SEASON, TZ, nextMilestone } from "@/lib/season.ts";
 export const dynamic = "force-dynamic";
 
 const ORGANIZERS = [
-  { name: "Soorya", tag: "Soorya", kind: "lift" as const, jersey: "#ff4d00", num: "1", role: "Organizer · built this website", line: "Built the whole site, from the arena to the roasts. Now he has to survive the leaderboard he made." },
-  { name: "Sanat", tag: "Sanat", kind: "run" as const, jersey: "#2f6fed", num: "2", role: "Organizer · started it all", line: "Said \"let's make it a competition\". It was supposed to be casual. It ended up being serious stuff like this." },
+  { name: "Soorya", tag: "Soorya", wa: "917561071554", kind: "lift" as const, jersey: "#ff4d00", num: "1", role: "Organizer · built this website", line: "Built the whole site, from the arena to the roasts. Now he has to survive the leaderboard he made." },
+  { name: "Sanat", tag: "Sanat", wa: "917256437300", kind: "run" as const, jersey: "#2f6fed", num: "2", role: "Organizer · started it all", line: "Said \"let's make it a competition\". It was supposed to be casual. It ended up being serious stuff like this." },
 ];
 
 export default async function Home() {
@@ -96,6 +96,7 @@ export default async function Home() {
                   <h3>{o.name}</h3>
                   <span className="org-role">{o.role}</span>
                   <p>{o.line}</p>
+                  <a className="wa" href={`https://wa.me/${o.wa}`} target="_blank" rel="noopener noreferrer">WhatsApp {o.tag}</a>
                 </div>
               </div>
             ))}
