@@ -8,7 +8,11 @@ export function db(): SupabaseClient {
     const url = process.env.SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!url || !key) throw new Error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set");
-    client = createClient(url, key, { auth: { persistSession: false } });
+    // Never let Next.js cache database reads: scores and taunts change constantly.
+    client = createClient(url, key, {
+      auth: { persistSession: false },
+      global: { fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }) },
+    });
   }
   return client;
 }
@@ -18,6 +22,7 @@ export type Participant = {
   name: string;
   email: string;
   nickname: string | null;
+  catchphrase: string | null;
   token: string;
   accepted_at: string | null;
   invited_at: string | null;
@@ -50,4 +55,12 @@ export async function practiceDays() {
   const { data, error } = await db().from("practice_logs").select("participant_id, day");
   if (error) throw error;
   return (data ?? []) as { participant_id: string; day: string }[];
+}
+
+export type Taunt = { id: number; participant_id: string; target_id: string | null; text: string; created_at: string };
+
+export async function recentTaunts(limit = 25) {
+  const { data, error } = await db().from("taunts").select("*").order("created_at", { ascending: false }).limit(limit);
+  if (error) throw error;
+  return (data ?? []) as Taunt[];
 }

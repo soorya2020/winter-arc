@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 
-const COLORS = ["#ff3d8b", "#ffd23f", "#2ee6d6", "#ff7a2f", "#fbf8ff"];
+const COLORS = ["#ff4d00", "#0c0d0e", "#ff4d00", "#d6d8d0", "#0c0d0e"];
 
 /** Fire with: window.dispatchEvent(new Event("confetti")) */
 export default function Confetti({ onLoad = false }: { onLoad?: boolean }) {

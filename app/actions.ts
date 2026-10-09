@@ -10,9 +10,10 @@ export async function acceptInvite(_: unknown, form: FormData) {
   const me = await currentParticipant();
   if (!me) return { error: "Open the invite link from your email first." };
   const nickname = String(form.get("nickname") ?? "").trim().slice(0, 28);
+  const catchphrase = String(form.get("catchphrase") ?? "").trim().slice(0, 80) || null;
   if (nickname.length < 2) return { error: "Pick a leaderboard name with at least 2 characters." };
   const { error } = await db().from("participants")
-    .update({ nickname, accepted_at: me.accepted_at ?? new Date().toISOString() })
+    .update({ nickname, catchphrase, accepted_at: me.accepted_at ?? new Date().toISOString() })
     .eq("id", me.id);
   if (error) return { error: "Couldn't save that. Try again." };
   revalidatePath("/board");
@@ -31,4 +32,16 @@ export async function logPractice(_: unknown, form: FormData) {
   if (error) return { error: "Couldn't save that. Try again." };
   revalidatePath("/board");
   return { ok: `Logged ${minutes} min of ${kind.toLowerCase()}. Streak updated.` };
+}
+
+export async function postTaunt(text: string, targetId: string | null) {
+  const me = await currentParticipant();
+  if (!me?.accepted_at) return { error: "Accept your invite first." };
+  const clean = text.replace(/\s+/g, " ").trim().slice(0, 120);
+  if (!clean) return { error: "Type something first." };
+  const { data: last } = await db().from("taunts").select("created_at").eq("participant_id", me.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
+  if (last && Date.now() - new Date(last.created_at).getTime() < 3000) return { error: "Easy, champ. One taunt every few seconds." };
+  const { error } = await db().from("taunts").insert({ participant_id: me.id, target_id: targetId, text: clean });
+  if (error) return { error: "Couldn't send that. Try again." };
+  return { ok: true };
 }

@@ -18,7 +18,7 @@ export default function Countdown({ to, label, when }: { to: string; label: stri
       {parts.map(([v, l]) => (
         <div className="unit" key={l}><b>{now == null ? "--" : pad(v)}</b><span>{l}</span></div>
       ))}
-      <p className="count-note"><b>Until {label}</b>{when}</p>
+      <p className="count-note"><b>Until {label}</b> · {when}</p>
     </div>
   );
 }

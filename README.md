@@ -1,8 +1,9 @@
 # Winter Arc
 
 Invite-only site for the Winter Arc fitness competition: landing page, personal invite links,
-daily reminder emails, a live leaderboard with practice streaks, an admin panel for entering
-results, certificates and shareable posters.
+daily reminder emails, a group arena where everyone's fighter brawls and trash-talks, a live
+leaderboard with practice streaks, an admin panel for entering results, certificates and
+shareable posters.
 
 Built with Next.js 14, Supabase (database) and any SMTP mailbox (Gmail works). Hosted on Vercel.
 All of it fits in free tiers for a group of 7.
@@ -22,7 +23,7 @@ Every event is worth 100, so nobody's specialty outweighs the rest.
 ## Set it up (about 20 minutes, once)
 
 1. **Database (Supabase).** Create a free project at supabase.com. Open *SQL Editor*, paste
-   [`supabase/schema.sql`](supabase/schema.sql) and run it. From *Project Settings > API*, copy the
+   [`supabase/schema.sql`](supabase/schema.sql) and run it. It's safe to run again after updates. From *Project Settings > API*, copy the
    project URL and the `service_role` key.
 2. **Email (Gmail).** On the Google account that will send the emails, turn on 2-step verification,
    then create an App Password (myaccount.google.com/apppasswords). Gmail allows about 500 emails
@@ -45,7 +46,7 @@ Every event is worth 100, so nobody's specialty outweighs the rest.
 | --- | --- | --- |
 | `/` | Everyone | Landing page. Personal welcome and confetti for invitees. |
 | `/i/<token>` | Invitee | Personal invite link. Remembers them and opens the page. |
-| `/board` | Accepted invitees, admin | Live leaderboard (refreshes every 10 s), practice log, streak. |
+| `/board` | Accepted invitees, admin | The arena (group brawl and shared trash talk), live table, practice log, streak. |
 | `/admin` | Admin | Participants and invites, result entry per weekend, baseline test, awards. |
 | `/certificate/<id>` | That athlete, admin | Printable A4 certificate (print or save as PDF). |
 | `/api/poster/<id>` | Invitees, admin | 1080×1350 PNG poster for stories. `/api/poster/board` is the group poster. |

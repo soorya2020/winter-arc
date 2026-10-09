@@ -36,3 +36,16 @@ create index if not exists practice_logs_participant_day on practice_logs (parti
 alter table participants enable row level security;
 alter table results enable row level security;
 alter table practice_logs enable row level security;
+
+-- Arena: each person's catchphrase and the group trash talk.
+alter table participants add column if not exists catchphrase text;
+
+create table if not exists taunts (
+  id bigserial primary key,
+  participant_id uuid not null references participants(id) on delete cascade,
+  target_id uuid references participants(id) on delete set null,
+  text text not null check (char_length(text) between 1 and 120),
+  created_at timestamptz not null default now()
+);
+create index if not exists taunts_created on taunts (created_at desc);
+alter table taunts enable row level security;

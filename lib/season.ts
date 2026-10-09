@@ -96,12 +96,12 @@ export const SEASON = {
 };
 
 export const TIMELINE = [
-  { when: "Sat 17 Oct", title: "Kickoff + baseline", text: "Everyone tries all six events once. No points, just your starting numbers.", color: "cyan" },
-  { when: "Oct to Dec", title: "Training block", text: "A daily email with today's practice, your streak and the days left.", color: "yellow" },
-  { when: "2 to 3 Jan", title: "Running weekend", text: "Sprint and 3 km on Saturday. The long run on Sunday.", color: "pink" },
-  { when: "9 to 10 Jan", title: "Strength weekend", text: "Push-ups and plank on Saturday. Burpees on Sunday.", color: "orange" },
-  { when: "Sun 10 Jan", title: "Awards night", text: "Final board, titles, certificates and your poster.", color: "cyan" },
-] as const;
+  { when: "Sat 17 Oct", title: "Kickoff + baseline", text: "Everyone tries all six events once. No points, just your starting numbers." },
+  { when: "Oct to Dec", title: "Training block", text: "A daily email with today's practice, your streak and the days left." },
+  { when: "2 to 3 Jan", title: "Running weekend", text: "Sprint and 3 km on Saturday. The long run on Sunday." },
+  { when: "9 to 10 Jan", title: "Strength weekend", text: "Push-ups and plank on Saturday. Burpees on Sunday." },
+  { when: "Sun 10 Jan", title: "Awards night", text: "Final board, titles, certificates and your poster." },
+];
 
 // Index 0 = Sunday, matching Date.getDay().
 export const WEEK_PLAN = [
@@ -121,11 +121,11 @@ export const DRILLS = [
 ];
 
 export const AWARDS = [
-  { title: "Arc Champion", text: "Most points across all six events.", color: "yellow" },
-  { title: "Iron Lungs", text: "Top score on running weekend.", color: "pink" },
-  { title: "Steel Core", text: "Top score on strength weekend.", color: "cyan" },
-  { title: "Biggest Leap", text: "Most improved from your baseline.", color: "orange" },
-] as const;
+  { title: "Arc Champion", text: "Most points across all six events." },
+  { title: "Iron Lungs", text: "Top score on running weekend." },
+  { title: "Steel Core", text: "Top score on strength weekend." },
+  { title: "Biggest Leap", text: "Most improved from your baseline." },
+];
 
 export const PRACTICE_KINDS = ["Run", "Strength", "Speed", "Burpees", "Mobility", "Other"];
 

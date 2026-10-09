@@ -121,8 +121,8 @@ async function Awards() {
   return (
     <div style={{ display: "grid", gap: "1.25rem" }}>
       <div className="awards">
-        {picks.map(([title, r], i) => (
-          <div key={title} className="award" style={{ ["--c" as string]: ["var(--yellow)", "var(--pink)", "var(--cyan)", "var(--orange)"][i] }}>
+        {picks.map(([title, r]) => (
+          <div key={title} className="award">
             <h3>{title}</h3><p>{r ? r.name : "Not decided yet"}</p>
           </div>
         ))}
