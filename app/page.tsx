@@ -3,7 +3,6 @@ import Header from "@/components/Header";
 import Countdown from "@/components/Countdown";
 import Confetti from "@/components/Confetti";
 import Reveal from "@/components/Reveal";
-import Hype from "@/components/Hype";
 import AcceptForm from "./AcceptForm";
 import LinkForm from "./LinkForm";
 import { currentParticipant } from "@/lib/auth";
@@ -30,10 +29,7 @@ export default async function Home() {
 
         <div className="hero">
           <p className="hello">{first ? `${first}, you were picked for a reason` : "By invitation only"}</p>
-          <div className="hero-top">
-            <h1>Winter<br /><em>Arc.</em></h1>
-            <Hype />
-          </div>
+          <h1>Winter<br /><em>Arc.</em></h1>
           <div className="hero-row">
             <p className="lede">{SEASON.spots} athletes. {EVENTS.length} events. Two weekends. <b>No excuses accepted.</b></p>
             <div style={{ display: "grid", gap: "1.25rem" }}>
