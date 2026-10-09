@@ -159,8 +159,18 @@ export default async function Home() {
               : <div className="panel"><p className="note">This page only opens up through a personal invite link. Check your email for yours.</p></div>}
         </div>
 
+        <section className="why" id="why">
+          <span className="label">Why we made this</span>
+          <h2>Fitness <em>first.</em></h2>
+          <div className="why-body">
+            <p>Work, studies, deadlines: something always wins over the workout. This year we wanted fitness to win for once. Your health is the thing that carries everything else you do, so it deserves to come first.</p>
+            <p>Winter Arc is a friendly match dressed up to look intimidating. The countdowns, the leaderboard and the roasts are there to get you moving, not to make anyone feel small. Finish last and you still started something.</p>
+            <p>Made with love and care for a few friends. Let's end this year strong and walk into the next one fitter than we've ever been. <b>Happy new year ahead.</b></p>
+          </div>
+        </section>
+
         <footer>
-          <span className="label">Winter Arc · by invitation</span>
+          <span className="label">Winter Arc · made with love for the crew</span>
           <span className="note">Questions? Reply to your invite email.</span>
         </footer>
       </div>
