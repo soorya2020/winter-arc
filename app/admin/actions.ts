@@ -6,6 +6,7 @@ import { sendBroadcast, sendDailyReminders, sendInvite, type Audience } from "@/
 import { EVENTS } from "@/lib/season.ts";
 import { mailCheck, mailError } from "@/lib/email";
 import { DEFAULTS } from "@/lib/schedule";
+import { pushTo, pushedPeople } from "@/lib/push";
 import { parseValue, points } from "@/lib/scoring.ts";
 
 type Msg = { ok?: string; error?: string } | null;
@@ -95,6 +96,15 @@ export async function importSeasonDates(): Promise<Msg> {
   return { ok: "Copied. Edit them below." };
 }
 
+export async function testPush(): Promise<Msg> {
+  requireAdmin();
+  const ids = [...(await pushedPeople().catch(() => new Set<string>()))];
+  if (!ids.length) return { error: "Nobody has turned on notifications yet. Each member taps Turn on in their arena page." };
+  let n = 0;
+  for (const id of ids) n += (await pushTo(id, { title: "Winter Arc test 🔔", body: "If you see this, daily reminders will reach you here.", url: "/board", tag: "test" })) ? 1 : 0;
+  return { ok: `Sent a test notification to ${n} of ${ids.length} people.` };
+}
+
 export async function testEmail(): Promise<Msg> {
   requireAdmin();
   try {
@@ -126,8 +136,9 @@ export async function saveResult(participantId: string, eventId: string, baselin
 export async function sendRemindersNow(): Promise<Msg> {
   requireAdmin();
   try {
-    const { sent, failed } = await sendDailyReminders(await allParticipants());
-    return failed.length ? { error: `Sent ${sent}. Failed for: ${failed.join(", ")}` } : { ok: `Sent today's reminder to ${sent} people.` };
+    const { sent, pushed, failed } = await sendDailyReminders(await allParticipants());
+    const done = `${pushed} by notification, ${sent} by email`;
+    return failed.length ? { error: `Sent ${done}. Email failed for: ${failed.join(", ")}` } : { ok: `Sent today's reminder: ${done}.` };
   } catch (e) {
     return { error: `Email failed. ${mailError(e)}` };
   }

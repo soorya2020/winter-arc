@@ -6,6 +6,7 @@ import { SEASON, WEEK_PLAN } from "./season.ts";
 import { upcoming } from "./schedule";
 import { weekday } from "./streak.ts";
 import { quoteOfTheDay } from "./quotes";
+import { pushTo } from "./push";
 
 export const inviteLink = (p: Participant) => `${siteUrl()}/i/${p.token}`;
 
@@ -39,11 +40,14 @@ export async function sendDailyReminders(people: Participant[]) {
   const days = daysUntil(ms.at);
   const quote = await quoteOfTheDay();
   const quoteHtml = `<span style="display:block;border-left:4px solid #ff4d00;padding-left:12px;font-weight:700">“${esc(quote.text)}”${quote.author ? `<br><span style="font-weight:400;color:#6b6f68">${esc(quote.author)}</span>` : ""}</span>`;
-  let sent = 0;
+  let sent = 0, pushed = 0;
   const failed: string[] = [];
   for (const p of people.filter((x) => x.accepted_at)) {
     const row = board.find((r) => r.id === p.id);
     const name = displayName(p).split(" ")[0];
+    // Phone notification first; email only for people who haven't turned notifications on.
+    const streak = row?.streak ? `${row.streak}-day streak, keep it alive.` : "Streak at zero. One session starts it again.";
+    if (await pushTo(p.id, { title: `Today: ${plan.title}`, body: `${name}, ${plan.detail} ${streak} ${days} days to ${ms.label.toLowerCase()}.`, url: "/board#you", tag: "daily" }).catch(() => 0)) { pushed++; continue; }
     const streakLine = row?.streak
       ? `You're on a <b>${row.streak}-day streak</b>. Log today's session to keep it alive.`
       : "Your streak is at zero. One session today starts it again.";
@@ -65,7 +69,7 @@ export async function sendDailyReminders(people: Participant[]) {
       failed.push(p.email);
     }
   }
-  return { sent, failed };
+  return { sent, pushed, failed };
 }
 
 export type Audience = "accepted" | "pending" | "all";

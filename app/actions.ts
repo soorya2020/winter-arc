@@ -2,6 +2,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { currentParticipant, participantCookie } from "@/lib/auth";
+import { pushKeys, pushTo, removeSubscription, saveSubscription, type PushSub } from "@/lib/push";
 import { cookies } from "next/headers";
 import { checkPassword, hashPassword, MIN_PASSWORD } from "@/lib/password";
 import { db, type Participant } from "@/lib/db";
@@ -123,4 +124,30 @@ export async function signIn(_: unknown, form: FormData): Promise<{ error?: stri
 export async function signOut() {
   cookies().delete("wa_invite");
   redirect("/");
+}
+
+/** The key a phone needs to turn on notifications, or null if the database isn't ready. */
+export async function pushPublicKey(): Promise<string | null> {
+  const me = await currentParticipant();
+  if (!me?.accepted_at) return null;
+  return (await pushKeys())?.publicKey ?? null;
+}
+
+export async function subscribePush(sub: PushSub): Promise<{ ok?: boolean; error?: string }> {
+  const me = await currentParticipant();
+  if (!me?.accepted_at) return { error: "Sign in first." };
+  if (!sub?.endpoint?.startsWith("https://") || !sub.keys?.p256dh || !sub.keys?.auth) return { error: "That phone didn't give a valid subscription." };
+  try {
+    await saveSubscription(me.id, sub);
+  } catch {
+    return { error: "Notifications aren't set up on the site yet. Ask the organizer." };
+  }
+  await pushTo(me.id, { title: "You're set 💪", body: "Your daily Winter Arc reminder will land here at 6 AM.", url: "/board#you", tag: "welcome" });
+  return { ok: true };
+}
+
+export async function unsubscribePush(endpoint: string) {
+  const me = await currentParticipant();
+  if (!me) return;
+  await removeSubscription(endpoint);
 }

@@ -7,11 +7,12 @@ import { EVENTS } from "@/lib/season.ts";
 import { formatValue, points } from "@/lib/scoring.ts";
 import { loadBoard } from "@/lib/board";
 import { allQuotes, quoteOfTheDay } from "@/lib/quotes";
-import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell, TestEmailButton, ScheduleForm, ScheduleActions, ImportSeasonDates } from "./ui";
+import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell, TestEmailButton, TestPushButton, ScheduleForm, ScheduleActions, ImportSeasonDates } from "./ui";
 import { logout } from "./actions";
 import { passwordColumnMissing, setupProblems } from "@/lib/health";
 import { DEFAULTS, SCHEDULE_SQL, allScheduled, fmtWhen, scheduleMissing, upcoming } from "@/lib/schedule";
 import { TZ } from "@/lib/season.ts";
+import { PUSH_SQL, pushMissing, pushedPeople } from "@/lib/push";
 
 export const dynamic = "force-dynamic";
 
@@ -74,6 +75,7 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
     );
   }
   const accepted = people.filter((p) => p.accepted_at);
+  const [noPush, pushOn] = tab === "people" ? await Promise.all([pushMissing(), pushedPeople().catch(() => new Set<string>())]) : [false, new Set<string>()];
   const counts = { accepted: accepted.length, invited: people.filter((p) => !p.accepted_at && p.invited_at).length, waiting: people.filter((p) => !p.invited_at).length };
 
   return (
@@ -117,16 +119,22 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
                     <b>{p.name}</b>{p.nickname && p.nickname !== p.name ? <span className="note"> “{p.nickname}”</span> : null}
                     <div className="copy">{p.email}</div>
                   </div>
-                  <span className={`tag${p.accepted_at ? " on" : ""}`}>{p.accepted_at ? "In" : p.invited_at ? "Invited" : "Not sent"}</span>
+                  <span className="adm-tags">{pushOn.has(p.id) && <span className="tag" title="Notifications on">🔔</span>}<span className={`tag${p.accepted_at ? " on" : ""}`}>{p.accepted_at ? "In" : p.invited_at ? "Invited" : "Not sent"}</span></span>
                 </div>
                 <div className="adm-actions">
-                  <InviteControls id={p.id} link={inviteLink(p)} sent={!!p.invited_at} />
+                  <InviteControls id={p.id} name={p.name} link={inviteLink(p)} sent={!!p.invited_at} />
                   <RemoveButton id={p.id} name={p.name} />
                 </div>
               </li>
             ))}
             {!people.length && <li className="note">No one yet. Add your first invitee above.</li>}
           </ul>
+          <div className="panel adm-card">
+            <b>Phone notifications</b>
+            {noPush
+              ? <><p className="note">Daily reminders can go to phones as notifications instead of email. The database needs one update first. In Supabase, open SQL Editor, paste this and press Run:</p><code className="adm-code">{PUSH_SQL}</code></>
+              : <><p className="note"><b>{pushOn.size}</b> of {counts.accepted} have them on. Members tap "Turn on" in their arena page (on iPhone, after adding Winter Arc to the home screen). Everyone else still gets the email.</p><TestPushButton /></>}
+          </div>
           <div className="panel adm-card">
             <b>Email check</b>
             <p className="note">Invites not arriving? This logs in to Gmail with the settings in Vercel and sends a test to your own address, then tells you exactly what went wrong.</p>

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { addParticipant, addQuote, removeQuote, broadcast, emailInvite, login, removeParticipant, saveResult, sendRemindersNow, testEmail, saveSchedule, removeSchedule, toggleSchedule, importSeasonDates } from "./actions";
+import { addParticipant, addQuote, removeQuote, broadcast, emailInvite, login, removeParticipant, saveResult, sendRemindersNow, testEmail, testPush, saveSchedule, removeSchedule, toggleSchedule, importSeasonDates } from "./actions";
 
 type Msg = { ok?: string; error?: string } | null;
 const Note = ({ m }: { m: Msg }) => (m?.error ? <p className="err">{m.error}</p> : m?.ok ? <p className="ok">{m.ok}</p> : null);
@@ -39,7 +39,7 @@ export function AddForm() {
   );
 }
 
-export function InviteControls({ id, link, sent }: { id: string; link: string; sent: boolean }) {
+export function InviteControls({ id, link, sent, name }: { id: string; link: string; sent: boolean; name: string }) {
   const [m, setM] = useState<Msg>(null);
   const [pending, start] = useTransition();
   const copy = async () => {
@@ -48,7 +48,8 @@ export function InviteControls({ id, link, sent }: { id: string; link: string; s
   return (
     <div style={{ display: "grid", gap: ".35rem" }}>
       <div style={{ display: "flex", gap: ".4rem", flexWrap: "wrap" }}>
-        <button className="small" disabled={pending} onClick={() => start(async () => setM(await emailInvite(id)))}>{pending ? "Sending…" : sent ? "Resend email" : "Email invite"}</button>
+        <a className="btn wa-btn small" href={`https://wa.me/?text=${encodeURIComponent(`${name.split(" ")[0]}, you've been picked for Winter Arc 2026 💪 Six events, two weekends, no excuses. Claim your spot: ${link}`)}`} target="_blank" rel="noopener">WhatsApp</a>
+        <button className="ghost small" disabled={pending} onClick={() => start(async () => setM(await emailInvite(id)))}>{pending ? "Sending…" : sent ? "Email again" : "Email"}</button>
         <button className="ghost small" onClick={copy}>Copy link</button>
       </div>
       <Note m={m} />
@@ -75,6 +76,17 @@ export function ReminderButton() {
   return (
     <>
       <button disabled={pending} onClick={() => start(async () => setM(await sendRemindersNow()))}>{pending ? "Sending…" : "Send today's reminder now"}</button>
+      <Note m={m} />
+    </>
+  );
+}
+
+export function TestPushButton() {
+  const [m, setM] = useState<Msg>(null);
+  const [pending, start] = useTransition();
+  return (
+    <>
+      <button className="ghost" disabled={pending} onClick={() => start(async () => setM(await testPush()))}>{pending ? "Sending…" : "Send a test notification"}</button>
       <Note m={m} />
     </>
   );

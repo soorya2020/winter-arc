@@ -595,3 +595,21 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 .sched-item .adm-actions:has(.sched-form) > button { display: none; }
 .sched-item.past { opacity: .6; }
 .sched-defaults { margin: .2rem 0; padding-left: 1.1rem; display: grid; gap: .2rem; font-size: .92rem; }
+
+/* member page: daily reminder as a phone notification */
+.push { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .8rem; align-items: center; margin-top: 1rem; padding: .9rem 1rem; background: #fff; border: 2px solid var(--ink); border-radius: 1rem; }
+.push.on { border-color: var(--line); }
+.push-ico { font-size: 1.5rem; }
+.push-txt { display: grid; gap: .15rem; min-width: 0; }
+.push-txt b { font-size: .98rem; }
+.push-txt span { font-size: .85rem; color: var(--muted); }
+.push-txt .push-msg { color: var(--accent); font-weight: 700; }
+.push > button { white-space: nowrap; }
+@media (max-width: 480px) { .push { grid-template-columns: auto minmax(0, 1fr); } .push > button { grid-column: 1 / -1; } }
+.adm-tags { display: flex; gap: .3rem; align-items: center; flex: none; }
+.adm .wa-btn { background: #1fa855; border-color: #1fa855; color: #fff; }
+.adm-code { display: block; font-size: .78rem; font-weight: 700; overflow-wrap: anywhere; background: #f4f5f1; padding: .6rem .7rem; border-radius: .6rem; user-select: all; }
+.adm-actions > div:first-child { flex: 1 1 100%; }
+.adm-actions > div:first-child > div { flex-wrap: nowrap !important; }
+.adm-actions > div:first-child > div > * { flex: 1 1 0; justify-content: center; text-align: center; padding-inline: .4rem !important; white-space: nowrap; }
+.adm-actions > button.ghost:last-child { margin-left: auto; min-height: 2rem; }

@@ -76,3 +76,15 @@ create table if not exists schedule (
   created_at timestamptz not null default now()
 );
 alter table schedule enable row level security;
+
+-- Phone notifications: each member's browser subscription, and the site's own push keys.
+create table if not exists push_subscriptions (
+  endpoint text primary key,
+  participant_id uuid not null references participants(id) on delete cascade,
+  p256dh text not null,
+  auth text not null,
+  created_at timestamptz not null default now()
+);
+alter table push_subscriptions enable row level security;
+create table if not exists app_settings (key text primary key, value text not null);
+alter table app_settings enable row level security;
