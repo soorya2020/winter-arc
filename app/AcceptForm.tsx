@@ -16,7 +16,7 @@ export default function AcceptForm({ defaultName, rivals }: { defaultName: strin
         <label htmlFor="nickname">Name on the leaderboard</label>
         <input id="nickname" name="nickname" defaultValue={defaultName} maxLength={28} required placeholder="Pick something legendary" />
       </div>
-      <p className="note">Answer a few questions so your fighter talks like you, and so everyone else knows exactly what to roast. All optional, and you can change them later.</p>
+      <p className="note">We're all friends here, so answer honestly. Your fighter talks like you, and everyone else gets material to roast you with. You can change your answers later.</p>
       <ProfileFields rivals={rivals} />
       <Submit />
       {state?.error && <p className="err">{state.error}</p>}

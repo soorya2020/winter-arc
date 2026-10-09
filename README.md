@@ -42,9 +42,10 @@ Every event is worth 100, so nobody's specialty outweighs the rest.
 
 ## The arena's trash talk
 
-When people accept their invite they answer a short personality questionnaire (tone, fighter name,
-signature move, go-to excuse, guilty snack, hype song, early bird or night owl, and a rival).
-Fighters roast each other with those answers plus real stats. Lines live in [`lib/trash.ts`](lib/trash.ts),
+When people accept their invite they answer honest questions about themselves (how long they've
+trained, toughest challenge, what they want to prove, most embarrassing workout moment, longest run,
+most push-ups) and optional fun ones (tone, fighter name, signature move, excuse, guilty snack, hype
+song, early bird or night owl, rival). Friends roast each other with those answers plus real stats. Lines live in [`lib/trash.ts`](lib/trash.ts),
 questions in [`lib/profile.ts`](lib/profile.ts). Anyone can change their answers at `/profile`.
 
 ## Pages

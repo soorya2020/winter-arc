@@ -74,3 +74,13 @@ test("rival gets picked about half the time", () => {
   for (let i = 0; i < 2000; i++) if (pickTarget(base({ profile: { rivalId: "r" } }), pool)?.id === "r") hits++;
   assert.ok(hits > 1000 && hits < 1500, String(hits));
 });
+
+test("friends get roasted with their honest answers", () => {
+  const a = base({ name: "Arjun", profile: { maxPushups: 60 } });
+  const b = base({ name: "Meera", rank: 2, profile: { trainingSince: "Under 6 months", toughest: "Climbing Chembra peak", goal: "Run 10 km without stopping", fail: "Fell off the treadmill", bestRun: 5, maxPushups: 12 } });
+  const lines = new Set<string>();
+  for (let i = 0; i < 400; i++) lines.add(trashTalk(a, b));
+  for (const bit of ["Under 6 months", "Climbing Chembra peak", "run 10 km", "Fell off the treadmill", "5 km", "12 push-ups"]) {
+    assert.ok([...lines].some((l) => l.includes(bit)), bit);
+  }
+});

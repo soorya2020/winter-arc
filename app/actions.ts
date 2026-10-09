@@ -5,7 +5,7 @@ import { currentParticipant } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { PRACTICE_KINDS } from "@/lib/season.ts";
 import { today } from "@/lib/streak.ts";
-import { profileFromForm } from "@/lib/profile.ts";
+import { missingPersonal, profileFromForm } from "@/lib/profile.ts";
 
 export async function acceptInvite(_: unknown, form: FormData) {
   const me = await currentParticipant();
@@ -13,8 +13,11 @@ export async function acceptInvite(_: unknown, form: FormData) {
   const nickname = String(form.get("nickname") ?? "").trim().slice(0, 28);
   const catchphrase = String(form.get("catchphrase") ?? "").trim().slice(0, 80) || null;
   if (nickname.length < 2) return { error: "Pick a leaderboard name with at least 2 characters." };
+  const profile = profileFromForm(form);
+  const missing = missingPersonal(profile);
+  if (missing) return { error: missing };
   const { error } = await db().from("participants")
-    .update({ nickname, catchphrase, profile: profileFromForm(form), accepted_at: me.accepted_at ?? new Date().toISOString() })
+    .update({ nickname, catchphrase, profile, accepted_at: me.accepted_at ?? new Date().toISOString() })
     .eq("id", me.id);
   if (error) return { error: "Couldn't save that. Try again." };
   revalidatePath("/board");
@@ -53,6 +56,8 @@ export async function saveProfile(_: unknown, form: FormData) {
   const catchphrase = String(form.get("catchphrase") ?? "").trim().slice(0, 80) || null;
   const profile = profileFromForm(form);
   if (profile.rivalId === me.id) delete profile.rivalId;
+  const missing = missingPersonal(profile);
+  if (missing) return { error: missing };
   const { error } = await db().from("participants").update({ catchphrase, profile }).eq("id", me.id);
   if (error) return { error: "Couldn't save that. Try again." };
   revalidatePath("/board");
