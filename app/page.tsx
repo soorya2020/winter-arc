@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Countdown from "@/components/Countdown";
 import Confetti from "@/components/Confetti";
 import AcceptForm from "./AcceptForm";
+import LinkForm from "./LinkForm";
 import { currentParticipant } from "@/lib/auth";
 import { allParticipants, displayName } from "@/lib/db";
 import { AWARDS, DRILLS, EVENTS, SEASON, TIMELINE, TZ, WEEK_PLAN, nextMilestone } from "@/lib/season.ts";
@@ -42,7 +43,7 @@ export default async function Home() {
                 ? <Link className="cta" href="/board">Enter the arena <span>→</span></Link>
                 : me
                   ? <a className="cta" href="#join">Claim your spot <span>→</span></a>
-                  : <p className="note">Invite only. Open the link in your invite email to claim your spot.</p>}
+                  : <a className="cta" href="#join">Members sign in <span>→</span></a>}
             </div>
           </div>
         </div>
@@ -156,7 +157,7 @@ export default async function Home() {
             ? <div><Link className="cta" href="/board">Enter the arena <span>→</span></Link></div>
             : me
               ? <AcceptForm defaultName={me.nickname || me.name} rivals={rivals} />
-              : <div className="panel"><p className="note">This page only opens up through a personal invite link. Check your email for yours.</p></div>}
+              : <LinkForm />}
         </div>
 
         <section className="why" id="why">
@@ -171,7 +172,7 @@ export default async function Home() {
 
         <footer>
           <span className="label">Winter Arc · made with love for the crew</span>
-          <span className="note">Questions? Reply to your invite email.</span>
+          <span className="note">Questions? Reply to your invite email. · <Link href="/admin">Organizers</Link></span>
         </footer>
       </div>
     </>
