@@ -12,6 +12,11 @@ import { EVENTS, SEASON, TZ, nextMilestone } from "@/lib/season.ts";
 
 export const dynamic = "force-dynamic";
 
+const ORGANIZERS = [
+  { name: "Soorya", role: "Organizer · built the site", line: "Wrote the rules, built the arena, and still has to do every push-up like the rest of you." },
+  { name: "Sanat", role: "Organizer · keeps everyone honest", line: "Holds the stopwatch on test day. Your excuses go to him, and he has heard them all." },
+];
+
 export default async function Home() {
   const me = await currentParticipant().catch(() => null);
   const ms = nextMilestone();
@@ -77,6 +82,23 @@ export default async function Home() {
             <p>Made with love and care for a few friends. Let's end this year strong and walk into the next one fitter than we've ever been. <b>Happy new year ahead.</b></p>
           </div>
           <label htmlFor="why-more" className="why-more">Read the rest</label>
+        </section>
+
+        <section className="orgs" id="organizers" data-reveal>
+          <span className="label">The organizers</span>
+          <h2>Blame <em>these two.</em></h2>
+          <div className="org-grid">
+            {ORGANIZERS.map((o) => (
+              <div className="org" key={o.name}>
+                <span className="org-badge" aria-hidden="true">{o.name[0]}</span>
+                <div>
+                  <h3>{o.name}</h3>
+                  <span className="org-role">{o.role}</span>
+                  <p>{o.line}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* phones only: the main button stays in reach at the bottom */}

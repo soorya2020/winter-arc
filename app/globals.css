@@ -362,3 +362,21 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
   .home[data-m="b"] .unit:first-child b { color: var(--accent); }
   .home[data-m="b"] .strip { margin-top: 1.5rem; }
 }
+
+/* home: organizers */
+.orgs { display: grid; gap: .8rem; border-top: 2px solid var(--ink); margin-top: clamp(3rem, 7vw, 5rem); padding-top: 1rem; }
+.orgs h2 { font-size: clamp(2.6rem, 7vw, 4.5rem); }
+.orgs h2 em { font-style: normal; color: var(--accent); }
+.org-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 2rem; margin-top: .5rem; }
+.org { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1rem; align-items: start; padding-top: 1rem; border-top: 1px solid var(--line); }
+.org-badge { width: 4.2rem; height: 4.2rem; display: grid; place-items: center; background: var(--ink); color: #fff; font-family: var(--display); font-size: 2.4rem; line-height: 1; border-radius: 50%; }
+.org:nth-child(2) .org-badge { background: var(--accent); }
+.org h3 { font-size: 2rem; }
+.org-role { display: block; margin-top: .2rem; font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.org p { margin-top: .5rem; color: var(--muted); max-width: 40ch; }
+@media (max-width: 560px) { .org-grid { grid-template-columns: minmax(0, 1fr); } .org-badge { width: 3.4rem; height: 3.4rem; font-size: 1.9rem; } }
+@media (prefers-reduced-motion: no-preference) {
+  .orgs.in .org { animation: up .6s cubic-bezier(.2,.8,.2,1) both; } .orgs.in .org + .org { animation-delay: .12s; }
+  .org:hover .org-badge { animation: wobble .5s ease; }
+  @keyframes wobble { 30% { transform: rotate(-10deg) scale(1.08); } 60% { transform: rotate(8deg); } }
+}
