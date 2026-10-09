@@ -14,8 +14,8 @@ import { EVENTS, SEASON, TZ, nextMilestone } from "@/lib/season.ts";
 export const dynamic = "force-dynamic";
 
 const ORGANIZERS = [
-  { name: "Soorya", kind: "lift" as const, jersey: "#ff4d00", num: "1", role: "Organizer · built this website", line: "Built the whole site, from the arena to the roasts. Now he has to survive the leaderboard he made." },
-  { name: "Sanat", kind: "run" as const, jersey: "#2f6fed", num: "2", role: "Organizer · started it all", line: "Said \"let's make it a competition\". It was supposed to be casual. It ended up being serious stuff like this." },
+  { name: "Soorya K Unni", tag: "Soorya", kind: "lift" as const, jersey: "#ff4d00", num: "1", role: "Organizer · built this website", line: "Built the whole site, from the arena to the roasts. Now he has to survive the leaderboard he made." },
+  { name: "Sanat Wilson", tag: "Sanat", kind: "run" as const, jersey: "#2f6fed", num: "2", role: "Organizer · started it all", line: "Said \"let's make it a competition\". It was supposed to be casual. It ended up being serious stuff like this." },
 ];
 
 export default async function Home() {
@@ -91,7 +91,7 @@ export default async function Home() {
           <div className="org-grid">
             {ORGANIZERS.map((o) => (
               <div className="org" key={o.name}>
-                <div className="org-ava"><OrgAvatar kind={o.kind} jersey={o.jersey} num={o.num} /><span className="tag">{o.name}</span></div>
+                <div className="org-ava"><OrgAvatar kind={o.kind} jersey={o.jersey} num={o.num} /><span className="tag">{o.tag}</span></div>
                 <div className="org-text">
                   <h3>{o.name}</h3>
                   <span className="org-role">{o.role}</span>
@@ -100,7 +100,6 @@ export default async function Home() {
               </div>
             ))}
           </div>
-          <p className="org-note">We both coordinate the event, but every participant is part of the management too. Want your pic up here? Let us know, shutumanis.</p>
         </section>
 
         {/* phones only: the main button stays in reach at the bottom */}
