@@ -237,3 +237,24 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 .strip p { margin: 0; color: var(--muted); }
 .strip b { display: inline-block; min-width: 11rem; margin-right: .75rem; color: var(--ink); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; }
 @media (max-width: 560px) { .strip b { display: block; margin-bottom: .15rem; } }
+
+/* home animation */
+@media (prefers-reduced-motion: no-preference) {
+  .hero h1 { animation: slam .65s cubic-bezier(.2,.9,.25,1.2) both; transform-origin: left bottom; }
+  .hero h1 em { display: inline-block; animation: swipe .6s .35s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes slam { from { transform: translateY(-40px) scale(1.12); opacity: 0; } 70% { opacity: 1; } to { transform: none; opacity: 1; } }
+  @keyframes swipe { from { transform: translateX(-60px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .hero-row { animation: up .7s .55s cubic-bezier(.2,.8,.2,1) both; }
+  .unit b { animation: tick .35s cubic-bezier(.2,.8,.2,1); }
+  @keyframes tick { from { transform: translateY(-.25em); opacity: .3; } to { transform: none; opacity: 1; } }
+  .hero .cta { animation: pulse 2.4s 1.4s ease-out infinite; }
+  .hero .cta span { display: inline-block; animation: nudge 2.4s 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 77, 0, .55); } 70%, 100% { box-shadow: 0 0 0 14px rgba(255, 77, 0, 0); } }
+  @keyframes nudge { 0%, 60%, 100% { transform: none; } 30% { transform: translateX(5px); } }
+  .cta { transition: transform .15s ease; } .cta:hover { transform: translateY(-2px); } .cta:active { transform: scale(.97); }
+  .js-reveal [data-reveal] { transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+  .js-reveal [data-reveal]:not(.in) { opacity: 0; transform: translateY(28px); }
+  .strip.in p { animation: swipe .5s cubic-bezier(.2,.8,.2,1) both; } .strip.in p + p { animation-delay: .12s; }
+  .why.in .why-body p { animation: up .6s cubic-bezier(.2,.8,.2,1) both; }
+  .why.in .why-body p:nth-child(2) { animation-delay: .12s; } .why.in .why-body p:nth-child(3) { animation-delay: .24s; }
+}

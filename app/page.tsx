@@ -2,6 +2,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Countdown from "@/components/Countdown";
 import Confetti from "@/components/Confetti";
+import Reveal from "@/components/Reveal";
 import AcceptForm from "./AcceptForm";
 import LinkForm from "./LinkForm";
 import { currentParticipant } from "@/lib/auth";
@@ -22,6 +23,7 @@ export default async function Home() {
   return (
     <>
       <Confetti onLoad={!!me && !me.accepted_at} />
+      <Reveal />
       <div className="wrap">
         <Header right={me?.accepted_at ? <Link className="pill" href="/board">Your arena →</Link> : undefined} />
 
@@ -41,13 +43,13 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="strip">
+        <div className="strip" data-reveal>
           {(["running", "strength"] as const).map((w) => (
             <p key={w}><b>{w === "running" ? "Running weekend" : "Strength weekend"}</b>{EVENTS.filter((e) => e.weekend === w).map((e) => e.name).join(" · ")}</p>
           ))}
         </div>
 
-        <div className="rsvp" id="join">
+        <div className="rsvp" id="join" data-reveal>
           <div>
             <h2>{me?.accepted_at ? <>You're <em>in.</em></> : <>Your spot is <em>waiting.</em></>}</h2>
             <p>{me?.accepted_at
@@ -61,7 +63,7 @@ export default async function Home() {
               : <LinkForm />}
         </div>
 
-        <section className="why" id="why">
+        <section className="why" id="why" data-reveal>
           <span className="label">Why we made this</span>
           <h2>Fitness <em>first.</em></h2>
           <div className="why-body">
