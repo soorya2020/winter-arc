@@ -25,7 +25,7 @@ export default async function Home() {
     <>
       <Confetti onLoad={!!me && !me.accepted_at} />
       <Reveal />
-      <div className="wrap home" data-m="a">
+      <div className="wrap home" data-m="b">
         <Header right={me?.accepted_at ? <Link className="pill" href="/board">Your arena →</Link> : undefined} />
 
         <div className="hero">
