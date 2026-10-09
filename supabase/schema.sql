@@ -62,3 +62,6 @@ create table if not exists quotes (
   created_at timestamptz not null default now()
 );
 alter table quotes enable row level security;
+
+-- Members sign in with email and password (set when they accept their invite).
+alter table participants add column if not exists password_hash text;

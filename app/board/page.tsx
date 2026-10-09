@@ -7,6 +7,7 @@ import Live from "./Live";
 import PracticeForm from "./PracticeForm";
 import QuoteStrip from "./QuoteStrip";
 import { quoteOfTheDay } from "@/lib/quotes";
+import { signOut } from "../actions";
 import { currentParticipant, isAdmin } from "@/lib/auth";
 import { loadBoard } from "@/lib/board";
 import { recentTaunts } from "@/lib/db";
@@ -29,7 +30,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
     <>
       <Confetti onLoad={searchParams.joined === "1"} />
       <div className="wrap">
-        <Header right={<>{admin && <Link href="/admin">Admin</Link>}<Link href="/">Home</Link><span className="pill">{me ? `You: #${mine?.rank ?? "–"}` : "Admin view"}</span></>} />
+        <Header right={<>{admin && <Link href="/admin">Admin</Link>}<Link href="/">Home</Link><span className="pill">{me ? `You: #${mine?.rank ?? "–"}` : "Admin view"}</span>{me && <form action={signOut}><button className="ghost small" type="submit">Sign out</button></form>}</>} />
         <QuoteStrip text={quote.text} author={quote.author} canAdd={!!me} />
         <Live rows={rows} taunts={taunts} meId={me?.id ?? null} events={EVENTS.map((e) => ({ id: e.id, name: e.name, weekend: e.weekend }))} />
 
