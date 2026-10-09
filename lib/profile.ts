@@ -11,9 +11,10 @@ export type Profile = {
   // Gear up checklist, set by the site
   installedAt?: string;
   lockedInAt?: string;
-  // About you: honest answers, required
+  // Asked on join: the only required answers
   trainingSince?: TrainingSince;
   toughest?: string;   // "The toughest challenge you've ever faced"
+  // Roast fuel: optional, on the profile page
   goal?: string;       // "What do you want to prove this winter?"
   fail?: string;       // "Your most embarrassing workout moment"
   bestRun?: number;    // "Longest you've ever run, in km"
@@ -31,9 +32,11 @@ export type Profile = {
 
 type TextKey = "toughest" | "goal" | "fail" | "excuse" | "weakness" | "song" | "alterEgo" | "move";
 
-/** Honest questions everyone must answer. */
+/** The one written question asked on join. */
+export const TOUGHEST = { key: "toughest" as const, label: "Toughest challenge you've ever faced", placeholder: "10 km trek on a sprained ankle" };
+
+/** Honest but optional questions. */
 export const PERSONAL: { key: TextKey; label: string; placeholder: string }[] = [
-  { key: "toughest", label: "The toughest challenge you've ever faced", placeholder: "Finishing a 10 km trek with a sprained ankle" },
   { key: "goal", label: "What do you want to prove this winter?", placeholder: "That I can run 10 km without stopping" },
   { key: "fail", label: "Your most embarrassing workout moment", placeholder: "Fell off the treadmill in front of everyone" },
 ];
@@ -64,19 +67,17 @@ export function profileFromForm(form: FormData): Profile {
   if (schedule === "Early bird" || schedule === "Night owl") p.schedule = schedule;
   const rival = clip(form.get("rivalId"), 40);
   if (/^[0-9a-f-]{36}$/.test(rival)) p.rivalId = rival;
-  for (const q of PERSONAL) { const v = clip(form.get(q.key), 100); if (v) p[q.key] = v; }
+  for (const q of [TOUGHEST, ...PERSONAL]) { const v = clip(form.get(q.key), 100); if (v) p[q.key] = v; }
   for (const q of QUESTIONS) { const v = clip(form.get(q.key)); if (v) p[q.key] = v; }
   const run = num(form.get("bestRun"), 500); if (run !== undefined) p.bestRun = run;
   const pu = num(form.get("maxPushups"), 2000); if (pu !== undefined) p.maxPushups = Math.round(pu);
   return p;
 }
 
-/** The honest questions are required. Returns a message naming what's missing, or null. */
+/** Only the join questions are required. Returns a message naming what's missing, or null. */
 export function missingPersonal(p: Profile): string | null {
   const missing: string[] = [];
   if (!p.trainingSince) missing.push("how long you've been working out");
-  for (const q of PERSONAL) if (!p[q.key]) missing.push(q.label.toLowerCase());
-  if (p.bestRun === undefined) missing.push("your longest run");
-  if (p.maxPushups === undefined) missing.push("your most push-ups");
-  return missing.length ? `Please answer: ${missing.join(", ")}.` : null;
+  if (!p.toughest) missing.push("your toughest challenge");
+  return missing.length ? `Please answer: ${missing.join(" and ")}.` : null;
 }

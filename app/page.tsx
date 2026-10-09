@@ -9,7 +9,7 @@ import OrgAvatar from "@/components/OrgAvatar";
 import AcceptForm from "./AcceptForm";
 import LinkForm from "./LinkForm";
 import { currentParticipant } from "@/lib/auth";
-import { allParticipants, displayName } from "@/lib/db";
+import { displayName } from "@/lib/db";
 import { EVENTS, SEASON } from "@/lib/season.ts";
 import { fmtWhen, upcoming } from "@/lib/schedule";
 
@@ -25,9 +25,6 @@ export default async function Home() {
   const { next: ms, then } = await upcoming();
   const when = fmtWhen(ms.at, true);
   const first = me ? displayName(me).split(" ")[0] : null;
-  const rivals = me && !me.accepted_at
-    ? (await allParticipants()).filter((p) => p.accepted_at && p.id !== me.id).map((p) => ({ id: p.id, name: displayName(p) }))
-    : [];
 
   return (
     <>
@@ -67,12 +64,12 @@ export default async function Home() {
             <h2>{me?.accepted_at ? <>You're <em>in.</em></> : <>Your spot is <em>waiting.</em></>}</h2>
             <p>{me?.accepted_at
               ? "Your fighter is in the arena. Log every session to keep your streak alive."
-              : "Accept the invite, pick your name and tell us how you talk. Your fighter joins the arena straight away."}</p>
+              : "A few quick answers and your fighter joins the arena."}</p>
           </div>
           {me?.accepted_at
             ? <div><Link className="cta" href="/board">Enter the arena <span>→</span></Link></div>
             : me
-              ? <AcceptForm defaultName={me.nickname || me.name} rivals={rivals} />
+              ? <AcceptForm defaultName={me.nickname || me.name} />
               : <LinkForm />}
         </div>
 
