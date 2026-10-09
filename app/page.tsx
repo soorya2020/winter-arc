@@ -25,7 +25,7 @@ export default async function Home() {
     <>
       <Confetti onLoad={!!me && !me.accepted_at} />
       <Reveal />
-      <div className="wrap">
+      <div className="wrap home" data-m="a">
         <Header right={me?.accepted_at ? <Link className="pill" href="/board">Your arena →</Link> : undefined} />
 
         <div className="hero">
@@ -49,7 +49,7 @@ export default async function Home() {
 
         <div className="strip" data-reveal>
           {(["running", "strength"] as const).map((w) => (
-            <p key={w}><b>{w === "running" ? "Running weekend" : "Strength weekend"}</b>{EVENTS.filter((e) => e.weekend === w).map((e) => e.name).join(" · ")}</p>
+            <p key={w}><b>{w === "running" ? "Running weekend" : "Strength weekend"}</b>{EVENTS.filter((e) => e.weekend === w).map((e) => <span className="chip" key={e.id}>{e.name}</span>)}</p>
           ))}
         </div>
 
@@ -70,12 +70,21 @@ export default async function Home() {
         <section className="why" id="why" data-reveal>
           <span className="label">Why we made this</span>
           <h2>Fitness <em>first.</em></h2>
+          <input type="checkbox" id="why-more" className="why-toggle" />
           <div className="why-body">
             <p>Work, studies, deadlines: something always wins over the workout. This year we wanted fitness to win for once. Your health is the thing that carries everything else you do, so it deserves to come first.</p>
             <p>Winter Arc is a friendly match dressed up to look intimidating. The countdowns, the leaderboard and the roasts are there to get you moving, not to make anyone feel small. Finish last and you still started something.</p>
             <p>Made with love and care for a few friends. Let's end this year strong and walk into the next one fitter than we've ever been. <b>Happy new year ahead.</b></p>
           </div>
+          <label htmlFor="why-more" className="why-more">Read the rest</label>
         </section>
+
+        {/* phones only: the main button stays in reach at the bottom */}
+        <div className="m-cta">
+          {me?.accepted_at
+            ? <Link className="cta" href="/board">Enter the arena <span>→</span></Link>
+            : <a className="cta" href="#join">{me ? "Claim your spot" : "Members sign in"} <span>→</span></a>}
+        </div>
 
         <footer>
           <span className="label">Winter Arc · made with love for the crew</span>

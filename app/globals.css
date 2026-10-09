@@ -308,3 +308,57 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 .share .wa:hover { filter: brightness(1.05); }
 .share .wa:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .share .note { flex-basis: 100%; margin: 0; }
+
+/* home: event chips read as "a · b · c" on wide screens */
+.strip .chip + .chip::before { content: " · "; }
+.why-toggle, .why-more, .m-cta { display: none; }
+
+/* home on phones: its own layout. Option a is light, option b puts the hero on a dark scoreboard. Other pages are untouched. */
+@media (max-width: 560px) {
+  .home { padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px)); }
+  .home .hero { min-height: calc(100svh - 10.5rem); align-content: space-between; gap: 1rem; padding-block: .75rem 1.25rem; }
+  .home .hero h1 { font-size: 31vw; line-height: .8; }
+  .home .hero-top { gap: .25rem; }
+  .home .fun--rejected .fun-stage { min-height: 6.5rem; }
+  .home .fun--rejected q { font-size: 10.5vw; }
+  .home .stamp { font-size: 7.5vw; }
+  .home .hero-row { gap: 1rem; }
+  .home .lede { font-size: 1.05rem; }
+  .home .hero-row .cta { display: none; }
+  .home .count { gap: .4rem; }
+  .home .unit { border-top: 0; background: var(--ink); color: #fff; padding: .55rem .5rem .45rem; border-radius: .4rem; text-align: center; justify-items: center; }
+  .home .unit b { font-size: 12vw; }
+  .home .unit:first-child b { color: var(--accent); }
+  .home .unit span { color: rgba(255, 255, 255, .6); font-size: .62rem; }
+  .home .count-note { text-align: center; }
+  .home .strip { border: 0; padding: 0; gap: 1rem; margin-bottom: 2rem; }
+  .home .strip p { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .home .strip b { display: block; flex-basis: 100%; min-width: 0; margin: 0 0 .1rem; }
+  .home .strip .chip { padding: .45rem .8rem; border: 2px solid var(--ink); border-radius: 999px; font-weight: 700; font-size: .9rem; color: var(--ink); }
+  .home .strip p:first-child .chip { border-color: var(--accent); color: var(--accent); }
+  .home .strip .chip + .chip::before { content: none; }
+  .home .rsvp { margin-inline: -16px; padding: 2rem 16px; }
+  .home .rsvp h2 { font-size: 15vw; }
+  .home .why-body { grid-template-columns: minmax(0, 1fr); gap: .8rem; }
+  .home .why-body p:nth-child(n + 2) { display: none; }
+  .home .why-toggle:checked + .why-body p { display: block; }
+  .home .why-more { display: inline-block; justify-self: start; font-weight: 800; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); cursor: pointer; border-bottom: 2px solid currentColor; }
+  .home .why-toggle:checked ~ .why-more { display: none; }
+  .home footer { flex-direction: column; }
+  .home .m-cta { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; padding: .75rem 16px calc(.75rem + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to top, var(--paper) 70%, rgba(244, 245, 241, 0)); }
+  .home .m-cta .cta { display: flex; justify-content: center; width: 100%; padding-block: 1.1rem; font-size: 1rem; background: var(--accent); box-shadow: 0 8px 24px rgba(255, 77, 0, .35); }
+  .home .m-cta .cta span { color: #fff; }
+
+  /* option b: dark scoreboard hero */
+  .home[data-m="b"] .hero { margin-inline: -16px; padding-inline: 16px; background: var(--ink); color: #fff; }
+  .home[data-m="b"] .hello { color: var(--accent); }
+  .home[data-m="b"] .fun-k, .home[data-m="b"] .count-note { color: rgba(255, 255, 255, .6); }
+  .home[data-m="b"] .count-note b { color: #fff; }
+  .home[data-m="b"] .fun--rejected .ex { color: #fff; }
+  .home[data-m="b"] .stamp { background: rgba(12, 13, 14, .85); box-shadow: 0 0 0 .15rem rgba(12, 13, 14, .85); color: #ff3b30; border-color: #ff3b30; }
+  .home[data-m="b"] .lede b { color: var(--accent); }
+  .home[data-m="b"] .unit { background: #1b1d1f; border: 1px solid #2c2f33; }
+  .home[data-m="b"] .unit b { color: #fff; text-shadow: 0 0 14px rgba(255, 77, 0, .35); }
+  .home[data-m="b"] .unit:first-child b { color: var(--accent); }
+  .home[data-m="b"] .strip { margin-top: 1.5rem; }
+}
