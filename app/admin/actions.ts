@@ -4,6 +4,7 @@ import { adminLogin, adminLogout, newToken, requireAdmin } from "@/lib/auth";
 import { allParticipants, db, type Participant } from "@/lib/db";
 import { sendBroadcast, sendDailyReminders, sendInvite, type Audience } from "@/lib/reminders";
 import { EVENTS } from "@/lib/season.ts";
+import { mailCheck, mailError } from "@/lib/email";
 import { parseValue, points } from "@/lib/scoring.ts";
 
 type Msg = { ok?: string; error?: string } | null;
@@ -44,11 +45,21 @@ export async function emailInvite(id: string): Promise<Msg> {
   try {
     await sendInvite(data as Participant);
   } catch (e) {
-    return { error: `Email failed: ${(e as Error).message}` };
+    return { error: `Email failed. ${mailError(e)}` };
   }
   await db().from("participants").update({ invited_at: new Date().toISOString() }).eq("id", id);
   revalidatePath("/admin");
   return { ok: `Invite sent to ${data.email}.` };
+}
+
+export async function testEmail(): Promise<Msg> {
+  requireAdmin();
+  try {
+    const r = await mailCheck();
+    return { ok: `Logged in to ${r.host} as ${r.user} and sent a test to ${r.accepted.join(", ") || r.user}. Check that inbox, and the Spam folder too.` };
+  } catch (e) {
+    return { error: mailError(e) };
+  }
 }
 
 export async function saveResult(participantId: string, eventId: string, baseline: boolean, raw: string): Promise<{ points?: number; error?: string }> {
@@ -75,7 +86,7 @@ export async function sendRemindersNow(): Promise<Msg> {
     const { sent, failed } = await sendDailyReminders(await allParticipants());
     return failed.length ? { error: `Sent ${sent}. Failed for: ${failed.join(", ")}` } : { ok: `Sent today's reminder to ${sent} people.` };
   } catch (e) {
-    return { error: `Email failed: ${(e as Error).message}` };
+    return { error: `Email failed. ${mailError(e)}` };
   }
 }
 
@@ -97,7 +108,7 @@ export async function broadcast(audience: Audience, subject: string, message: st
     if (!sent && !failed.length) return { error: "Nobody matches that group yet." };
     return failed.length ? { error: `Sent ${sent}. Failed for: ${failed.join(", ")}` } : { ok: `Sent to ${sent} ${sent === 1 ? "person" : "people"}.` };
   } catch (e) {
-    return { error: `Email failed: ${(e as Error).message}` };
+    return { error: `Email failed. ${mailError(e)}` };
   }
 }
 

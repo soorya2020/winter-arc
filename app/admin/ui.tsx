@@ -1,7 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { addParticipant, addQuote, removeQuote, broadcast, emailInvite, login, removeParticipant, saveResult, sendRemindersNow } from "./actions";
+import { addParticipant, addQuote, removeQuote, broadcast, emailInvite, login, removeParticipant, saveResult, sendRemindersNow, testEmail } from "./actions";
 
 type Msg = { ok?: string; error?: string } | null;
 const Note = ({ m }: { m: Msg }) => (m?.error ? <p className="err">{m.error}</p> : m?.ok ? <p className="ok">{m.ok}</p> : null);
@@ -75,6 +75,17 @@ export function ReminderButton() {
   return (
     <>
       <button disabled={pending} onClick={() => start(async () => setM(await sendRemindersNow()))}>{pending ? "Sending…" : "Send today's reminder now"}</button>
+      <Note m={m} />
+    </>
+  );
+}
+
+export function TestEmailButton() {
+  const [m, setM] = useState<Msg>(null);
+  const [pending, start] = useTransition();
+  return (
+    <>
+      <button className="ghost" disabled={pending} onClick={() => start(async () => setM(await testEmail()))}>{pending ? "Testing…" : "Send me a test email"}</button>
       <Note m={m} />
     </>
   );

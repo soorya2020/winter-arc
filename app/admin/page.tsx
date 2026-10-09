@@ -7,7 +7,7 @@ import { EVENTS } from "@/lib/season.ts";
 import { formatValue, points } from "@/lib/scoring.ts";
 import { loadBoard } from "@/lib/board";
 import { allQuotes, quoteOfTheDay } from "@/lib/quotes";
-import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell } from "./ui";
+import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell, TestEmailButton } from "./ui";
 import { logout } from "./actions";
 import { passwordColumnMissing, setupProblems } from "@/lib/health";
 
@@ -111,6 +111,11 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
             ))}
             {!people.length && <li className="note">No one yet. Add your first invitee above.</li>}
           </ul>
+          <div className="panel adm-card">
+            <b>Email check</b>
+            <p className="note">Invites not arriving? This logs in to Gmail with the settings in Vercel and sends a test to your own address, then tells you exactly what went wrong.</p>
+            <TestEmailButton />
+          </div>
           <div className="panel adm-card">
             <b>Daily reminder</b>
             <p className="note">Goes out by itself at 6:00 IST to everyone who's in. Tap to send today's now.</p>

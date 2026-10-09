@@ -3,14 +3,46 @@ import nodemailer from "nodemailer";
 
 let transport: nodemailer.Transporter | null = null;
 
+// Settings as typed into Vercel, cleaned up: Gmail shows app passwords as "abcd efgh ijkl mnop",
+// and stray spaces or quotes around any value make the login fail.
+function smtp() {
+  const clean = (v?: string) => (v ?? "").trim().replace(/^["']|["']$/g, "").trim();
+  const user = clean(process.env.SMTP_USER);
+  const host = clean(process.env.SMTP_HOST) || (user.endsWith("@gmail.com") || user.endsWith("@googlemail.com") ? "smtp.gmail.com" : "");
+  const port = Number(clean(process.env.SMTP_PORT) || 465);
+  const pass = clean(process.env.SMTP_PASS).replace(/\s+/g, "");
+  const from = clean(process.env.MAIL_FROM) || user;
+  return { host, port, user, pass, from };
+}
+
 function mailer() {
   if (!transport) {
-    const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
-    if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) throw new Error("SMTP settings are missing");
-    const port = Number(SMTP_PORT || 465);
-    transport = nodemailer.createTransport({ host: SMTP_HOST, port, secure: port === 465, auth: { user: SMTP_USER, pass: SMTP_PASS } });
+    const { host, port, user, pass } = smtp();
+    const missing = [!host && "SMTP_HOST", !user && "SMTP_USER", !pass && "SMTP_PASS"].filter(Boolean);
+    if (missing.length) throw new Error(`Email isn't set up: ${missing.join(", ")} missing in Vercel.`);
+    transport = nodemailer.createTransport({ host, port, secure: port === 465, auth: { user, pass }, connectionTimeout: 15000, greetingTimeout: 15000 });
   }
   return transport;
+}
+
+/** Turns SMTP errors into a sentence an organizer can act on. */
+export function mailError(e: unknown) {
+  const err = e as { code?: string; responseCode?: number; message?: string };
+  const msg = err.message ?? String(e);
+  if (err.code === "EAUTH" || err.responseCode === 535 || err.responseCode === 534)
+    return "Gmail refused the login. In Vercel, SMTP_USER must be the full Gmail address and SMTP_PASS a 16-letter App Password (not your normal password), then redeploy.";
+  if (err.code === "ETIMEDOUT" || err.code === "ECONNECTION" || err.code === "ESOCKET" || err.code === "EDNS")
+    return `Couldn't reach the mail server (${err.code}). Use SMTP_HOST smtp.gmail.com and SMTP_PORT 465, then redeploy.`;
+  if (err.code === "EENVELOPE") return `The address was rejected: ${msg}`;
+  return msg;
+}
+
+/** Logs in to the mail server and sends a test to the organizer's own inbox. */
+export async function mailCheck() {
+  const { host, port, user, from } = smtp();
+  await mailer().verify();
+  const info = await mailer().sendMail({ from, to: user, subject: "Winter Arc test email", text: "If you can read this, invite emails work. Check that the invite lands in the inbox, not spam.", html: "<p>If you can read this, <b>invite emails work</b>.</p><p>Check that invites land in the inbox, not spam.</p>" });
+  return { host, port, user, from, accepted: (info.accepted ?? []).map(String), rejected: (info.rejected ?? []).map(String) };
 }
 
 // On Vercel, use the project's real production address so links can't point at the wrong site.
@@ -20,7 +52,8 @@ export const siteUrl = () => {
 };
 
 export async function sendMail(to: string, subject: string, html: string, text: string) {
-  await mailer().sendMail({ from: process.env.MAIL_FROM || process.env.SMTP_USER, to, subject, html, text });
+  const info = await mailer().sendMail({ from: smtp().from, to, subject, html, text });
+  if (info.rejected?.length) throw new Error(`The mail server rejected ${info.rejected.join(", ")}.`);
 }
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
