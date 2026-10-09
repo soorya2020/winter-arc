@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: "Winter Arc 2026",
   description: "Six athletes. Six events. Two weekends to find your limits. By invitation.",
   robots: { index: false, follow: false },
+  applicationName: "Winter Arc",
+  appleWebApp: { capable: true, title: "Winter Arc", statusBarStyle: "default" },
+  icons: { icon: [{ url: "/icon-192.png", sizes: "192x192" }, { url: "/icon-512.png", sizes: "512x512" }], apple: "/apple-touch-icon.png" },
 };
 export const viewport: Viewport = { themeColor: "#f4f5f1", width: "device-width", initialScale: 1, viewportFit: "cover" };
 

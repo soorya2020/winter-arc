@@ -403,3 +403,12 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
   @keyframes speed { from { transform: translateX(12px); opacity: 0; } 40% { opacity: 1; } to { transform: translateX(-10px); opacity: 0; } }
 }
 .org .wa { margin-top: .75rem; padding: .55rem .9rem; font-size: .72rem; }
+
+/* add-to-home-screen nudge */
+.install { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: .75rem; align-items: center; padding: .75rem .9rem; margin-bottom: 1rem; background: #fff; border: 2px solid var(--ink); border-radius: .9rem; }
+.install img { border-radius: .6rem; display: block; }
+.install b { display: block; font-size: .95rem; }
+.install span { font-size: .85rem; color: var(--muted); }
+.install span b { display: inline; font-size: inherit; color: var(--ink); }
+.install button.small { padding: .55rem .9rem; font-size: .75rem; }
+@media (max-width: 420px) { .install { grid-template-columns: auto minmax(0, 1fr) auto; } .install button:not(.ghost) { grid-column: 2 / -1; justify-self: start; } }
