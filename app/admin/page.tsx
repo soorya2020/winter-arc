@@ -15,12 +15,19 @@ export const dynamic = "force-dynamic";
 
 // Phone first: a bottom tab bar (top row on wide screens), cards instead of wide tables,
 // and results entered one event at a time with big number boxes.
+const ICONS: Record<string, React.ReactNode> = {
+  people: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>,
+  results: <><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2 2" /><path d="M10 2h4" /><path d="M12 2v3" /></>,
+  broadcast: <><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-10 6L2 7" /></>,
+  quotes: <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z" />,
+  awards: <><path d="M8 21h8" /><path d="M12 17v4" /><path d="M7 4h10v5a5 5 0 0 1-10 0z" /><path d="M17 5h3v2a3 3 0 0 1-3 3" /><path d="M7 5H4v2a3 3 0 0 0 3 3" /></>,
+};
 const TABS = [
-  { id: "people", label: "People", icon: "👥" },
-  { id: "results", label: "Results", icon: "⏱" },
-  { id: "broadcast", label: "Email", icon: "✉" },
-  { id: "quotes", label: "Bro talk", icon: "💬" },
-  { id: "awards", label: "Awards", icon: "🏆" },
+  { id: "people", label: "People" },
+  { id: "results", label: "Results" },
+  { id: "broadcast", label: "Email" },
+  { id: "quotes", label: "Bro talk" },
+  { id: "awards", label: "Awards" },
 ];
 const WEEKENDS = [
   { id: "running", label: "Running" },
@@ -78,8 +85,13 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
           <code>alter table participants add column if not exists password_hash text;</code>
         </div>
       )}
-      <nav className="anav" aria-label="Admin sections">
-        {TABS.map((t) => <Link key={t.id} href={`/admin?tab=${t.id}`} className={t.id === tab ? "on" : ""} aria-current={t.id === tab ? "page" : undefined}><span aria-hidden="true">{t.icon}</span>{t.label}</Link>)}
+      <nav className="anav" aria-label="Admin sections" style={{ ["--i" as string]: TABS.findIndex((t) => t.id === tab) }}>
+        <i className="anav-ind" aria-hidden="true" />
+        {TABS.map((t) => (
+          <Link key={t.id} href={`/admin?tab=${t.id}`} className={t.id === tab ? "on" : ""} aria-current={t.id === tab ? "page" : undefined}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">{ICONS[t.id]}</svg><span>{t.label}</span>
+          </Link>
+        ))}
       </nav>
 
       {tab === "people" && (
