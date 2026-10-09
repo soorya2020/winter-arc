@@ -1,7 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { addParticipant, emailInvite, login, removeParticipant, saveResult, sendRemindersNow } from "./actions";
+import { addParticipant, broadcast, emailInvite, login, removeParticipant, saveResult, sendRemindersNow } from "./actions";
 
 type Msg = { ok?: string; error?: string } | null;
 const Note = ({ m }: { m: Msg }) => (m?.error ? <p className="err">{m.error}</p> : m?.ok ? <p className="ok">{m.ok}</p> : null);
@@ -99,6 +99,53 @@ export function ResultCell(props: { participantId: string; eventId: string; base
       <input value={value} placeholder={props.placeholder} inputMode="decimal" aria-label="Result"
         onChange={(e) => setValue(e.target.value)} onBlur={save} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
       <span className={err ? "err" : "pts"} style={{ fontSize: ".72rem" }}>{pending ? "Saving…" : err ?? (pts != null ? `${pts} pts` : value !== saved ? "Not saved" : "")}</span>
+    </div>
+  );
+}
+
+export function Broadcast({ counts }: { counts: { accepted: number; pending: number; all: number } }) {
+  const [audience, setAudience] = useState<"accepted" | "pending" | "all">("accepted");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [confirm, setConfirm] = useState(false);
+  const [m, setM] = useState<Msg>(null);
+  const [pending, start] = useTransition();
+  const n = counts[audience];
+  const run = (testOnly: boolean) => start(async () => {
+    const r = await broadcast(audience, subject, message, testOnly);
+    setM(r); setConfirm(false);
+    if (r?.ok && !testOnly) { setSubject(""); setMessage(""); }
+  });
+  return (
+    <div className="panel" style={{ maxWidth: "44rem" }}>
+      <div className="field">
+        <label htmlFor="b-audience">Send to</label>
+        <select id="b-audience" value={audience} onChange={(e) => { setAudience(e.target.value as typeof audience); setConfirm(false); }}>
+          <option value="accepted">Everyone who accepted ({counts.accepted})</option>
+          <option value="pending">Invited but not accepted yet ({counts.pending})</option>
+          <option value="all">Everyone on the list ({counts.all})</option>
+        </select>
+      </div>
+      <div className="field">
+        <label htmlFor="b-subject">Subject</label>
+        <input id="b-subject" value={subject} maxLength={120} onChange={(e) => setSubject(e.target.value)} placeholder="Running weekend moved to 3 January" />
+      </div>
+      <div className="field">
+        <label htmlFor="b-message">Message</label>
+        <textarea id="b-message" value={message} maxLength={5000} rows={8} onChange={(e) => setMessage(e.target.value)} style={{ borderRadius: 14 }}
+          placeholder={"Leave a blank line between paragraphs.\n\nEach person's email starts with \"Hey <name>,\" and ends with a button back to the site."} />
+      </div>
+      <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap", alignItems: "center" }}>
+        {!confirm
+          ? <button type="button" disabled={pending || !subject.trim() || !message.trim()} onClick={() => setConfirm(true)}>Send to {n} {n === 1 ? "person" : "people"}</button>
+          : <>
+              <span className="note">Send "{subject}" to {n} {n === 1 ? "person" : "people"}? This can't be unsent.</span>
+              <button type="button" disabled={pending} onClick={() => run(false)} style={{ background: "var(--accent)" }}>{pending ? "Sending…" : "Yes, send it"}</button>
+              <button type="button" className="ghost" onClick={() => setConfirm(false)}>Cancel</button>
+            </>}
+        {!confirm && <button type="button" className="ghost" disabled={pending || !subject.trim() || !message.trim()} onClick={() => run(true)}>Send me a test</button>}
+      </div>
+      <Note m={m} />
     </div>
   );
 }

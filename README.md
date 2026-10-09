@@ -56,7 +56,7 @@ questions in [`lib/profile.ts`](lib/profile.ts). Anyone can change their answers
 | `/i/<token>` | Invitee | Personal invite link. Remembers them and opens the page. |
 | `/profile` | Accepted invitees | Edit catchphrase and personality answers. |
 | `/board` | Accepted invitees, admin | The arena (group brawl and shared trash talk), live table, practice log, streak. |
-| `/admin` | Admin | Participants and invites, result entry per weekend, baseline test, awards. |
+| `/admin` | Admin | Participants and invites, result entry per weekend, baseline test, broadcast emails, awards. |
 | `/certificate/<id>` | That athlete, admin | Printable A4 certificate (print or save as PDF). |
 | `/api/poster/<id>` | Invitees, admin | 1080×1350 PNG poster for stories. `/api/poster/board` is the group poster. |
 

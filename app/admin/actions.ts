@@ -2,7 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { adminLogin, adminLogout, newToken, requireAdmin } from "@/lib/auth";
 import { allParticipants, db, type Participant } from "@/lib/db";
-import { sendDailyReminders, sendInvite } from "@/lib/reminders";
+import { sendBroadcast, sendDailyReminders, sendInvite, type Audience } from "@/lib/reminders";
 import { EVENTS } from "@/lib/season.ts";
 import { parseValue, points } from "@/lib/scoring.ts";
 
@@ -74,6 +74,28 @@ export async function sendRemindersNow(): Promise<Msg> {
   try {
     const { sent, failed } = await sendDailyReminders(await allParticipants());
     return failed.length ? { error: `Sent ${sent}. Failed for: ${failed.join(", ")}` } : { ok: `Sent today's reminder to ${sent} people.` };
+  } catch (e) {
+    return { error: `Email failed: ${(e as Error).message}` };
+  }
+}
+
+export async function broadcast(audience: Audience, subject: string, message: string, testOnly: boolean): Promise<Msg> {
+  requireAdmin();
+  subject = subject.trim().slice(0, 120);
+  message = message.trim().slice(0, 5000);
+  if (!subject || !message) return { error: "Add a subject and a message." };
+  if (!["accepted", "pending", "all"].includes(audience)) return { error: "Pick who should get it." };
+  try {
+    if (testOnly) {
+      const to = process.env.SMTP_USER;
+      if (!to) return { error: "SMTP_USER isn't set, so there's nowhere to send a test." };
+      const me = { id: "test", name: "Organiser", email: to, nickname: null, catchphrase: null, profile: null, token: "test", accepted_at: new Date().toISOString(), invited_at: null, created_at: "" };
+      await sendBroadcast([me], "accepted", `[Test] ${subject}`, message);
+      return { ok: `Test sent to ${to}.` };
+    }
+    const { sent, failed } = await sendBroadcast(await allParticipants(), audience, subject, message);
+    if (!sent && !failed.length) return { error: "Nobody matches that group yet." };
+    return failed.length ? { error: `Sent ${sent}. Failed for: ${failed.join(", ")}` } : { ok: `Sent to ${sent} ${sent === 1 ? "person" : "people"}.` };
   } catch (e) {
     return { error: `Email failed: ${(e as Error).message}` };
   }

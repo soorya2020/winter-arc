@@ -63,3 +63,34 @@ export async function sendDailyReminders(people: Participant[]) {
   }
   return { sent, failed };
 }
+
+export type Audience = "accepted" | "pending" | "all";
+
+/** Sends an organiser update. Plain text in, paragraphs out; each person gets their own email. */
+export async function sendBroadcast(people: Participant[], audience: Audience, subject: string, message: string) {
+  const list = people.filter((p) => audience === "all" ? true : audience === "accepted" ? !!p.accepted_at : !p.accepted_at);
+  const paras = message.split(/\n{2,}/).map((t) => t.trim()).filter(Boolean);
+  let sent = 0;
+  const failed: string[] = [];
+  for (const p of list) {
+    const first = displayName(p).split(" ")[0];
+    const href = p.accepted_at ? `${siteUrl()}/board` : inviteLink(p);
+    try {
+      await sendMail(
+        p.email,
+        subject,
+        emailLayout({
+          kicker: "Update from the organisers",
+          title: subject,
+          body: [`Hey ${esc(first)},`, ...paras.map((t) => esc(t).replace(/\n/g, "<br>"))],
+          cta: { label: p.accepted_at ? "Open the arena" : "Claim my spot", href },
+        }),
+        `Hey ${first},\n\n${paras.join("\n\n")}\n\n${href}`,
+      );
+      sent++;
+    } catch {
+      failed.push(p.email);
+    }
+  }
+  return { sent, failed };
+}

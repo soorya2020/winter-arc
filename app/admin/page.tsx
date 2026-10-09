@@ -6,7 +6,7 @@ import { inviteLink } from "@/lib/reminders";
 import { EVENTS } from "@/lib/season.ts";
 import { formatValue, points } from "@/lib/scoring.ts";
 import { loadBoard } from "@/lib/board";
-import { AddForm, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell } from "./ui";
+import { AddForm, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell } from "./ui";
 import { logout } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +16,7 @@ const TABS = [
   { id: "running", label: "Running weekend" },
   { id: "strength", label: "Strength weekend" },
   { id: "baseline", label: "Baseline test" },
+  { id: "broadcast", label: "Broadcast email" },
   { id: "awards", label: "Certificates & posters" },
 ];
 
@@ -107,6 +108,13 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
             </div>
           );
         })()}
+
+        {tab === "broadcast" && (
+          <div style={{ display: "grid", gap: "1rem" }}>
+            <p className="note">Write an update and email it to the group in the Winter Arc style. Send yourself a test first to see how it looks.</p>
+            <Broadcast counts={{ accepted: people.filter((p) => p.accepted_at).length, pending: people.filter((p) => !p.accepted_at).length, all: people.length }} />
+          </div>
+        )}
 
         {tab === "awards" && <Awards />}
       </section>
