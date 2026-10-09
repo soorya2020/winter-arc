@@ -110,7 +110,7 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
     layout();
     const ro = new ResizeObserver(layout); ro.observe(cv);
 
-    const say = (f: Fighter, text: string, now: number) => { w.bubbles = w.bubbles.filter((b) => b.f !== f); w.bubbles.push({ f, text, t0: now }); };
+    const say = (f: Fighter, text: string, now: number) => { w.bubbles = w.bubbles.filter((b) => b.f !== f).slice(-1); w.bubbles.push({ f, text, t0: now }); };
     const start = (a: Fighter, b: Fighter, text: string, now: number, toFeed: boolean) => {
       if (a.busy || b.busy || a === b) return false;
       a.busy = b.busy = true; a.state = "walk"; a.face = b.x > a.x ? 1 : -1;
@@ -213,7 +213,7 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
     const wrap = (txt: string, maxW: number) => {
       const out: string[] = []; let cur = "";
       for (const word of txt.split(" ")) { const t2 = cur ? cur + " " + word : word; if (ctx.measureText(t2).width > maxW && cur) { out.push(cur); cur = word; } else cur = t2; }
-      if (cur) out.push(cur); return out.slice(0, 4);
+      if (cur) out.push(cur); return out.slice(0, 6);
     };
     const drawBubble = (b: Bubble, now: number) => {
       const age = now - b.t0, dur = 2400 + b.text.length * 25;
@@ -221,7 +221,7 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
       const f = b.f;
       ctx.save(); ctx.globalAlpha = Math.min(1, age / 120, (dur - age) / 250);
       ctx.font = `700 13px ${BODY}`;
-      const lines = wrap(b.text, Math.min(200, W * 0.42) - 20);
+      const lines = wrap(b.text, (W < 520 ? Math.min(250, W * 0.66) : Math.min(220, W * 0.44)) - 20);
       const bw = Math.max(...lines.map((l) => ctx.measureText(l).width)) + 22, bh = lines.length * 17 + 14;
       const bx = Math.max(6, Math.min(W - bw - 6, f.x - bw / 2)), by = Math.max(6, f.y - 150 * f.s - bh);
       ctx.fillStyle = f.me ? "#ff4d00" : "#ffffff"; rr(bx, by, bw, bh, 14); ctx.fill();

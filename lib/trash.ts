@@ -95,7 +95,7 @@ const COMEBACKS: Line[] = [
   (b) => b.catchphrase,
   (b) => b.profile.move ? `${b.profile.move}. Kandu padikku.` : null,
   (b) => b.profile.toughest ? `"${b.profile.toughest}" survive cheytha aala njan. Nee enne pedippikkan nokkenda.` : null,
-  (b) => b.profile.goal ? `Njan vannathu ${lc(b.profile.goal)}. Maaru.` : null,
+  (b) => b.profile.goal ? `Ente lakshyam: "${lc(b.profile.goal)}". Vazhi maaru.` : null,
   (b, a) => a.profile.fail ? `"${a.profile.fail}" aaya aala aanu ee parayunnathu.` : null,
   () => "Samsaaram cheap aanu. Training alla.",
 ];
