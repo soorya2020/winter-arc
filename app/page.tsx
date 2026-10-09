@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Countdown from "@/components/Countdown";
 import Confetti from "@/components/Confetti";
 import Reveal from "@/components/Reveal";
-import HeroFun, { HeroFunAll } from "@/components/HeroFun";
+import HeroFun from "@/components/HeroFun";
 import AcceptForm from "./AcceptForm";
 import LinkForm from "./LinkForm";
 import { currentParticipant } from "@/lib/auth";
@@ -12,7 +12,7 @@ import { EVENTS, SEASON, TZ, nextMilestone } from "@/lib/season.ts";
 
 export const dynamic = "force-dynamic";
 
-export default async function Home({ searchParams }: { searchParams: { fun?: string } }) {
+export default async function Home() {
   const me = await currentParticipant().catch(() => null);
   const ms = nextMilestone();
   const when = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(ms.at));
@@ -32,7 +32,7 @@ export default async function Home({ searchParams }: { searchParams: { fun?: str
           <p className="hello">{first ? `${first}, you were picked for a reason` : "By invitation only"}</p>
           <div className="hero-top">
             <h1>Winter<br /><em>Arc.</em></h1>
-            {searchParams.fun === "all" ? <HeroFunAll /> : <HeroFun />}
+            <HeroFun />
           </div>
           <div className="hero-row">
             <p className="lede">{SEASON.spots} athletes. {EVENTS.length} events. Two weekends. <b>No excuses accepted.</b></p>
