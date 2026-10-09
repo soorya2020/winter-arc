@@ -54,7 +54,7 @@ test("trash talk uses the target's questionnaire answers", () => {
   const lines = new Set<string>();
   for (let i = 0; i < 200; i++) lines.add(trashTalk(a, b));
   assert.ok([...lines].some((l) => l.includes("It looked like rain")));
-  assert.ok([...lines].some((l) => l.includes("midnight biryani")));
+  assert.ok([...lines].some((l) => l.includes("Midnight biryani")));
   assert.ok([...lines].every((l) => l.length > 0 && !l.includes("undefined") && !l.includes("null")));
 });
 
