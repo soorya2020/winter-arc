@@ -55,7 +55,7 @@ export async function sendDailyReminders(people: Participant[]) {
           title: `Today: ${plan.title}`,
           stats: [[String(days), "days left"], [String(row?.streak ?? 0), "day streak"], [row ? `#${row.rank}` : "–", "your rank"]],
           body: [`${esc(name)}, ${esc(plan.detail)}`, streakLine, quoteHtml],
-          cta: { label: "Log it", href: `${siteUrl()}/board#you` },
+          cta: { label: "Log it", href: `${siteUrl()}/board` },
         }),
         `${days} days to ${ms.label}. Today: ${plan.title}. ${plan.detail}\n\n"${quote.text}"${quote.author ? ` (${quote.author})` : ""}\n\nLog it: ${siteUrl()}/board`,
       );

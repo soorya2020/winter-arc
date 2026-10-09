@@ -8,32 +8,24 @@ export default function BoardLive({ rows, at, meId, events }: { rows: BoardRow[]
   return (
     <div className="board">
       {rows.map((r) => (
-        <div key={r.id} className={`lb r${r.rank}${r.id === meId ? " me" : ""}`}>
-          <span className="rk">{r.rank}</span>
-          <div style={{ minWidth: 0 }}>
-            <div className="nm">{r.name}{r.id === meId ? " (you)" : ""}</div>
-            <div className="sub">
-              Run {r.running} · Strength {r.strength}
-              {r.leap ? ` · ${r.leap > 0 ? "+" : ""}${r.leap} vs baseline` : ""}
-              {" · "}{r.streak}-day streak
-              <span className="streak" aria-label={`${r.recent.filter(Boolean).length} of last 10 days trained`}>
-                {r.recent.map((on, i) => <i key={i} className={on ? "on" : ""} />)}
-              </span>
-            </div>
-          </div>
-          <span className="tot">{r.total}</span>
+        <details key={r.id} className={`lb r${r.rank}${r.id === meId ? " me" : ""}`}>
+          <summary>
+            <span className="rk">{r.rank}</span>
+            <span className="nm">{r.name}{r.id === meId ? " (you)" : ""}<span className="sub">{r.streak ? ` · ${r.streak}-day streak` : ""}</span></span>
+            <span className="tot">{r.total}</span>
+          </summary>
           <div className="bars">
             {events.map((e) => {
               const p = r.perEvent[e.id];
               return (
-                <div key={e.id} title={`${e.name}: ${p ?? "not scored yet"}`}>
+                <div key={e.id}>
                   <span>{e.name.replace("100 m ", "")} {p != null ? Math.round(p) : "–"}</span>
                   <span className="track"><i style={{ width: `${p ?? 0}%`, background: e.weekend === "running" ? "var(--accent)" : "var(--ink)" }} /></span>
                 </div>
               );
             })}
           </div>
-        </div>
+        </details>
       ))}
       {at && <p className="note">Updated {new Date(at).toLocaleTimeString()}</p>}
     </div>

@@ -230,3 +230,18 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 .rsvp .panel p { margin-top: 0; color: var(--muted); font-weight: 400; }
 .rsvp .panel p.err { color: var(--bad); font-weight: 600; }
 .rsvp .panel p.ok { color: var(--accent); font-weight: 600; }
+
+/* simple member page */
+.topline { display: flex; justify-content: space-between; gap: .5rem 1rem; flex-wrap: wrap; padding-block: .8rem; font-size: .85rem; color: var(--muted); }
+.topline b { color: var(--accent); }
+.topline a { font-weight: 700; }
+.trained { display: grid; gap: .4rem; justify-items: start; margin-bottom: 1.25rem; }
+.trained .cta { background: var(--accent); }
+.trained .cta span { color: #fff; }
+.trained.done { font-family: var(--display); font-size: 1.6rem; text-transform: uppercase; color: var(--accent); }
+.trained.done span { font-family: var(--body); font-size: .85rem; text-transform: none; color: var(--muted); font-weight: 600; margin-left: .4rem; }
+details.lb { display: block; }
+details.lb summary { display: grid; grid-template-columns: 3.2rem minmax(0, 1fr) auto; gap: 1rem; align-items: center; cursor: pointer; list-style: none; }
+details.lb summary::-webkit-details-marker { display: none; }
+details.lb .bars { margin-top: .75rem; margin-left: 4.2rem; }
+details.lb .nm .sub { font-weight: 600; }

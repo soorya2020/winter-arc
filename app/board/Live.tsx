@@ -31,7 +31,7 @@ export default function Live(props: { rows: BoardRow[]; taunts: Taunt[]; meId: s
         <div className="head">
           <span className="live">Live</span>
           <h2>The table</h2>
-          <p>Points update the moment a result is entered. Bars show how close each person got to the cap in every event.</p>
+          <p>Points update the moment a result is entered. Tap a name to see their points per event.</p>
         </div>
         <BoardLive rows={rows} at={at} meId={props.meId} events={props.events} />
       </section>

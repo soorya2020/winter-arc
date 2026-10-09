@@ -124,3 +124,17 @@ export async function signOut() {
   cookies().delete("wa_invite");
   redirect("/");
 }
+
+/** One tap: today counts as trained. Logging twice in a day does nothing extra. */
+export async function trainedToday(): Promise<{ ok?: string; error?: string }> {
+  const me = await currentParticipant();
+  if (!me?.accepted_at) return { error: "Accept your invite first." };
+  const day = today();
+  const { data } = await db().from("practice_logs").select("id").eq("participant_id", me.id).eq("day", day).limit(1);
+  if (!data?.length) {
+    const { error } = await db().from("practice_logs").insert({ participant_id: me.id, day, kind: "Trained", minutes: 30 });
+    if (error) return { error: "Couldn't save that. Try again." };
+  }
+  revalidatePath("/board");
+  return { ok: "Logged. Streak alive." };
+}
