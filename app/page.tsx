@@ -4,7 +4,7 @@ import Countdown from "@/components/Countdown";
 import Confetti from "@/components/Confetti";
 import AcceptForm from "./AcceptForm";
 import { currentParticipant } from "@/lib/auth";
-import { displayName } from "@/lib/db";
+import { allParticipants, displayName } from "@/lib/db";
 import { AWARDS, DRILLS, EVENTS, SEASON, TIMELINE, TZ, WEEK_PLAN, nextMilestone } from "@/lib/season.ts";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +21,9 @@ export default async function Home() {
   const ms = nextMilestone();
   const when = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(ms.at));
   const first = me ? displayName(me).split(" ")[0] : null;
+  const rivals = me && !me.accepted_at
+    ? (await allParticipants()).filter((p) => p.accepted_at && p.id !== me.id).map((p) => ({ id: p.id, name: displayName(p) }))
+    : [];
 
   return (
     <>
@@ -147,12 +150,12 @@ export default async function Home() {
             <h2>{me?.accepted_at ? <>You're <em>in.</em></> : <>Your spot is <em>waiting.</em></>}</h2>
             <p>{me?.accepted_at
               ? "Your fighter is in the arena. Log every session to keep your streak alive."
-              : "Accept the invite, pick your name and your catchphrase. Your fighter joins the arena straight away."}</p>
+              : "Accept the invite, pick your name and tell us how you talk. Your fighter joins the arena straight away."}</p>
           </div>
           {me?.accepted_at
             ? <div><Link className="cta" href="/board">Enter the arena <span>→</span></Link></div>
             : me
-              ? <AcceptForm defaultName={me.nickname || me.name} />
+              ? <AcceptForm defaultName={me.nickname || me.name} rivals={rivals} />
               : <div className="panel"><p className="note">This page only opens up through a personal invite link. Check your email for yours.</p></div>}
         </div>
 

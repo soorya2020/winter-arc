@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { Profile } from "./profile.ts";
 
 let client: SupabaseClient | null = null;
 
@@ -23,6 +24,7 @@ export type Participant = {
   email: string;
   nickname: string | null;
   catchphrase: string | null;
+  profile: Profile | null;
   token: string;
   accepted_at: string | null;
   invited_at: string | null;

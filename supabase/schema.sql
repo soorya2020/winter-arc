@@ -49,3 +49,6 @@ create table if not exists taunts (
 );
 create index if not exists taunts_created on taunts (created_at desc);
 alter table taunts enable row level security;
+
+-- Personality questionnaire answers that power the arena trash talk.
+alter table participants add column if not exists profile jsonb not null default '{}'::jsonb;

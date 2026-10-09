@@ -43,3 +43,34 @@ test("standings total, rank and limit", () => {
   assert.equal(second.total, 50);
   assert.equal(second.limit, null);
 });
+
+import { trashTalk, comeback, pickTarget, type Talker } from "./trash.ts";
+
+const base = (o: Partial<Talker>): Talker => ({ id: "x", name: "X", rank: 1, total: 0, streak: 0, limit: null, best: null, catchphrase: null, profile: {}, ...o });
+
+test("trash talk uses the target's questionnaire answers", () => {
+  const a = base({ id: "a", name: "Arjun", rank: 1, profile: { tone: "Savage" } });
+  const b = base({ id: "b", name: "Meera", rank: 2, profile: { excuse: "It looked like rain", weakness: "Midnight biryani" } });
+  const lines = new Set<string>();
+  for (let i = 0; i < 200; i++) lines.add(trashTalk(a, b));
+  assert.ok([...lines].some((l) => l.includes("It looked like rain")));
+  assert.ok([...lines].some((l) => l.includes("midnight biryani")));
+  assert.ok([...lines].every((l) => l.length > 0 && !l.includes("undefined") && !l.includes("null")));
+});
+
+test("every tone produces a line even with an empty profile", () => {
+  for (const tone of ["Savage", "Playful", "Dad jokes", "Cold and quiet"] as const) {
+    for (let i = 0; i < 50; i++) {
+      const l = trashTalk(base({ profile: { tone } }), base({ name: "B", rank: 3 }));
+      assert.ok(l && !l.includes("undefined"), `${tone}: ${l}`);
+      assert.ok(comeback(base({}), base({})));
+    }
+  }
+});
+
+test("rival gets picked about half the time", () => {
+  const pool = [{ id: "r" }, { id: "s" }, { id: "t" }, { id: "u" }];
+  let hits = 0;
+  for (let i = 0; i < 2000; i++) if (pickTarget(base({ profile: { rivalId: "r" } }), pool)?.id === "r") hits++;
+  assert.ok(hits > 1000 && hits < 1500, String(hits));
+});

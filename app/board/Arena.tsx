@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { BoardRow } from "@/lib/board";
 import type { Taunt } from "@/lib/db";
 import { postTaunt } from "../actions";
+import { trashTalk, comeback as comebackLine, pickTarget, type Talker } from "@/lib/trash.ts";
 
 // Everyone who accepted brawls in one ring. Fighters trash-talk with their real stats,
 // and taunts people type here are shared with the whole group.
@@ -23,27 +24,17 @@ type FeedItem = { key: string; who: string; text: string; mine: boolean };
 
 const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
 
-function lineFor(a: BoardRow, b: BoardRow): string {
-  const opts: string[] = [
-    `See you on running weekend, ${b.name}. Bring snacks, you'll be out there a while.`,
-    `Log a session first, ${b.name}. Then we talk.`,
-    `It's cold out. Your pace is colder.`,
-    `I warm up on your personal best, ${b.name}.`,
-  ];
-  if (a.streak > b.streak) opts.push(`${b.name}, ${a.streak} days straight. You're on ${b.streak}. Do the maths.`);
-  if (a.rank < b.rank) opts.push(`Rank ${a.rank} says hi, ${b.name}. Wave from down there.`);
-  if (b.limit) opts.push(`${b.name}, your ${b.limit.toLowerCase()} looks like a nap.`);
-  if (a.best) opts.push(`My ${a.best.toLowerCase()} has its own fan club.`);
-  if (a.total > b.total) opts.push(`${a.total} points. ${b.name}, you've got ${b.total}. Keep up.`);
-  if (a.catchphrase) opts.push(a.catchphrase, a.catchphrase);
-  return pick(opts);
-}
-function comeback(b: BoardRow, a: BoardRow): string {
-  const opts = ["That tickled.", "Ouch. Okay. Fair.", `Rematch on strength weekend, ${a.name}.`, "Talk is cheap. Training isn't."];
-  if (b.rank < a.rank) opts.push(`Big words from rank ${a.rank}.`);
-  if (b.catchphrase) opts.push(b.catchphrase);
-  return pick(opts);
-}
+const talker = (r: BoardRow): Talker => ({ ...r, profile: r.profile ?? {} });
+// Avoid repeating anything said in the last few lines.
+const recentLines: string[] = [];
+const fresh = (make: () => string) => {
+  let line = make();
+  for (let i = 0; i < 8 && recentLines.includes(line); i++) line = make();
+  recentLines.push(line); if (recentLines.length > 6) recentLines.shift();
+  return line;
+};
+const lineFor = (a: BoardRow, b: BoardRow) => fresh(() => trashTalk(talker(a), talker(b)));
+const comeback = (b: BoardRow, a: BoardRow) => fresh(() => comebackLine(talker(b), talker(a)));
 
 export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts: Taunt[]; meId: string | null }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -164,8 +155,8 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
       const free = w.fighters.filter((f) => !f.busy);
       if (!reduce && free.length >= 2 && w.fights.length < (W < 520 ? 1 : Math.min(2, Math.floor(w.fighters.length / 2))) && now - lastAuto > 1300) {
         lastAuto = now;
-        const a = pick(free), b = pick(free.filter((f) => f !== a));
-        start(a, b, lineFor(a.row, b.row), now, true);
+        const a = pick(free), b = pickTarget(talker(a.row), free.filter((f) => f !== a));
+        if (b) start(a, b, lineFor(a.row, b.row), now, true);
       }
     };
 

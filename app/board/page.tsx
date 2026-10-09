@@ -50,6 +50,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
                   Streak: <b style={{ color: "var(--accent)" }}>{mine?.streak ?? 0} days</b> · Sessions logged: {mine?.sessions ?? 0}
                   {mine?.limit ? <> · Your limit right now: <b style={{ color: "var(--accent)" }}>{mine.limit}</b></> : null}
                 </p>
+                <p className="note"><Link href="/profile">Edit your fighter's personality →</Link></p>
                 {mine && mine.total > 0 && (
                   <p className="note"><Link href={`/certificate/${me.id}`}>Your certificate</Link> · <a href={`/api/poster/${me.id}`}>Your poster</a></p>
                 )}

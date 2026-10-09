@@ -2,9 +2,10 @@ import "server-only";
 import { allParticipants, allResults, practiceDays, displayName } from "./db";
 import { standings, type Standing } from "./scoring.ts";
 import { EVENTS } from "./season.ts";
+import type { Profile } from "./profile.ts";
 import { streak, lastDays } from "./streak.ts";
 
-export type BoardRow = Standing & { rank: number; streak: number; sessions: number; recent: boolean[]; catchphrase: string | null; best: string | null };
+export type BoardRow = Standing & { rank: number; streak: number; sessions: number; recent: boolean[]; catchphrase: string | null; best: string | null; profile: Profile };
 
 /** Leaderboard of everyone who accepted their invite. */
 export async function loadBoard(): Promise<BoardRow[]> {
@@ -18,7 +19,7 @@ export async function loadBoard(): Promise<BoardRow[]> {
     const mine = [...new Set(byPerson.get(s.id) ?? [])];
     const scored = EVENTS.filter((e) => s.perEvent[e.id] != null);
     const best = scored.length ? scored.reduce((hi, e) => (s.perEvent[e.id] > s.perEvent[hi.id] ? e : hi)).name : null;
-    const catchphrase = accepted.find((p) => p.id === s.id)?.catchphrase ?? null;
-    return { ...s, rank, streak: streak(mine), sessions: mine.length, recent: lastDays(mine), catchphrase, best };
+    const person = accepted.find((p) => p.id === s.id);
+    return { ...s, rank, streak: streak(mine), sessions: mine.length, recent: lastDays(mine), catchphrase: person?.catchphrase ?? null, best, profile: person?.profile ?? {} };
   });
 }

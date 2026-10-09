@@ -5,6 +5,7 @@ import { currentParticipant } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { PRACTICE_KINDS } from "@/lib/season.ts";
 import { today } from "@/lib/streak.ts";
+import { profileFromForm } from "@/lib/profile.ts";
 
 export async function acceptInvite(_: unknown, form: FormData) {
   const me = await currentParticipant();
@@ -13,7 +14,7 @@ export async function acceptInvite(_: unknown, form: FormData) {
   const catchphrase = String(form.get("catchphrase") ?? "").trim().slice(0, 80) || null;
   if (nickname.length < 2) return { error: "Pick a leaderboard name with at least 2 characters." };
   const { error } = await db().from("participants")
-    .update({ nickname, catchphrase, accepted_at: me.accepted_at ?? new Date().toISOString() })
+    .update({ nickname, catchphrase, profile: profileFromForm(form), accepted_at: me.accepted_at ?? new Date().toISOString() })
     .eq("id", me.id);
   if (error) return { error: "Couldn't save that. Try again." };
   revalidatePath("/board");
@@ -44,4 +45,16 @@ export async function postTaunt(text: string, targetId: string | null) {
   const { error } = await db().from("taunts").insert({ participant_id: me.id, target_id: targetId, text: clean });
   if (error) return { error: "Couldn't send that. Try again." };
   return { ok: true };
+}
+
+export async function saveProfile(_: unknown, form: FormData) {
+  const me = await currentParticipant();
+  if (!me?.accepted_at) return { error: "Accept your invite first." };
+  const catchphrase = String(form.get("catchphrase") ?? "").trim().slice(0, 80) || null;
+  const profile = profileFromForm(form);
+  if (profile.rivalId === me.id) delete profile.rivalId;
+  const { error } = await db().from("participants").update({ catchphrase, profile }).eq("id", me.id);
+  if (error) return { error: "Couldn't save that. Try again." };
+  revalidatePath("/board");
+  return { ok: "Saved. Your fighter has a new attitude." };
 }

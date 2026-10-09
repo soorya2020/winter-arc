@@ -40,12 +40,20 @@ Every event is worth 100, so nobody's specialty outweighs the rest.
    (or *Copy link* to send it yourself on WhatsApp). The daily reminder goes out at 6:00 IST to
    everyone who accepted (`vercel.json`, schedule `30 0 * * *` in UTC).
 
+## The arena's trash talk
+
+When people accept their invite they answer a short personality questionnaire (tone, fighter name,
+signature move, go-to excuse, guilty snack, hype song, early bird or night owl, and a rival).
+Fighters roast each other with those answers plus real stats. Lines live in [`lib/trash.ts`](lib/trash.ts),
+questions in [`lib/profile.ts`](lib/profile.ts). Anyone can change their answers at `/profile`.
+
 ## Pages
 
 | Page | Who | What |
 | --- | --- | --- |
 | `/` | Everyone | Landing page. Personal welcome and confetti for invitees. |
 | `/i/<token>` | Invitee | Personal invite link. Remembers them and opens the page. |
+| `/profile` | Accepted invitees | Edit catchphrase and personality answers. |
 | `/board` | Accepted invitees, admin | The arena (group brawl and shared trash talk), live table, practice log, streak. |
 | `/admin` | Admin | Participants and invites, result entry per weekend, baseline test, awards. |
 | `/certificate/<id>` | That athlete, admin | Printable A4 certificate (print or save as PDF). |
