@@ -50,7 +50,7 @@ const base = (o: Partial<Talker>): Talker => ({ id: "x", name: "X", rank: 1, tot
 
 test("trash talk uses the target's questionnaire answers", () => {
   const a = base({ id: "a", name: "Arjun", rank: 1, profile: { tone: "Savage" } });
-  const b = base({ id: "b", name: "Meera", rank: 2, profile: { excuse: "It looked like rain", weakness: "Midnight biryani" } });
+  const b = base({ id: "b", name: "Rahul", rank: 2, profile: { excuse: "It looked like rain", weakness: "Midnight biryani" } });
   const lines = new Set<string>();
   for (let i = 0; i < 200; i++) lines.add(trashTalk(a, b));
   assert.ok([...lines].some((l) => l.includes("It looked like rain")));
@@ -77,7 +77,7 @@ test("rival gets picked about half the time", () => {
 
 test("friends get roasted with their honest answers", () => {
   const a = base({ name: "Arjun", profile: { maxPushups: 60 } });
-  const b = base({ name: "Meera", rank: 2, profile: { trainingSince: "Under 6 months", toughest: "Climbing Chembra peak", goal: "Run 10 km without stopping", fail: "Fell off the treadmill", bestRun: 5, maxPushups: 12 } });
+  const b = base({ name: "Rahul", rank: 2, profile: { trainingSince: "Under 6 months", toughest: "Climbing Chembra peak", goal: "Run 10 km without stopping", fail: "Fell off the treadmill", bestRun: 5, maxPushups: 12 } });
   const lines = new Set<string>();
   for (let i = 0; i < 400; i++) lines.add(trashTalk(a, b));
   for (const bit of ["Under 6 months", "Climbing Chembra peak", "run 10 km", "Fell off the treadmill", "5 km", "12 push-ups"]) {
