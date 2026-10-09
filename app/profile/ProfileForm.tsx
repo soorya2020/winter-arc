@@ -14,10 +14,6 @@ export default function ProfileForm(props: { profile: Profile | null; catchphras
   return (
     <form className="card" action={action}>
       <ProfileFields {...props} />
-      <div className="field">
-        <label htmlFor="password">New password (optional)</label>
-        <input id="password" name="password" type="password" minLength={6} autoComplete="new-password" placeholder="Leave empty to keep your current one" />
-      </div>
       <Submit />
       {state?.error && <p className="err">{state.error}</p>}
       {state?.ok && <p className="ok">{state.ok}</p>}

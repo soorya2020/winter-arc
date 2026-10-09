@@ -1,9 +1,7 @@
 "use server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { currentParticipant, participantCookie } from "@/lib/auth";
-import { cookies } from "next/headers";
-import { checkPassword, hashPassword, MIN_PASSWORD } from "@/lib/password";
+import { currentParticipant } from "@/lib/auth";
 import { db, type Participant } from "@/lib/db";
 import { sendInvite } from "@/lib/reminders";
 import { PRACTICE_KINDS } from "@/lib/season.ts";
@@ -16,15 +14,13 @@ export async function acceptInvite(_: unknown, form: FormData) {
   const nickname = String(form.get("nickname") ?? "").trim().slice(0, 28);
   const catchphrase = String(form.get("catchphrase") ?? "").trim().slice(0, 80) || null;
   if (nickname.length < 2) return { error: "Pick a leaderboard name with at least 2 characters." };
-  const password = String(form.get("password") ?? "");
-  if (password.length < MIN_PASSWORD) return { error: `Pick a password with at least ${MIN_PASSWORD} characters. You'll use it to sign in.` };
   const profile = profileFromForm(form);
   const missing = missingPersonal(profile);
   if (missing) return { error: missing };
   const { error } = await db().from("participants")
-    .update({ nickname, catchphrase, profile, password_hash: await hashPassword(password), accepted_at: me.accepted_at ?? new Date().toISOString() })
+    .update({ nickname, catchphrase, profile, accepted_at: me.accepted_at ?? new Date().toISOString() })
     .eq("id", me.id);
-  if (error) return { error: /password_hash/.test(error.message) ? "The site needs a quick database update first. Ask the organiser." : "Couldn't save that. Try again." };
+  if (error) return { error: "Couldn't save that. Try again." };
   revalidatePath("/board");
   redirect("/board?joined=1");
 }
@@ -63,11 +59,7 @@ export async function saveProfile(_: unknown, form: FormData) {
   if (profile.rivalId === me.id) delete profile.rivalId;
   const missing = missingPersonal(profile);
   if (missing) return { error: missing };
-  const password = String(form.get("password") ?? "");
-  if (password && password.length < MIN_PASSWORD) return { error: `New password needs at least ${MIN_PASSWORD} characters.` };
-  const update: Record<string, unknown> = { catchphrase, profile };
-  if (password) update.password_hash = await hashPassword(password);
-  const { error } = await db().from("participants").update(update).eq("id", me.id);
+  const { error } = await db().from("participants").update({ catchphrase, profile }).eq("id", me.id);
   if (error) return { error: "Couldn't save that. Try again." };
   revalidatePath("/board");
   return { ok: "Saved. Your fighter has a new attitude." };
@@ -101,26 +93,4 @@ export async function resendLink(_: unknown, form: FormData): Promise<{ ok?: str
     return { error: "Couldn't send the email right now. Ask the organiser for your link." };
   }
   return done;
-}
-
-/** Email and password sign-in. Only people on the invite list who have accepted and set a password get in. */
-export async function signIn(_: unknown, form: FormData): Promise<{ error?: string }> {
-  const email = String(form.get("email") ?? "").trim().toLowerCase().slice(0, 200);
-  const password = String(form.get("password") ?? "");
-  if (!email.includes("@") || !password) return { error: "Enter your email and password." };
-  const { data } = await db().from("participants").select("*").ilike("email", email).maybeSingle();
-  const p = data as Participant | null;
-  const ok = !!p?.accepted_at && (await checkPassword(password, p.password_hash));
-  if (!ok) {
-    await new Promise((r) => setTimeout(r, 600));
-    if (p && !p.password_hash) return { error: "You haven't set a password yet. Use \"Email me a sign-in link\" below, then set one on your profile page." };
-    return { error: "That email and password don't match. Only invited members can sign in." };
-  }
-  cookies().set(participantCookie(p!.token));
-  redirect("/board");
-}
-
-export async function signOut() {
-  cookies().delete("wa_invite");
-  redirect("/");
 }

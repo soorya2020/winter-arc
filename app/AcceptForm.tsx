@@ -16,11 +16,6 @@ export default function AcceptForm({ defaultName, rivals }: { defaultName: strin
         <label htmlFor="nickname">Name on the leaderboard</label>
         <input id="nickname" name="nickname" defaultValue={defaultName} maxLength={28} required placeholder="Pick something legendary" />
       </div>
-      <div className="field">
-        <label htmlFor="password">Choose a password</label>
-        <input id="password" name="password" type="password" minLength={6} required autoComplete="new-password" placeholder="At least 6 characters" />
-        <span className="note">You'll sign in with your email and this password.</span>
-      </div>
       <p className="note">We're all friends here, so answer honestly. Your fighter talks like you, and everyone else gets material to roast you with. You can change your answers later.</p>
       <ProfileFields rivals={rivals} />
       <Submit />

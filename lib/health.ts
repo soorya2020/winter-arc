@@ -45,11 +45,3 @@ export async function setupProblems(): Promise<string[]> {
   }
   return out;
 }
-
-/** True when the database is older than password sign-in and needs its one-line update. */
-export async function passwordColumnMissing() {
-  try {
-    const { error } = await db().from("participants").select("password_hash").limit(1);
-    return !!error && /password_hash/.test(error.message ?? "");
-  } catch { return false; }
-}

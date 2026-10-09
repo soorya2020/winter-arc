@@ -36,7 +36,6 @@ export type Participant = {
   token: string;
   accepted_at: string | null;
   invited_at: string | null;
-  password_hash?: string | null;
   created_at: string;
 };
 

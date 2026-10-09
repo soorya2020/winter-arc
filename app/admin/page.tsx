@@ -9,7 +9,7 @@ import { loadBoard } from "@/lib/board";
 import { allQuotes, quoteOfTheDay } from "@/lib/quotes";
 import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell } from "./ui";
 import { logout } from "./actions";
-import { passwordColumnMissing, setupProblems } from "@/lib/health";
+import { setupProblems } from "@/lib/health";
 
 export const dynamic = "force-dynamic";
 
@@ -60,13 +60,6 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
       <Header right={<><Link href="/board">Leaderboard</Link><form action={logout}><button className="ghost small" type="submit">Sign out</button></form></>} />
       <section style={{ paddingTop: "1rem" }}>
         <div className="head"><span className="label">Organizer panel</span><h2>Run the arc</h2></div>
-        {await passwordColumnMissing() && (
-          <div className="panel" style={{ marginBottom: "1.25rem", borderColor: "var(--accent)" }}>
-            <h3 style={{ fontSize: "1.2rem" }}>One database update needed</h3>
-            <p className="note">Member passwords need one new column. In Supabase, open SQL Editor, paste this line and press Run:</p>
-            <code style={{ fontWeight: 700, overflowWrap: "anywhere" }}>alter table participants add column if not exists password_hash text;</code>
-          </div>
-        )}
         <nav className="tabs">{TABS.map((t) => <Link key={t.id} href={`/admin?tab=${t.id}`} className={t.id === tab ? "on" : ""}>{t.label}</Link>)}</nav>
 
         {tab === "people" && (
