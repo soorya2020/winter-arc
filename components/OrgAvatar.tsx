@@ -55,7 +55,7 @@ function Runner({ jersey, num }: { jersey: string; num: string }) {
         <line x1="6" y1="70" x2="22" y2="70" /><line x1="2" y1="90" x2="20" y2="90" /><line x1="10" y1="110" x2="24" y2="110" />
       </g>
       <ellipse cx="62" cy="153" rx="26" ry="4" fill="rgba(12,13,14,.15)" />
-      <g className="bob">
+      <g transform="rotate(8 62 150)"><g className="bob">
         {/* back leg and arm */}
         <g className="leg leg-b"><rect x="56" y="100" width="11" height="46" rx="4" fill={PANTS} /><rect x="55" y="140" width="20" height="8" rx="4" fill={SHOE} stroke={INK} strokeWidth="1.3" /></g>
         <g className="arm arm-b"><rect x="57" y="68" width="9" height="34" rx="4.5" fill={SKIN} /></g>
@@ -67,7 +67,7 @@ function Runner({ jersey, num }: { jersey: string; num: string }) {
         <Beanie x={68} y={38} />
         <circle cx="77" cy="45" r="2.1" fill={INK} />
         <path d="M74 53 q4 3 8 0" stroke={INK} strokeWidth="2" fill="none" strokeLinecap="round" />
-      </g>
+      </g></g>
     </svg>
   );
 }

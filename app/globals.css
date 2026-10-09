@@ -394,12 +394,12 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
   @keyframes strain { 50% { transform: translateY(1.5px); } }
   .ava-sweat { animation: ava-sweat 1.6s ease-in infinite; }
   @keyframes ava-sweat { 0% { opacity: 0; transform: none; } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(16px); } }
-  .ava .leg-f, .ava .arm-b { animation: swing .5s ease-in-out infinite alternate; }
-  .ava .leg-b, .ava .arm-f { animation: swing .5s ease-in-out infinite alternate-reverse; }
-  @keyframes swing { from { transform: rotate(-32deg); } to { transform: rotate(32deg); } }
-  .ava .bob { animation: bob .25s ease-in-out infinite alternate; }
+  .ava .leg-f, .ava .arm-b { animation: swing .26s ease-in-out infinite alternate; }
+  .ava .leg-b, .ava .arm-f { animation: swing .26s ease-in-out infinite alternate-reverse; }
+  @keyframes swing { from { transform: rotate(-42deg); } to { transform: rotate(42deg); } }
+  .ava .bob { animation: bob .13s ease-in-out infinite alternate; }
   @keyframes bob { to { transform: translateY(-4px); } }
-  .ava .speed { animation: speed .5s linear infinite; }
+  .ava .speed { animation: speed .3s linear infinite; }
   @keyframes speed { from { transform: translateX(12px); opacity: 0; } 40% { opacity: 1; } to { transform: translateX(-10px); opacity: 0; } }
 }
 .org .wa { margin-top: .75rem; padding: .55rem .9rem; font-size: .72rem; }
