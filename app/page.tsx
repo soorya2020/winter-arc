@@ -4,6 +4,7 @@ import Countdown from "@/components/Countdown";
 import Confetti from "@/components/Confetti";
 import Reveal from "@/components/Reveal";
 import HeroFun from "@/components/HeroFun";
+import OrgAvatar from "@/components/OrgAvatar";
 import AcceptForm from "./AcceptForm";
 import LinkForm from "./LinkForm";
 import { currentParticipant } from "@/lib/auth";
@@ -13,8 +14,8 @@ import { EVENTS, SEASON, TZ, nextMilestone } from "@/lib/season.ts";
 export const dynamic = "force-dynamic";
 
 const ORGANIZERS = [
-  { name: "Soorya", role: "Organizer · built the site", line: "Wrote the rules, built the arena, and still has to do every push-up like the rest of you." },
-  { name: "Sanat", role: "Organizer · keeps everyone honest", line: "Holds the stopwatch on test day. Your excuses go to him, and he has heard them all." },
+  { name: "Soorya", kind: "lift" as const, jersey: "#ff4d00", num: "1", role: "Organizer · built the site", line: "Wrote the rules, built the arena, and still has to do every push-up like the rest of you." },
+  { name: "Sanat", kind: "run" as const, jersey: "#2f6fed", num: "2", role: "Organizer · keeps everyone honest", line: "Holds the stopwatch on test day. Your excuses go to him, and he has heard them all." },
 ];
 
 export default async function Home() {
@@ -84,14 +85,14 @@ export default async function Home() {
           <label htmlFor="why-more" className="why-more">Read the rest</label>
         </section>
 
-        <section className="orgs" id="organizers" data-reveal>
+        <section className="orgs" id="organizers" data-o="cards" data-reveal>
           <span className="label">The organizers</span>
           <h2>Blame <em>these two.</em></h2>
           <div className="org-grid">
             {ORGANIZERS.map((o) => (
               <div className="org" key={o.name}>
-                <span className="org-badge" aria-hidden="true">{o.name[0]}</span>
-                <div>
+                <div className="org-ava"><OrgAvatar kind={o.kind} jersey={o.jersey} num={o.num} /><span className="tag">{o.name}</span></div>
+                <div className="org-text">
                   <h3>{o.name}</h3>
                   <span className="org-role">{o.role}</span>
                   <p>{o.line}</p>
