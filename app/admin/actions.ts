@@ -144,7 +144,7 @@ export async function sendRemindersNow(): Promise<Msg> {
   }
 }
 
-export async function broadcast(audience: Audience, subject: string, message: string, testOnly: boolean): Promise<Msg> {
+export async function broadcast(audience: Audience, subject: string, message: string, testOnly: boolean, channel: "push" | "email" = "email"): Promise<Msg> {
   requireAdmin();
   subject = subject.trim().slice(0, 120);
   message = message.trim().slice(0, 5000);
@@ -158,7 +158,23 @@ export async function broadcast(audience: Audience, subject: string, message: st
       await sendBroadcast([me], "accepted", `[Test] ${subject}`, message);
       return { ok: `Test sent to ${to}.` };
     }
-    const { sent, failed } = await sendBroadcast(await allParticipants(), audience, subject, message);
+    let people = await allParticipants();
+    let pushed = 0;
+    if (channel === "push") {
+      // Pop-up on every phone that has notifications on; email only for the rest.
+      const on = await pushedPeople().catch(() => new Set<string>());
+      const body = message.replace(/\s+/g, " ").slice(0, 180);
+      const inGroup = people.filter((p) => audience === "all" ? true : audience === "accepted" ? !!p.accepted_at : !p.accepted_at);
+      for (const p of inGroup.filter((x) => on.has(x.id))) if (await pushTo(p.id, { title: subject, body, url: "/board", tag: `msg-${Date.now()}` })) pushed++;
+      const reached = new Set(inGroup.filter((x) => on.has(x.id)).map((x) => x.id));
+      people = people.filter((p) => !reached.has(p.id));
+    }
+    const { sent, failed } = await sendBroadcast(people, audience, subject, message);
+    if (channel === "push") {
+      if (!pushed && !sent && !failed.length) return { error: "Nobody matches that group yet." };
+      const parts = `${pushed} by notification, ${sent} by email (no notifications on)`;
+      return failed.length ? { error: `Sent ${parts}. Email failed for: ${failed.join(", ")}` } : { ok: `Sent: ${parts}.` };
+    }
     if (!sent && !failed.length) return { error: "Nobody matches that group yet." };
     return failed.length ? { error: `Sent ${sent}. Failed for: ${failed.join(", ")}` } : { ok: `Sent to ${sent} ${sent === 1 ? "person" : "people"}.` };
   } catch (e) {

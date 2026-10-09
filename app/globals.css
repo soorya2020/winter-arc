@@ -635,3 +635,7 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 .adm-actions > div:first-child > div > * { flex: 1 1 0; justify-content: center; text-align: center; padding-inline: .4rem !important; white-space: nowrap; }
 .adm-actions > button.ghost:last-child { margin-left: auto; min-height: 2rem; }
 .adm .nudge { border-color: #1fa855; color: #12753a; }
+.adm .seg.chan { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.adm .seg.chan button { all: unset; cursor: pointer; text-align: center; padding: .65rem .3rem; border-radius: 999px; font-weight: 800; font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; }
+.adm .seg.chan button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.adm .seg.chan button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }

@@ -31,7 +31,7 @@ const TABS = [
   { id: "people", label: "People" },
   { id: "results", label: "Results" },
   { id: "schedule", label: "Events" },
-  { id: "broadcast", label: "Email" },
+  { id: "broadcast", label: "Message" },
   { id: "quotes", label: "Bro talk" },
   { id: "awards", label: "Awards" },
 ];
@@ -76,7 +76,7 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
     );
   }
   const accepted = people.filter((p) => p.accepted_at);
-  const [noPush, pushOn] = tab === "people" ? await Promise.all([pushMissing(), pushedPeople().catch(() => new Set<string>())]) : [false, new Set<string>()];
+  const [noPush, pushOn] = tab === "people" || tab === "broadcast" ? await Promise.all([pushMissing(), pushedPeople().catch(() => new Set<string>())]) : [false, new Set<string>()];
   const counts = { accepted: accepted.length, invited: people.filter((p) => !p.accepted_at && p.invited_at).length, waiting: people.filter((p) => !p.invited_at).length };
 
   return (
@@ -189,8 +189,8 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
 
       {tab === "broadcast" && (
         <div className="adm-body">
-          <p className="note">Write an update and email it to the group in the Winter Arc style. Send yourself a test first to see how it looks.</p>
-          <Broadcast counts={{ accepted: accepted.length, pending: people.length - accepted.length, all: people.length }} />
+          <p className="note">Send the group an update: as a pop-up notification on their phones, or as an email.</p>
+          <Broadcast pushOn={pushOn.size} counts={{ accepted: accepted.length, pending: people.length - accepted.length, all: people.length }} />
         </div>
       )}
 

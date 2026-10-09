@@ -134,8 +134,9 @@ export function ResultCell(props: { participantId: string; eventId: string; base
   );
 }
 
-export function Broadcast({ counts }: { counts: { accepted: number; pending: number; all: number } }) {
+export function Broadcast({ counts, pushOn }: { counts: { accepted: number; pending: number; all: number }; pushOn: number }) {
   const [audience, setAudience] = useState<"accepted" | "pending" | "all">("accepted");
+  const [channel, setChannel] = useState<"push" | "email">("push");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [confirm, setConfirm] = useState(false);
@@ -143,12 +144,20 @@ export function Broadcast({ counts }: { counts: { accepted: number; pending: num
   const [pending, start] = useTransition();
   const n = counts[audience];
   const run = (testOnly: boolean) => start(async () => {
-    const r = await broadcast(audience, subject, message, testOnly);
+    const r = await broadcast(audience, subject, message, testOnly, channel);
     setM(r); setConfirm(false);
     if (r?.ok && !testOnly) { setSubject(""); setMessage(""); }
   });
   return (
     <div className="panel" style={{ maxWidth: "44rem" }}>
+      <div className="field">
+        <span className="label">Send as</span>
+        <div className="seg chan" role="group" aria-label="Send as">
+          <button type="button" aria-pressed={channel === "push"} onClick={() => { setChannel("push"); setConfirm(false); }}>🔔 Notification</button>
+          <button type="button" aria-pressed={channel === "email"} onClick={() => { setChannel("email"); setConfirm(false); }}>✉ Email</button>
+        </div>
+        <p className="note" style={{ margin: 0 }}>{channel === "push" ? `Pops up on the phones of the ${pushOn} people with notifications on, all at once. Everyone else gets it by email.` : "Goes to everyone's inbox (check spam if it doesn't show)."}</p>
+      </div>
       <div className="field">
         <label htmlFor="b-audience">Send to</label>
         <select id="b-audience" value={audience} onChange={(e) => { setAudience(e.target.value as typeof audience); setConfirm(false); }}>
@@ -158,12 +167,12 @@ export function Broadcast({ counts }: { counts: { accepted: number; pending: num
         </select>
       </div>
       <div className="field">
-        <label htmlFor="b-subject">Subject</label>
-        <input id="b-subject" value={subject} maxLength={120} onChange={(e) => setSubject(e.target.value)} placeholder="Running weekend moved to 3 January" />
+        <label htmlFor="b-subject">{channel === "push" ? "Title" : "Subject"}</label>
+        <input id="b-subject" value={subject} maxLength={120} onChange={(e) => setSubject(e.target.value)} placeholder={channel === "push" ? "Baseline test tomorrow, 7 AM 💪" : "Running weekend moved to 3 January"} />
       </div>
       <div className="field">
         <label htmlFor="b-message">Message</label>
-        <textarea id="b-message" value={message} maxLength={5000} rows={8} onChange={(e) => setMessage(e.target.value)} style={{ borderRadius: 14 }}
+        <textarea id="b-message" value={message} maxLength={5000} rows={channel === "push" ? 3 : 8} onChange={(e) => setMessage(e.target.value)} style={{ borderRadius: 14 }}
           placeholder={"Leave a blank line between paragraphs.\n\nEach person's email starts with \"Hey <name>,\" and ends with a button back to the site."} />
       </div>
       <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap", alignItems: "center" }}>
@@ -174,7 +183,7 @@ export function Broadcast({ counts }: { counts: { accepted: number; pending: num
               <button type="button" disabled={pending} onClick={() => run(false)} style={{ background: "var(--accent)" }}>{pending ? "Sending…" : "Yes, send it"}</button>
               <button type="button" className="ghost" onClick={() => setConfirm(false)}>Cancel</button>
             </>}
-        {!confirm && <button type="button" className="ghost" disabled={pending || !subject.trim() || !message.trim()} onClick={() => run(true)}>Send me a test</button>}
+        {!confirm && channel === "email" && <button type="button" className="ghost" disabled={pending || !subject.trim() || !message.trim()} onClick={() => run(true)}>Send me a test</button>}
       </div>
       <Note m={m} />
     </div>
