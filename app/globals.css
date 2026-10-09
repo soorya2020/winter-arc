@@ -412,3 +412,19 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 .install span b { display: inline; font-size: inherit; color: var(--ink); }
 .install button.small { padding: .55rem .9rem; font-size: .75rem; }
 @media (max-width: 420px) { .install { grid-template-columns: auto minmax(0, 1fr) auto; } .install button:not(.ghost) { grid-column: 2 / -1; justify-self: start; } }
+
+/* home: a short snowfall on first load */
+.snow { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .snow { display: block; position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; animation: snow-melt 1.2s 5.2s ease forwards; }
+  .snow i { position: absolute; top: -12px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px rgba(47, 111, 237, .16), 0 1px 4px rgba(12, 13, 14, .18); opacity: 0; animation: snow-fall 4s linear both; will-change: transform; }
+  .snow i.far { filter: blur(1px); box-shadow: 0 0 0 1px rgba(47, 111, 237, .1); }
+  @keyframes snow-fall {
+    0% { transform: translate3d(0, 0, 0); opacity: 0; }
+    10% { opacity: .95; }
+    50% { transform: translate3d(calc(var(--dx) * -.4), 50vh, 0); }
+    85% { opacity: .9; }
+    100% { transform: translate3d(var(--dx), 104vh, 0); opacity: 0; }
+  }
+  @keyframes snow-melt { to { opacity: 0; visibility: hidden; } }
+}

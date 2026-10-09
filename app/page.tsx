@@ -4,6 +4,7 @@ import Countdown from "@/components/Countdown";
 import Confetti from "@/components/Confetti";
 import Reveal from "@/components/Reveal";
 import HeroFun from "@/components/HeroFun";
+import Snow from "@/components/Snow";
 import OrgAvatar from "@/components/OrgAvatar";
 import AcceptForm from "./AcceptForm";
 import LinkForm from "./LinkForm";
@@ -31,6 +32,7 @@ export default async function Home() {
     <>
       <Confetti onLoad={!!me && !me.accepted_at} />
       <Reveal />
+      <Snow />
       <div className="wrap home" data-m="a">
         <Header right={me?.accepted_at ? <Link className="pill" href="/board">Your arena →</Link> : undefined} />
 
