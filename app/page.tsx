@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Countdown from "@/components/Countdown";
@@ -18,10 +17,8 @@ const EXAMPLES = [
 const EX_ORDER = ["long-run", "3k", "sprint", "push-ups", "plank", "burpees"];
 const TICKER = ["10 km long run", "3 km run", "100 m sprint", "Max push-ups", "Plank hold", "Burpees", "Daily log"];
 
-export default async function Home({ searchParams }: { searchParams: { home?: string } }) {
+export default async function Home() {
   const me = await currentParticipant().catch(() => null);
-  // Signed-in members skip the landing page and go straight to their arena. "Home" links add ?home=1 to see it anyway.
-  if (me?.accepted_at && !searchParams.home) redirect("/board");
   const ms = nextMilestone();
   const when = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(ms.at));
   const first = me ? displayName(me).split(" ")[0] : null;

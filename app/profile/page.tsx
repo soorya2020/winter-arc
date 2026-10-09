@@ -13,7 +13,7 @@ export default async function ProfilePage() {
   const rivals = (await allParticipants()).filter((p) => p.accepted_at && p.id !== me.id).map((p) => ({ id: p.id, name: displayName(p) }));
   return (
     <div className="wrap">
-      <Header right={<><Link href="/board">Arena</Link><Link href="/?home=1">Home</Link></>} />
+      <Header right={<><Link href="/board">Arena</Link><Link href="/">Home</Link></>} />
       <section style={{ maxWidth: "40rem" }}>
         <div className="head">
           <span className="label">{displayName(me)}</span>
