@@ -258,3 +258,18 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
   .why.in .why-body p { animation: up .6s cubic-bezier(.2,.8,.2,1) both; }
   .why.in .why-body p:nth-child(2) { animation-delay: .12s; } .why.in .why-body p:nth-child(3) { animation-delay: .24s; }
 }
+
+/* member page animation */
+@media (prefers-reduced-motion: no-preference) {
+  .board.in .lb { animation: rowin .55s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 70ms + .1s); }
+  @keyframes rowin { from { transform: translateX(-24px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .board.in .lb .track i { transform-origin: left; animation: fill 1s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 70ms + .45s); }
+  @keyframes fill { from { transform: scaleX(0); } to { transform: none; } }
+  .board.in .streak i.on { animation: pop .35s cubic-bezier(.3,1.6,.5,1) both; animation-delay: calc(var(--i, 0) * 70ms + var(--d, 0) * 40ms + .5s); }
+  @keyframes pop { from { transform: scaleY(0); } to { transform: none; } }
+  .lb.r1 .rk { animation: glow 2.6s 1.5s ease-in-out infinite; }
+  @keyframes glow { 50% { text-shadow: 0 0 18px rgba(255, 77, 0, .55); } }
+  .wrap > section, .arena, .quote, .topline { animation: up .6s cubic-bezier(.2,.8,.2,1) both; }
+  .wrap > section:nth-of-type(2) { animation-delay: .1s; } .wrap > section:nth-of-type(3) { animation-delay: .2s; }
+  .lb { transition: background .2s ease; } .lb:hover { background: rgba(255, 77, 0, .04); }
+}
