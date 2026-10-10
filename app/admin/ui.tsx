@@ -48,7 +48,7 @@ export function InviteControls({ id, link, sent, name }: { id: string; link: str
   return (
     <div style={{ display: "grid", gap: ".35rem" }}>
       <div style={{ display: "flex", gap: ".4rem", flexWrap: "wrap" }}>
-        <a className="btn wa-btn small" href={`https://wa.me/?text=${encodeURIComponent(`${name.split(" ")[0]}, you've been picked for Winter Arc 2026 💪 Six events, two weekends, no excuses. Claim your spot: ${link}`)}`} target="_blank" rel="noopener">WhatsApp</a>
+        <a className="btn wa-btn small" href={`https://wa.me/?text=${encodeURIComponent(`Oii ${name.split(" ")[0]} 👀 Winter Arc 2026 thudangaan pokunnu. 7 perkku maathram spot, athil onnu ninakku. Pedichu pinmaaraan pattilla 😤 Six events, two weekends. Claim it: ${link}`)}`} target="_blank" rel="noopener">WhatsApp</a>
         <button className="ghost small" disabled={pending} onClick={() => start(async () => setM(await emailInvite(id)))}>{pending ? "Sending…" : sent ? "Email again" : "Email"}</button>
         <button className="ghost small" onClick={copy}>Copy link</button>
       </div>
