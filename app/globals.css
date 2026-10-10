@@ -661,3 +661,26 @@ form.join > .note { margin: 0; text-align: center; }
 .fuel summary small { color: var(--muted); font-size: .8rem; }
 .fuel summary em { font-style: normal; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); }
 .fuel-body { display: grid; gap: .75rem; padding: 0 1rem 1rem; }
+
+/* member page: buy me a masala dosa (free, virtual thank-you) */
+.dosa { max-width: 34rem; padding: 1.1rem; background: #fff; border: 2px solid var(--ink); border-radius: 1.2rem; display: grid; gap: .8rem; }
+.dosa-why { font-size: .95rem; color: var(--muted); }
+.dosa-count { display: flex; align-items: baseline; gap: .5rem; }
+.dosa-count b { font-family: var(--display); font-weight: 400; font-size: 3rem; line-height: 1; color: var(--accent); }
+.dosa-count span { font-weight: 800; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.dosa-opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+.dosa-opts button { all: unset; cursor: pointer; display: grid; justify-items: center; gap: .2rem; padding: .7rem .3rem; border: 2px solid var(--line); border-radius: .9rem; font-weight: 800; font-size: .78rem; text-align: center; line-height: 1.2; }
+.dosa-opts button i { font-style: normal; font-size: 1.8rem; }
+.dosa-opts button.on { border-color: var(--accent); background: #fff6f1; color: var(--accent); }
+.dosa-opts button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.dosa-go { min-height: 3rem; background: var(--accent); border-color: var(--accent); }
+.dosa-msg { font-weight: 700; color: var(--accent); font-size: .92rem; }
+.dosa-disc { font-size: .82rem; background: var(--paper); border-radius: .7rem; padding: .6rem .75rem; }
+.dosa-wall { display: grid; gap: .45rem; border-top: 1px solid var(--line); padding-top: .7rem; font-size: .85rem; }
+.dosa-wall div { display: flex; flex-wrap: wrap; gap: .4rem; }
+.dosa-wall span { background: var(--paper); border-radius: 999px; padding: .3rem .7rem; font-size: .8rem; font-weight: 600; }
+.dosa-done { border-color: var(--accent); background: #fff6f1; text-align: center; justify-items: center; }
+.dosa-done h3 { font-size: 1.9rem; }
+.dosa-done p:not(.note) { color: var(--muted); }
+.dosa-big { font-size: 3.5rem; line-height: 1; }
+#dosa h2 em { font-style: normal; color: var(--accent); }

@@ -8,6 +8,7 @@ import PracticeForm from "./PracticeForm";
 import QuoteStrip from "./QuoteStrip";
 import ShareButtons from "./ShareButtons";
 import GearUp from "./GearUp";
+import DosaCard from "./DosaCard";
 import { siteUrl } from "@/lib/email";
 import { quoteOfTheDay } from "@/lib/quotes";
 import { signOut } from "../actions";
@@ -16,7 +17,8 @@ import { loadBoard } from "@/lib/board";
 import { displayName, recentTaunts } from "@/lib/db";
 import { EVENTS, WEEK_PLAN } from "@/lib/season.ts";
 import { fmtWhen, upcoming } from "@/lib/schedule";
-import { weekday } from "@/lib/streak.ts";
+import { today, weekday } from "@/lib/streak.ts";
+import { DOSAS, dosaCount, type DosaKind } from "@/lib/profile.ts";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +31,10 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
   const { next: ms } = await upcoming();
   const when = fmtWhen(ms.at);
   const todayPlan = WEEK_PLAN[weekday()];
+  const dosaWall = rows.filter((r) => dosaCount(r.profile) > 0).map((r) => {
+    const fav = (Object.keys(DOSAS) as DosaKind[]).reduce((a, k) => ((r.profile.dosas?.[k] ?? 0) > (r.profile.dosas?.[a] ?? 0) ? k : a), "masala");
+    return { id: r.id, name: r.name.split(" ")[0], count: dosaCount(r.profile), icon: DOSAS[fav].icon };
+  }).sort((a, b) => b.count - a.count);
 
   return (
     <>
@@ -67,6 +73,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
             </div>
           </section>
         )}
+        {me && <DosaCard total={dosaWall.reduce((n, d) => n + d.count, 0)} wall={dosaWall} offeredToday={me.profile?.dosas?.last === today()} meId={me.id} meName={displayName(me).split(" ")[0]} />}
       </div>
     </>
   );
