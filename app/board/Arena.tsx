@@ -5,14 +5,15 @@ import type { Taunt } from "@/lib/db";
 import { postTaunt } from "../actions";
 import { trashTalk, comeback as comebackLine, pickTarget, type Talker } from "@/lib/trash.ts";
 import { TZ } from "@/lib/season.ts";
+import { alpha, figure, palette } from "@/lib/theme";
 
 // Everyone who accepted brawls in one ring. Fighters trash-talk with their real stats,
 // and taunts people type here are shared with the whole group. Everything said, plus new
 // results, lands in a timestamped live feed next to the ring.
 
-const JERSEYS = ["#0c0d0e", "#2f6fed", "#1f9d61", "#8a4fff", "#e0a100", "#c2185b", "#4a4d52"];
+const JERSEYS = palette.jerseys;
 const QUICK = ["Vidilla machane 💪", "Naale muthal, alle? 😂", "Ninte streak evide?", "Pedikkanda, njan undu", "Ithokke entha!", "Plank-il urangalle"];
-const SKINS = ["#e5b48f", "#c98b62", "#a8714a", "#8d5a3b", "#d6a27c", "#f0c9a5"];
+const SKINS = figure.skins;
 const HITS = ["Smash", "Boom", "Ouch", "Too easy", "Wham"];
 
 type Fighter = {
@@ -44,7 +45,7 @@ const comeback = (b: BoardRow, a: BoardRow) => fresh(() => comebackLine(talker(b
 
 export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts: Taunt[]; meId: string | null }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const jerseyFor = (id: string, i: number) => (id === meId ? "#ff4d00" : JERSEYS[i % JERSEYS.length]);
+  const jerseyFor = (id: string, i: number) => (id === meId ? palette.accent : JERSEYS[i % JERSEYS.length]);
   const world = useRef<{ fighters: Fighter[]; fights: Fight[]; bubbles: Bubble[]; pops: Pop[]; seen: Set<number>; mine: { text: string; at: number }[]; paused: boolean }>(
     { fighters: [], fights: [], bubbles: [], pops: [], seen: new Set(taunts.map((t) => t.id)), mine: [], paused: false },
   );
@@ -192,16 +193,16 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
       const shake = f.state === "hurt" && now - f.t0 < 300 ? (Math.random() - 0.5) * 6 : 0;
       ctx.save();
       ctx.translate(f.x + shake, f.y);
-      ctx.fillStyle = "rgba(12,13,14,.12)"; ctx.beginPath(); ctx.ellipse(0, 0, 34 * s, 7 * s, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = alpha(palette.ink, 0.12); ctx.beginPath(); ctx.ellipse(0, 0, 34 * s, 7 * s, 0, 0, 7); ctx.fill();
       ctx.scale(s, s); ctx.translate(0, bob); ctx.rotate(lean);
-      const pants = "#26272a", hip = -46, sh = -92, step = f.state === "walk" ? Math.sin(t * 12) * 14 : 0;
+      const pants = figure.pants, hip = -46, sh = -92, step = f.state === "walk" ? Math.sin(t * 12) * 14 : 0;
       limb(-7, hip, -10 - step, -4, 12, pants); limb(7, hip, 10 + step, -4, 12, pants);
-      ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#0c0d0e"; ctx.lineWidth = 1.4;
+      ctx.fillStyle = figure.shoe; ctx.strokeStyle = figure.line; ctx.lineWidth = 1.4;
       rr(-19 - step, -8, 18, 9, 4); ctx.fill(); ctx.stroke(); rr(1 + step, -8, 18, 9, 4); ctx.fill(); ctx.stroke();
       // torso
       ctx.fillStyle = f.jersey; rr(-21, sh - 4, 42, hip - sh + 12, 13); ctx.fill();
-      ctx.fillStyle = f.me ? "#0c0d0e" : "#ff4d00"; ctx.fillRect(-21, sh + 22, 42, 5);
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = f.me ? palette.ink : palette.accent; ctx.fillRect(-21, sh + 22, 42, 5);
+      ctx.fillStyle = figure.number;
       ctx.font = `16px ${DISPLAY}`; ctx.textAlign = "center"; ctx.fillText(String(f.row.rank), 0, hip - 8);
       // arms
       const pr = f.state === "punch" ? Math.min(1, (now - f.t0) / 110) : 0, g = Math.sin(t * 4) * 3;
@@ -212,27 +213,27 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
       // head + beanie
       const hy = sh - 24;
       ctx.fillStyle = f.skin; ctx.beginPath(); ctx.arc(0, hy, 21, 0, 7); ctx.fill();
-      ctx.fillStyle = "#0c0d0e";
+      ctx.fillStyle = figure.line;
       if (f.state === "hurt") { ctx.font = `800 13px ${BODY}`; ctx.fillText("x  x", d * 4, hy + 6); }
       else {
         ctx.beginPath(); ctx.arc(d * 5 - 5, hy + 2, 2.6, 0, 7); ctx.arc(d * 5 + 6, hy + 2, 2.6, 0, 7); ctx.fill();
-        limb(d * 5 - 10, hy - 5, d * 5 - 2, hy - 2, 2.4, "#0c0d0e"); limb(d * 5 + 11, hy - 5, d * 5 + 3, hy - 2, 2.4, "#0c0d0e");
-        ctx.strokeStyle = "#0c0d0e"; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(d * 5 - 5, hy + 9); ctx.quadraticCurveTo(d * 5 + 2, hy + 15, d * 5 + 8, hy + 8); ctx.stroke();
+        limb(d * 5 - 10, hy - 5, d * 5 - 2, hy - 2, 2.4, figure.line); limb(d * 5 + 11, hy - 5, d * 5 + 3, hy - 2, 2.4, figure.line);
+        ctx.strokeStyle = figure.line; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(d * 5 - 5, hy + 9); ctx.quadraticCurveTo(d * 5 + 2, hy + 15, d * 5 + 8, hy + 8); ctx.stroke();
       }
-      ctx.fillStyle = f.me ? "#ff4d00" : "#ffffff"; ctx.strokeStyle = "#0c0d0e"; ctx.lineWidth = 1.4;
+      ctx.fillStyle = f.me ? palette.accent : figure.shoe; ctx.strokeStyle = figure.line; ctx.lineWidth = 1.4;
       ctx.beginPath(); ctx.moveTo(-21, hy - 5); ctx.quadraticCurveTo(0, hy - 38, 21, hy - 5); ctx.closePath(); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = f.me ? "#0c0d0e" : "#ff4d00"; rr(-22, hy - 10, 44, 8, 4); ctx.fill();
+      ctx.fillStyle = f.me ? palette.ink : palette.accent; rr(-22, hy - 10, 44, 8, 4); ctx.fill();
       ctx.beginPath(); ctx.arc(0, hy - 30, 6, 0, 7); ctx.fill();
       ctx.restore();
       // name tag + hp
       const ny = f.y + 22, fs = Math.round(12 * Math.max(0.9, s));
       ctx.font = `800 ${fs}px ${BODY}`; ctx.textAlign = "center";
       const label = f.me ? `${f.name} (you)` : f.name, tw = ctx.measureText(label).width + 14;
-      ctx.fillStyle = f.me ? "#ff4d00" : "#ffffff"; rr(f.x - tw / 2, ny - fs, tw, fs + 6, 99); ctx.fill();
-      if (!f.me) { ctx.strokeStyle = "#d6d8d0"; ctx.lineWidth = 1; ctx.stroke(); }
-      ctx.fillStyle = f.me ? "#ffffff" : "#0c0d0e"; ctx.fillText(label, f.x, ny);
-      const bw = 50 * s; ctx.fillStyle = "#e1e3dc"; ctx.fillRect(f.x - bw / 2, ny + 7, bw, 4);
-      ctx.fillStyle = f.hp > 40 ? "#0c0d0e" : "#ff4d00"; ctx.fillRect(f.x - bw / 2, ny + 7, (bw * f.hp) / 100, 4);
+      ctx.fillStyle = f.me ? palette.accent : palette.surface; rr(f.x - tw / 2, ny - fs, tw, fs + 6, 99); ctx.fill();
+      if (!f.me) { ctx.strokeStyle = palette.line; ctx.lineWidth = 1; ctx.stroke(); }
+      ctx.fillStyle = f.me ? palette.onAccent : palette.ink; ctx.fillText(label, f.x, ny);
+      const bw = 50 * s; ctx.fillStyle = palette.track; ctx.fillRect(f.x - bw / 2, ny + 7, bw, 4);
+      ctx.fillStyle = f.hp > 40 ? palette.ink : palette.accent; ctx.fillRect(f.x - bw / 2, ny + 7, (bw * f.hp) / 100, 4);
     };
 
     const wrap = (txt: string, maxW: number) => {
@@ -251,11 +252,11 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
       const bw = Math.max(...lines.map((l) => ctx.measureText(l).width)) + 22, bh = lines.length * 17 + 14;
       const bx = Math.max(6, Math.min(W - bw - 6, f.x - bw / 2)), by = Math.max(6, f.y - 150 * f.s - bh);
       const tx = Math.max(bx + 12, Math.min(bx + bw - 12, f.x));
-      ctx.fillStyle = f.me ? "#ff4d00" : "#ffffff"; ctx.strokeStyle = f.me ? "#ff4d00" : "#0c0d0e"; ctx.lineWidth = 2; ctx.lineJoin = "round";
+      ctx.fillStyle = f.me ? palette.accent : palette.surface; ctx.strokeStyle = f.me ? palette.accent : palette.ink; ctx.lineWidth = 2; ctx.lineJoin = "round";
       ctx.beginPath(); ctx.moveTo(tx - 7, by + bh); ctx.lineTo(tx, by + bh + 9); ctx.lineTo(tx + 7, by + bh); ctx.closePath(); ctx.fill(); ctx.stroke();
       rr(bx, by, bw, bh, 14); ctx.fill(); ctx.stroke();
       ctx.fillRect(tx - 6, by + bh - 3, 12, 3);
-      ctx.fillStyle = f.me ? "#ffffff" : "#0c0d0e"; ctx.textAlign = "left";
+      ctx.fillStyle = f.me ? palette.onAccent : palette.ink; ctx.textAlign = "left";
       lines.forEach((l, i) => ctx.fillText(l, bx + 11, by + 20 + i * 17));
       ctx.restore(); return true;
     };
@@ -263,10 +264,10 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
     const drawStage = () => {
       ctx.clearRect(0, 0, W, H);
       ctx.save(); ctx.font = `${Math.round(Math.min(W * 0.2, 170))}px ${DISPLAY}`; ctx.textAlign = "center";
-      ctx.fillStyle = "rgba(12,13,14,.045)"; ctx.fillText("WINTER ARC", W / 2, H * 0.42); ctx.restore();
-      ctx.strokeStyle = "rgba(12,13,14,.1)"; ctx.lineWidth = 1;
+      ctx.fillStyle = alpha(palette.ink, 0.045); ctx.fillText("WINTER ARC", W / 2, H * 0.42); ctx.restore();
+      ctx.strokeStyle = alpha(palette.ink, 0.1); ctx.lineWidth = 1;
       for (let i = 1; i <= 3; i++) { const y = H * (0.5 + i * 0.12); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-      ctx.fillStyle = "#ff4d00"; ctx.fillRect(0, H * 0.5, W, 3);
+      ctx.fillStyle = palette.accent; ctx.fillRect(0, H * 0.5, W, 3);
     };
 
     const frame = (now: number) => {
@@ -274,14 +275,14 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
       if (!w.paused) update(now, dt);
       drawStage();
       if (!w.fighters.length) {
-        ctx.fillStyle = "#6b6f68"; ctx.font = `600 15px ${BODY}`; ctx.textAlign = "center";
+        ctx.fillStyle = palette.muted; ctx.font = `600 15px ${BODY}`; ctx.textAlign = "center";
         ctx.fillText("The ring fills up as people accept their invites.", W / 2, H / 2 + 40);
       }
       [...w.fighters].sort((a, b) => a.y - b.y).forEach((f) => drawFighter(f, now));
       w.pops = w.pops.filter((p) => {
         const age = now - p.t0; if (age > 800) return false;
         ctx.save(); ctx.globalAlpha = 1 - age / 800; ctx.textAlign = "center";
-        ctx.font = `${p.big ? 34 : 20}px ${DISPLAY}`; ctx.fillStyle = p.big ? "#ff4d00" : "#0c0d0e";
+        ctx.font = `${p.big ? 34 : 20}px ${DISPLAY}`; ctx.fillStyle = p.big ? palette.accent : palette.ink;
         ctx.fillText(p.big ? p.text.toUpperCase() : p.text, p.x, p.y - age * 0.05); ctx.restore(); return true;
       });
       w.bubbles = w.bubbles.filter((b) => drawBubble(b, now));
@@ -342,7 +343,7 @@ export default function Arena({ rows, taunts, meId }: { rows: BoardRow[]; taunts
           {me && (
             <form className="taunt" onSubmit={send}>
               <div className="aim" role="group" aria-label="Aim it at">
-                <button type="button" aria-pressed={target === ""} onClick={() => setTarget("")}><span className="av" style={{ background: "#6b6f68" }}>All</span><span>Everyone</span></button>
+                <button type="button" aria-pressed={target === ""} onClick={() => setTarget("")}><span className="av" style={{ background: palette.muted }}>All</span><span>Everyone</span></button>
                 {others.map(({ r, color }) => (
                   <button key={r.id} type="button" aria-pressed={target === r.id} onClick={() => setTarget(r.id)}><span className="av" style={{ background: color }}>{r.name.slice(0, 1).toUpperCase()}</span><span>{r.name.split(" ")[0]}</span></button>
                 ))}

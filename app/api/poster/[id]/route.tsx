@@ -5,13 +5,14 @@ import { NextResponse } from "next/server";
 import { currentParticipant, isAdmin } from "@/lib/auth";
 import { loadBoard } from "@/lib/board";
 import { EVENTS, SEASON } from "@/lib/season.ts";
+import { palette } from "@/lib/theme";
 
 export const dynamic = "force-dynamic";
 
 let anton: Promise<Buffer> | null = null;
 const font = () => (anton ??= readFile(join(process.cwd(), "assets/Anton-Regular.ttf")));
 
-const C = { bg: "#f4f5f1", card: "#e1e3dc", ink: "#0c0d0e", muted: "#6b6f68", pink: "#ff4d00", yellow: "#ff4d00", cyan: "#0c0d0e" };
+const C = { bg: palette.paper, card: palette.track, ink: palette.ink, muted: palette.muted, pink: palette.accent, yellow: palette.accent, cyan: palette.ink };
 
 // 1080 × 1350 portrait poster for Instagram and the group chat.
 // /api/poster/<participant id> is one athlete; /api/poster/board is the whole leaderboard.

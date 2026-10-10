@@ -2,9 +2,10 @@
 import type { BoardRow } from "@/lib/board";
 import CountUp from "@/components/CountUp";
 import { MAX_PER_EVENT } from "@/lib/season.ts";
+import { palette } from "@/lib/theme";
 import { useEffect, useRef, useState } from "react";
 
-const COLORS = ["#0c0d0e", "#2f6fed", "#1f9d61", "#8a4fff", "#e0a100", "#c2185b", "#4a4d52"];
+const COLORS = palette.jerseys;
 
 // Race track: one lane per person, their token placed by points on the way to the finish
 // (every event maxed). Tap a lane for the event-by-event scores.
@@ -35,7 +36,7 @@ export default function BoardLive({ rows, at, meId, events }: { rows: BoardRow[]
       {rows.map((r, i) => {
         const x = Math.min(100, (r.total / finish) * 100);
         const me = r.id === meId;
-        const color = me ? "#ff4d00" : COLORS[i % COLORS.length];
+        const color = me ? palette.accent : COLORS[i % COLORS.length];
         return (
           <details key={r.id} className={`lane r${r.rank}${me ? " me" : ""}`} style={{ ["--i" as string]: i, ["--c" as string]: color, ["--x" as string]: `${x}%` }}>
             <summary>

@@ -7,6 +7,7 @@ import { upcoming } from "./schedule";
 import { weekday } from "./streak.ts";
 import { quoteOfTheDay } from "./quotes";
 import { pushTo } from "./push";
+import { palette as P } from "./theme";
 
 export const inviteLink = (p: Participant) => `${siteUrl()}/i/${p.token}`;
 
@@ -39,7 +40,7 @@ export async function sendDailyReminders(people: Participant[]) {
   const { next: ms } = await upcoming();
   const days = daysUntil(ms.at);
   const quote = await quoteOfTheDay();
-  const quoteHtml = `<span style="display:block;border-left:4px solid #ff4d00;padding-left:12px;font-weight:700">“${esc(quote.text)}”${quote.author ? `<br><span style="font-weight:400;color:#6b6f68">${esc(quote.author)}</span>` : ""}</span>`;
+  const quoteHtml = `<span style="display:block;border-left:4px solid ${P.accent};padding-left:12px;font-weight:700">“${esc(quote.text)}”${quote.author ? `<br><span style="font-weight:400;color:${P.muted}">${esc(quote.author)}</span>` : ""}</span>`;
   let sent = 0, pushed = 0;
   const failed: string[] = [];
   for (const p of people.filter((x) => x.accepted_at)) {

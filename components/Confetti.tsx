@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useRef } from "react";
+import { palette } from "@/lib/theme";
 
-const COLORS = ["#ff4d00", "#0c0d0e", "#ff4d00", "#d6d8d0", "#0c0d0e"];
+const COLORS = [palette.accent, palette.ink, palette.accent, palette.line, palette.ink];
 
 /** Fire with: window.dispatchEvent(new Event("confetti")) */
 export default function Confetti({ onLoad = false }: { onLoad?: boolean }) {
