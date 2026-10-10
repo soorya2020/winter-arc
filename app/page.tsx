@@ -12,12 +12,13 @@ import { currentParticipant } from "@/lib/auth";
 import { displayName } from "@/lib/db";
 import { EVENTS, SEASON } from "@/lib/season.ts";
 import { fmtWhen, upcoming } from "@/lib/schedule";
+import { palette } from "@/lib/theme";
 
 export const dynamic = "force-dynamic";
 
 const ORGANIZERS = [
-  { name: "Soorya", tag: "Soorya", wa: "917561071554", kind: "lift" as const, jersey: "#ff4d00", num: "1", role: "Organizer · built this website", line: "Built the whole site, from the arena to the roasts. Now he has to survive the leaderboard he made." },
-  { name: "Sanat", tag: "Sanat", wa: "917356437300", kind: "run" as const, jersey: "#2f6fed", num: "2", role: "Organizer · started it all", line: "Said \"let's make it a competition\". It was supposed to be casual. It ended up being serious stuff like this." },
+  { name: "Soorya", tag: "Soorya", wa: "917561071554", kind: "lift" as const, jersey: palette.accent, num: "1", role: "Organizer · built this website", line: "Built the whole site, from the arena to the roasts. Now he has to survive the leaderboard he made." },
+  { name: "Sanat", tag: "Sanat", wa: "917356437300", kind: "run" as const, jersey: palette.jerseys[1], num: "2", role: "Organizer · started it all", line: "Said \"let's make it a competition\". It was supposed to be casual. It ended up being serious stuff like this." },
 ];
 
 export default async function Home() {
