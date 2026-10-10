@@ -597,7 +597,7 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 .sched-defaults { margin: .2rem 0; padding-left: 1.1rem; display: grid; gap: .2rem; font-size: .92rem; }
 
 /* member page: gear up checklist */
-.gear { position: relative; margin-top: 1rem; padding: 1.1rem 1.1rem 1rem; background: #fff; border: 2px solid var(--ink); border-radius: 1.2rem; display: grid; gap: .7rem; scroll-margin-top: 1rem; }
+.gear { position: relative; margin: 1rem 0 1.75rem; padding: 1.1rem 1.1rem 1rem; background: #fff; border: 2px solid var(--ink); border-radius: 1.2rem; display: grid; gap: .7rem; scroll-margin-top: 1rem; }
 .gear-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; }
 .gear-head h3 { font-size: 2rem; line-height: .9; }
 .gear-head h3 em { font-style: normal; color: var(--accent); }
@@ -618,9 +618,8 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 .gear-btns { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .35rem; align-items: center; }
 .gear-btns button:not(.small) { min-height: 2.8rem; padding-inline: 1.4rem; background: var(--accent); }
 .gear-msg { margin: 0; font-size: .88rem; font-weight: 700; color: var(--accent); }
-.gear-later { all: unset; cursor: pointer; justify-self: end; font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.gear-later:focus-visible, .gear-pill:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.gear-pill { all: unset; cursor: pointer; display: inline-flex; gap: .5rem; align-items: center; margin-top: 1rem; padding: .6rem 1rem; border-radius: 999px; background: var(--ink); color: #fff; font-weight: 800; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; }
+.gear-must { margin: 0; padding: .6rem .8rem; border-radius: .7rem; background: #fff6f1; border-left: 4px solid var(--accent); font-size: .88rem; }
+.gear-must b { color: var(--accent); }
 .gear.done { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; border-color: var(--accent); background: #fff6f1; }
 .gear.done > div { display: grid; gap: .2rem; }
 .gear.done span { font-size: .9rem; color: var(--muted); }

@@ -31,7 +31,6 @@ export default function GearUp({ installed: wasInstalled, lockedIn: wasLocked, n
   const [buzzed, setBuzzed] = useState(false);
   const [locked, setLocked] = useState(wasLocked);
   const [justLocked, setJustLocked] = useState(false);
-  const [open, setOpen] = useState(true);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -107,14 +106,6 @@ export default function GearUp({ installed: wasInstalled, lockedIn: wasLocked, n
     );
   }
 
-  if (!open) {
-    return (
-      <button type="button" className="gear-pill" onClick={() => setOpen(true)}>
-        <span aria-hidden="true">⚡</span> Gear up · {done}/3 done <span aria-hidden="true">→</span>
-      </button>
-    );
-  }
-
   const iosNeedsInstall = device === "ios" && !standalone;
   return (
     <section className="gear" id="gear" aria-label="Gear up">
@@ -123,6 +114,7 @@ export default function GearUp({ installed: wasInstalled, lockedIn: wasLocked, n
         <div className="gear-meter" aria-label={`${done} of 3 done`}>{[0, 1, 2].map((i) => <i key={i} className={i < done ? "on" : ""} />)}</div>
       </div>
       <p className="gear-why">Three quick steps so the arc can reach you every morning. Finish them to get the 🔒 next to your name.</p>
+      <p className="gear-must"><b>Compulsory aanu, machane.</b> "Later" button njangal eduthu kalanju. Gear up cheyyaathe ivide ninnu rakshapedaan pattilla 😤</p>
       <ol className="gear-steps">
         <li className={step1 ? "fin" : "now"}>
           <span className="gear-n">{step1 ? "✓" : "1"}</span>
@@ -168,7 +160,6 @@ export default function GearUp({ installed: wasInstalled, lockedIn: wasLocked, n
         </li>
       </ol>
       {msg && <p className="gear-msg" aria-live="polite">{msg}</p>}
-      <button type="button" className="gear-later" onClick={() => setOpen(false)}>Later</button>
     </section>
   );
 }
