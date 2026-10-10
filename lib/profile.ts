@@ -5,12 +5,18 @@ export const TONES = ["Savage", "Playful", "Dad jokes", "Cold and quiet"] as con
 export type Tone = (typeof TONES)[number];
 
 export const TRAINING_SINCE = ["Not started yet", "Under 6 months", "6 to 12 months", "1 to 3 years", "3+ years"] as const;
+export const DOSAS = { plain: { label: "Plain dosa", icon: "🫓" }, masala: { label: "Masala dosa", icon: "🫓" }, ghee: { label: "Ghee roast", icon: "🧈" } } as const;
+export type DosaKind = keyof typeof DOSAS;
+export const dosaCount = (p?: Profile | null) => (Object.keys(DOSAS) as DosaKind[]).reduce((n, k) => n + (p?.dosas?.[k] ?? 0), 0);
+
 export type TrainingSince = (typeof TRAINING_SINCE)[number];
 
 export type Profile = {
   // Gear up checklist, set by the site
   installedAt?: string;
   lockedInAt?: string;
+  // Masala dosa thank-yous this member has offered (virtual, free), set by the site
+  dosas?: Partial<Record<DosaKind, number>> & { last?: string };
   // Asked on join: the only required answers
   trainingSince?: TrainingSince;
   toughest?: string;   // "The toughest challenge you've ever faced"

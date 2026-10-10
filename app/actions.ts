@@ -9,7 +9,7 @@ import { db, type Participant } from "@/lib/db";
 import { sendInvite } from "@/lib/reminders";
 import { PRACTICE_KINDS } from "@/lib/season.ts";
 import { today } from "@/lib/streak.ts";
-import { missingPersonal, profileFromForm } from "@/lib/profile.ts";
+import { DOSAS, missingPersonal, profileFromForm, type DosaKind } from "@/lib/profile.ts";
 
 export async function acceptInvite(_: unknown, form: FormData) {
   const me = await currentParticipant();
@@ -61,7 +61,8 @@ export async function saveProfile(_: unknown, form: FormData) {
   const me = await currentParticipant();
   if (!me?.accepted_at) return { error: "Accept your invite first." };
   const catchphrase = String(form.get("catchphrase") ?? "").trim().slice(0, 80) || null;
-  const profile = profileFromForm(form);
+  // Keep what the site itself stored (gear-up progress, dosas) when the form saves.
+  const profile = { ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, dosas: me.profile?.dosas };
   if (profile.rivalId === me.id) delete profile.rivalId;
   const missing = missingPersonal(profile);
   if (missing) return { error: missing };
@@ -170,3 +171,17 @@ export async function buzzMe(): Promise<{ ok?: boolean; error?: string }> {
 }
 
 export async function lockIn() { await setGear("lockedInAt"); }
+
+/** A free, virtual masala dosa for the organiser. One per member per day. */
+export async function offerDosa(kind: DosaKind): Promise<{ ok?: boolean; error?: string }> {
+  const me = await currentParticipant();
+  if (!me?.accepted_at) return { error: "Sign in first." };
+  if (!(kind in DOSAS)) return { error: "Pick a dosa first." };
+  const dosas = me.profile?.dosas ?? {};
+  if (dosas.last === today()) return { error: "Innathe dosa already offered. Naale veendum vaa. 🫓" };
+  const next = { ...dosas, [kind]: (dosas[kind] ?? 0) + 1, last: today() };
+  const { error } = await db().from("participants").update({ profile: { ...(me.profile ?? {}), dosas: next } }).eq("id", me.id);
+  if (error) return { error: "Couldn't serve that dosa. Try again." };
+  revalidatePath("/board");
+  return { ok: true };
+}
