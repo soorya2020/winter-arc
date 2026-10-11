@@ -83,7 +83,7 @@ export default function QuickLog({ logs, on: firstOn, missing, home }: { logs: H
     if (h.kind === "check") {
       if (v === 1) return `Day ${s} · clean today ✓`;
       if (v === 0) return "Slipped today. Day 1 starts tomorrow.";
-      return `${s ? `Day ${s}` : "Start today"}${h.private ? " · only you see this" : ""}`;
+      return s ? `Day ${s}` : "Start today";
     }
     const best = Math.max(past[h.id].best, v ?? 0);
     return v ? `${v} today${s > 1 ? ` · ${s}-day streak` : ""}` : `0 today${best ? ` · best ${best}` : ""}`;
@@ -161,8 +161,8 @@ function Pick({ on, first, onDone }: { on: string[]; first: boolean; onDone: (on
   };
   return (
     <>
-      <div className="qk-head"><h3>{first ? "Pick your streaks" : "Your streaks"}</h3><span className="label">Only you see this</span></div>
-      <p className="note">Choose the ones you'll follow every day. Change them any time. Want one that isn't here? Ask the organizers.</p>
+      <div className="qk-head"><h3>{first ? "Pick your streaks" : "Your streaks"}</h3></div>
+      <p className="note">Choose the ones you'll follow every day. You'll show up on the Streaks board for each one (Ranks tab). Change them any time. Want one that isn't here? Ask the organizers.</p>
       {HABITS.map((h) => (
         <label key={h.id} className="qk-row qk-pick">
           <span className="qk-ic" aria-hidden="true">{h.icon}</span>

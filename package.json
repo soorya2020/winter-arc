@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --test --experimental-strip-types lib/scoring.test.ts"
+    "test": "node --test --experimental-strip-types lib/scoring.test.ts lib/streak.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.45.4",

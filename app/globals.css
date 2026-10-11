@@ -762,3 +762,23 @@ button[aria-busy="true"]:disabled { opacity: .8; }
 .adm-reqs { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .5rem; }
 .adm-reqs li { display: flex; justify-content: space-between; align-items: center; gap: .75rem; padding-top: .5rem; border-top: 1px solid var(--line); }
 .adm-reqs p { margin: 0 0 .15rem; overflow-wrap: anywhere; }
+
+/* Ranks tab: Events | Streaks switch, and the Streaks board */
+.seg2 { display: grid; grid-template-columns: 1fr 1fr; border: 2px solid var(--ink); border-radius: 999px; padding: 3px; }
+.seg2 button { all: unset; cursor: pointer; text-align: center; padding: .6rem .3rem; border-radius: 999px; font-weight: 800; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+.seg2 button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+.seg2 button:focus-visible, .streaks .chips-row button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.streaks { display: grid; gap: .75rem; }
+.streaks .chips-row button { all: unset; cursor: pointer; flex: none; padding: .55rem .9rem; border-radius: 999px; border: 2px solid var(--ink); font-weight: 800; font-size: .82rem; white-space: nowrap; }
+.streaks .chips-row button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+.streak-list { list-style: none; margin: 0; padding: 0; border: 2px solid var(--ink); border-radius: 1rem; overflow: hidden; background: var(--surface); }
+.streak-list li { display: grid; grid-template-columns: 2rem minmax(0, 1fr) auto; gap: .6rem; align-items: center; padding: .7rem .9rem; border-top: 1px solid var(--line); }
+.streak-list li:first-child { border-top: 0; }
+.streak-list li.me { background: var(--accent-soft); }
+.streak-list .rk { font-family: var(--display); font-size: 1.5rem; color: var(--muted); }
+.streak-list li:first-child .rk { color: var(--accent); }
+.streak-list b { display: block; }
+.streak-list small { color: var(--muted); font-size: .78rem; }
+.streak-list .cur { font-family: var(--display); font-size: 1.9rem; line-height: 1; }
+.streak-list .cur i { font-style: normal; font-size: 1.2rem; }
+.streak-list li.me .cur { color: var(--accent); }

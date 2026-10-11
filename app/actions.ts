@@ -212,7 +212,7 @@ export async function logHabit(id: string, op: { add: number } | { set: 0 | 1 | 
     ? await db().from("habit_logs").delete().match(key)
     : await db().from("habit_logs").upsert({ ...key, value, updated_at: new Date().toISOString() });
   if (error) return { error: /habit_logs/.test(error.message) ? "Quick log needs a database update. Ask the organizer." : "Couldn't save. Try again." };
-  if (habit.kind === "count" && habit.training) revalidatePath("/board");
+  revalidatePath("/board");
   return { value };
 }
 

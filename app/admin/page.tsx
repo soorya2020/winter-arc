@@ -9,7 +9,7 @@ import { formatValue, points } from "@/lib/scoring.ts";
 import { loadBoard } from "@/lib/board";
 import { allQuotes, quoteOfTheDay } from "@/lib/quotes";
 import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell, TestEmailButton, TestPushButton, ScheduleForm, ScheduleActions, ImportSeasonDates, CloseRequest } from "./ui";
-import { HABITS_SQL, openRequests } from "@/lib/habits";
+import { HABITS_SQL, openRequests, streakBoard } from "@/lib/habits";
 import { logout } from "./actions";
 import { passwordColumnMissing, setupProblems } from "@/lib/health";
 import { DEFAULTS, SCHEDULE_SQL, allScheduled, fmtWhen, scheduleMissing, upcoming } from "@/lib/schedule";
@@ -229,7 +229,7 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
 }
 
 async function Awards() {
-  const rows = await loadBoard();
+  const [rows, streaks] = await Promise.all([loadBoard(), streakBoard()]);
   const top = (k: "total" | "running" | "strength" | "leap") => [...rows].sort((a, b) => b[k] - a[k])[0];
   const picks = [["Arc Champion", top("total")], ["Iron Lungs", top("running")], ["Steel Core", top("strength")], ["Biggest Leap", top("leap")]] as const;
   return (
@@ -251,6 +251,31 @@ async function Awards() {
         ))}
       </ul>
       <p className="note">Group poster for the chat: <a href="/api/poster/board">leaderboard poster</a>. Certificates open as a page you can print or save as PDF.</p>
+
+      <div className="adm-ev"><div><h2>Streaks</h2><p className="note">Daily habits from members&apos; + button. Separate from event points. Longest is the best run so far; members see the same board in Ranks &gt; Streaks.</p></div></div>
+      <div className="awards">
+        {streaks.map((h) => {
+          const best = [...h.rows].sort((a, b) => b.best - a.best || b.current - a.current)[0];
+          return <div key={h.id} className="award"><h3>{h.icon} Longest {h.name.toLowerCase()} streak</h3><p>{best?.best ? `${best.name} · ${best.best} days` : "Nobody yet"}</p></div>;
+        })}
+      </div>
+      {streaks.map((h) => (
+        <details key={h.id} className="adm-fold" open={h.id === streaks[0]?.id}>
+          <summary>{h.icon} {h.name} · {h.rows.length} following</summary>
+          <ul className="adm-list">
+            {h.rows.map((r, i) => (
+              <li key={r.id} className="adm-card adm-row">
+                <span className="adm-rk">{i + 1}</span>
+                <div style={{ minWidth: 0 }}>
+                  <b>{r.name}</b>
+                  <div className="note">Now {r.current} 🔥 · longest {r.best} · {r.days} days logged{h.unit ? ` · ${r.total} ${h.unit}` : ""}{r.last ? ` · last ${r.last}` : ""}{r.slippedToday ? " · slipped today" : ""}</div>
+                </div>
+              </li>
+            ))}
+            {!h.rows.length && <li className="note">Nobody follows this one yet.</li>}
+          </ul>
+        </details>
+      ))}
     </div>
   );
 }

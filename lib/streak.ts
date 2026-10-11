@@ -21,6 +21,18 @@ export function streak(days: string[], now = new Date()) {
   return n;
 }
 
+/** Longest run of consecutive days ever. */
+export function longest(days: string[]) {
+  const sorted = [...new Set(days)].sort();
+  let best = 0, run = 0, prev = "";
+  for (const d of sorted) {
+    run = prev && prevDay(d) === prev ? run + 1 : 1;
+    best = Math.max(best, run);
+    prev = d;
+  }
+  return best;
+}
+
 /** Last `n` days, oldest first, each marked done or not. */
 export function lastDays(days: string[], n = 10, now = new Date()) {
   const set = new Set(days);
