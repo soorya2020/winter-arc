@@ -665,11 +665,11 @@ button.wide, .cta.wide { width: 100%; justify-content: center; }
 .menu li + li { border-top: 1px solid var(--line); }
 .menu a { display: flex; justify-content: space-between; padding: 1rem; font-weight: 800; text-decoration: none; }
 .menu a span { color: var(--accent); }
-.tabbar { position: fixed; z-index: 30; left: 50%; translate: -50% 0; bottom: 0; width: 100%; max-width: 30rem; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--surface); border-top: 2px solid var(--ink); padding-bottom: env(safe-area-inset-bottom, 0px); }
-.tabbar button { all: unset; cursor: pointer; display: grid; justify-items: center; gap: .15rem; padding: .55rem 0 .6rem; font-size: .66rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.tabbar { position: fixed; z-index: 30; left: 50%; translate: -50% 0; bottom: 0; width: 100%; max-width: 30rem; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: var(--surface); border-top: 2px solid var(--ink); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.tabbar a { all: unset; cursor: pointer; display: grid; justify-items: center; gap: .15rem; padding: .55rem 0 .6rem; font-size: .66rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .tabbar svg { width: 1.5rem; height: 1.5rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.tabbar button[aria-current="page"] { color: var(--accent); }
-.tabbar button:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.tabbar a[aria-current="page"] { color: var(--accent); }
+.tabbar a:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
 .app .ring { border-top: 0; padding-top: 0; }
 .app .ring canvas { display: block; width: 100%; height: min(62dvh, 520px); border-radius: 1rem; border: 2px solid var(--ink); background: var(--surface); touch-action: manipulation; cursor: pointer; }
 .app .ring .hint { margin-top: .5rem; font-size: .85rem; color: var(--muted); text-align: center; }
@@ -702,3 +702,4 @@ button.wide, .cta.wide { width: 100%; justify-content: center; }
 .sheet .panel, .sheet form.card { border-radius: 1rem; }
 .sheet .grid2 { grid-template-columns: minmax(0, 1fr); }
 @media (prefers-reduced-motion: no-preference) { .sheet[open] { animation: up .3s cubic-bezier(.2,.8,.2,1) both; } }
+.app.home.in { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)); }

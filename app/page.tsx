@@ -5,6 +5,7 @@ import AcceptForm from "./AcceptForm";
 import LinkForm from "./LinkForm";
 import AuthPopup from "./AuthPopup";
 import OrgAvatar from "@/components/OrgAvatar";
+import TabBar from "@/components/TabBar";
 import { currentParticipant } from "@/lib/auth";
 import { displayName } from "@/lib/db";
 import { EVENTS, SEASON } from "@/lib/season.ts";
@@ -26,7 +27,7 @@ export default async function Home() {
   return (
     <>
       <Confetti onLoad={!!me && !me.accepted_at} />
-      <div className="app home">
+      <div className={`app home${me?.accepted_at ? " in" : ""}`}>
         <header className="appbar">
           <Link className="mark" href="/">Winter Arc</Link>
           <span className="pill">Season 2026</span>
@@ -67,6 +68,7 @@ export default async function Home() {
           <span>Winter Arc · made with love for the crew</span>
           <Link href="/admin">Organizers</Link>
         </footer>
+        {me?.accepted_at && <TabBar active="home" />}
       </div>
     </>
   );
