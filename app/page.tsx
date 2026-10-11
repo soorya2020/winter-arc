@@ -1,120 +1,56 @@
 import Link from "next/link";
-import Header from "@/components/Header";
 import Countdown from "@/components/Countdown";
 import Confetti from "@/components/Confetti";
-import Reveal from "@/components/Reveal";
-import HeroFun from "@/components/HeroFun";
-import Snow from "@/components/Snow";
-import OrgAvatar from "@/components/OrgAvatar";
 import AcceptForm from "./AcceptForm";
 import LinkForm from "./LinkForm";
 import { currentParticipant } from "@/lib/auth";
 import { displayName } from "@/lib/db";
-import { EVENTS, MORE_EVENTS_NOTE, SEASON } from "@/lib/season.ts";
+import { EVENTS, SEASON } from "@/lib/season.ts";
 import { fmtWhen, upcoming } from "@/lib/schedule";
-import { palette } from "@/lib/theme";
 
 export const dynamic = "force-dynamic";
 
 const ORGANIZERS = [
-  { name: "Soorya", tag: "Soorya", wa: "917561071554", kind: "lift" as const, jersey: palette.accent, num: "1", role: "Organizer · built this website", line: "Built the whole site, from the arena to the roasts. Now he has to survive the leaderboard he made." },
-  { name: "Sanat", tag: "Sanat", wa: "917356437300", kind: "run" as const, jersey: palette.jerseys[1], num: "2", role: "Organizer · started it all", line: "Said \"let's make it a competition\". It was supposed to be casual. It ended up being serious stuff like this." },
+  { tag: "Soorya", wa: "917561071554" },
+  { tag: "Sanat", wa: "917356437300" },
 ];
 
 export default async function Home() {
   const me = await currentParticipant().catch(() => null);
-  const { next: ms, then } = await upcoming();
-  const when = fmtWhen(ms.at, true);
+  const { next: ms } = await upcoming();
   const first = me ? displayName(me).split(" ")[0] : null;
 
   return (
     <>
       <Confetti onLoad={!!me && !me.accepted_at} />
-      <Reveal />
-      <Snow />
-      <div className="wrap home" data-m="a">
-        <Header right={me?.accepted_at ? <Link className="pill" href="/board">Your arena →</Link> : undefined} />
+      <div className="app home">
+        <header className="appbar">
+          <Link className="mark" href="/">Winter Arc</Link>
+          <span className="pill">Season 2026</span>
+        </header>
 
         <div className="hero">
-          <p className="hello">{first ? `${first}, you were picked for a reason` : "By invitation only"}</p>
-          <div className="hero-top">
-            <h1>Winter<br /><em>Arc.</em></h1>
-            <HeroFun />
-          </div>
-          <div className="hero-row">
-            <p className="lede">{SEASON.spots} athletes. {EVENTS.length} events (for now). Two weekends. <b>No excuses accepted.</b></p>
-            <div style={{ display: "grid", gap: "1.25rem" }}>
-              <Countdown to={ms.at} label={ms.label} when={when} note={ms.note} then={then ? `${then.label} · ${fmtWhen(then.at)}` : null} />
-              {me?.accepted_at
-                ? <Link className="cta" href="/board">Enter the arena <span>→</span></Link>
-                : me
-                  ? <a className="cta" href="#join">Claim your spot <span>→</span></a>
-                  : <a className="cta" href="#join">Members sign in <span>→</span></a>}
-            </div>
-          </div>
+          <p className="hello">{first ? `Hey ${first}` : "By invitation only"}</p>
+          <h1>Winter<br /><em>Arc.</em></h1>
+          <p className="lede">{SEASON.spots} athletes. {EVENTS.length} events. Two weekends. <b>No excuses.</b></p>
         </div>
 
-        <div className="strip" data-reveal>
-          {(["running", "strength"] as const).map((w) => (
-            <p key={w}><b>{w === "running" ? "Running weekend" : "Strength weekend"}</b>{EVENTS.filter((e) => e.weekend === w).map((e) => <span className="chip" key={e.id}>{e.name}</span>)}</p>
-          ))}
-          <p className="strip-more"><span>+ More coming</span>{MORE_EVENTS_NOTE}</p>
+        <div className="card-s">
+          <span className="label">Next up</span>
+          <Countdown to={ms.at} label={ms.label} when={fmtWhen(ms.at, true)} note={ms.note} />
         </div>
 
-        <div className="rsvp" id="join" data-reveal>
-          <div>
-            <h2>{me?.accepted_at ? <>You're <em>in.</em></> : <>Your spot is <em>waiting.</em></>}</h2>
-            <p>{me?.accepted_at
-              ? "Your fighter is in the arena. Log every session to keep your streak alive."
-              : "A few quick answers and your fighter joins the arena."}</p>
-          </div>
+        <div id="join">
           {me?.accepted_at
-            ? <div><Link className="cta" href="/board">Enter the arena <span>→</span></Link></div>
+            ? <Link className="cta wide" href="/board">Enter the arena <span>→</span></Link>
             : me
-              ? <AcceptForm defaultName={me.nickname || me.name} />
+              ? <><h2 className="tab-h">Claim your spot</h2><AcceptForm defaultName={me.nickname || me.name} /></>
               : <LinkForm />}
         </div>
 
-        <section className="why" id="why" data-reveal>
-          <span className="label">Why we made this</span>
-          <h2>Fitness <em>first.</em></h2>
-          <input type="checkbox" id="why-more" className="why-toggle" />
-          <div className="why-body">
-            <p>Work, studies, deadlines: something always wins over the workout. This year we wanted fitness to win for once. Your health is the thing that carries everything else you do, so it deserves to come first.</p>
-            <p>Winter Arc is a friendly match dressed up to look intimidating. The countdowns, the leaderboard and the roasts are there to get you moving, not to make anyone feel small. Finish last and you still started something.</p>
-            <p>Made with love and care for a few friends. Let's end this year strong and walk into the next one fitter than we've ever been. <b>Happy new year ahead.</b></p>
-          </div>
-          <label htmlFor="why-more" className="why-more">Read the rest</label>
-        </section>
-
-        <section className="orgs" id="organizers" data-reveal>
-          <span className="label">The organizers</span>
-          <h2>Blame <em>these two.</em></h2>
-          <div className="org-grid">
-            {ORGANIZERS.map((o) => (
-              <div className="org" key={o.name}>
-                <div className="org-ava"><OrgAvatar kind={o.kind} jersey={o.jersey} num={o.num} /><span className="tag">{o.tag}</span></div>
-                <div className="org-text">
-                  <h3>{o.name}</h3>
-                  <span className="org-role">{o.role}</span>
-                  <p>{o.line}</p>
-                  <a className="wa" href={`https://wa.me/${o.wa}`} target="_blank" rel="noopener noreferrer">WhatsApp {o.tag}</a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* phones only: the main button stays in reach at the bottom */}
-        <div className="m-cta">
-          {me?.accepted_at
-            ? <Link className="cta" href="/board">Enter the arena <span>→</span></Link>
-            : <a className="cta" href="#join">{me ? "Claim your spot" : "Members sign in"} <span>→</span></a>}
-        </div>
-
-        <footer>
-          <span className="label">Winter Arc · made with love for the crew</span>
-          <span className="note">Questions? Reply to your invite email. · <Link href="/admin">Organizers</Link></span>
+        <footer className="foot">
+          <span>Questions? WhatsApp {ORGANIZERS.map((o, i) => <span key={o.tag}>{i ? " or " : ""}<a href={`https://wa.me/${o.wa}`} target="_blank" rel="noopener noreferrer">{o.tag}</a></span>)}.</span>
+          <Link href="/admin">Organizers</Link>
         </footer>
       </div>
     </>
