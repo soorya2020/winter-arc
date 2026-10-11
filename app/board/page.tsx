@@ -8,6 +8,8 @@ import QuoteStrip from "./QuoteStrip";
 import ShareButtons from "./ShareButtons";
 import GearUp from "./GearUp";
 import DosaCard from "./DosaCard";
+import QuickLog from "@/components/QuickLog";
+import { myHabitLogs, streakBoard } from "@/lib/habits";
 import { siteUrl } from "@/lib/email";
 import { quoteOfTheDay } from "@/lib/quotes";
 import { signOut } from "../actions";
@@ -25,7 +27,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
   const me = await currentParticipant();
   const admin = isAdmin();
   if (!me?.accepted_at && !admin) redirect("/");
-  const [rows, quote] = await Promise.all([loadBoard(), quoteOfTheDay()]);
+  const [rows, quote, habits, streaks] = await Promise.all([loadBoard(), quoteOfTheDay(), me ? myHabitLogs(me.id) : null, streakBoard()]);
   const mine = rows.find((r) => r.id === me?.id);
   const { next: ms } = await upcoming();
   const todayPlan = WEEK_PLAN[weekday()];
@@ -85,7 +87,8 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
           <Link className="mark" href="/">Winter Arc</Link>
           <span className="pill">{me ? `#${mine?.rank ?? "–"} · ${first}` : "Admin view"}</span>
         </header>
-        <AppTabs rows={rows} meId={me?.id ?? null} events={EVENTS.map((e) => ({ id: e.id, name: e.name, weekend: e.weekend }))} today={todayTab} me={meTab} />
+        {me && habits && <QuickLog logs={habits.logs} on={me.profile?.habitsOn ?? null} missing={habits.missing} />}
+        <AppTabs streaks={streaks} rows={rows} meId={me?.id ?? null} events={EVENTS.map((e) => ({ id: e.id, name: e.name, weekend: e.weekend }))} today={todayTab} me={meTab} />
       </div>
     </>
   );

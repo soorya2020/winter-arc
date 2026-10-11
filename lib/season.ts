@@ -133,6 +133,19 @@ export const AWARDS = [
 
 export const PRACTICE_KINDS = ["Run", "Strength", "Speed", "Burpees", "Mobility", "Other"];
 
+/** Daily habits in the quick-log button. No points, just streaks. Add one with a single line.
+    check: one tap for yes (or "no", which breaks the streak). count: chips that add to today's total.
+    training: a logged day also keeps the main 🔥 practice streak alive. Every habit has its own Streaks board, separate from the event ranks. */
+export type Habit = { id: string; name: string; icon: string } & (
+  | { kind: "check"; yes: string; no?: string }
+  | { kind: "count"; steps: number[]; unit: string; training?: boolean }
+);
+export const HABITS: Habit[] = [
+  { id: "nofap", name: "No-fap", icon: "🔒", kind: "check", yes: "Clean ✓", no: "Slipped" },
+  { id: "pushups", name: "Push-ups", icon: "💪", kind: "count", steps: [10, 20, 50], unit: "push-ups", training: true },
+  { id: "squats", name: "Squats", icon: "🦵", kind: "count", steps: [10, 20, 50], unit: "squats", training: true },
+];
+
 export function nextMilestone(now = new Date()) {
   const list = [
     { label: "Baseline test", at: SEASON.baseline },

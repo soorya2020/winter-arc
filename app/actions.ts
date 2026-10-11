@@ -7,7 +7,8 @@ import { cookies } from "next/headers";
 import { checkPassword, hashPassword, MIN_PASSWORD } from "@/lib/password";
 import { db, type Participant } from "@/lib/db";
 import { sendInvite } from "@/lib/reminders";
-import { PRACTICE_KINDS } from "@/lib/season.ts";
+import { HABITS, PRACTICE_KINDS } from "@/lib/season.ts";
+import { emailLayout, esc, sendMail, siteUrl } from "@/lib/email";
 import { today } from "@/lib/streak.ts";
 import { DOSAS, missingPersonal, profileFromForm, type DosaKind } from "@/lib/profile.ts";
 
@@ -20,7 +21,7 @@ export async function acceptInvite(_: unknown, form: FormData) {
   const password = String(form.get("password") ?? "");
   if (password.length < MIN_PASSWORD) return { error: `Pick a password with at least ${MIN_PASSWORD} characters. You'll use it to sign in.` };
   // Keep what the site itself stored (gear-up progress) when the form saves.
-  const profile = { ...me.profile, ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt };
+  const profile = { ...me.profile, ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, habitsOn: me.profile?.habitsOn };
   const missing = missingPersonal(profile);
   if (missing) return { error: missing };
   const { error } = await db().from("participants")
@@ -62,7 +63,7 @@ export async function saveProfile(_: unknown, form: FormData) {
   if (!me?.accepted_at) return { error: "Accept your invite first." };
   const catchphrase = String(form.get("catchphrase") ?? "").trim().slice(0, 80) || null;
   // Keep what the site itself stored (gear-up progress, dosas) when the form saves.
-  const profile = { ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, dosas: me.profile?.dosas };
+  const profile = { ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, dosas: me.profile?.dosas, habitsOn: me.profile?.habitsOn };
   if (profile.rivalId === me.id) delete profile.rivalId;
   const missing = missingPersonal(profile);
   if (missing) return { error: missing };
@@ -188,4 +189,59 @@ export async function offerDosa(kind: DosaKind): Promise<{ ok?: boolean; error?:
   if (error) return { error: "Couldn't serve that dosa. Try again." };
   revalidatePath("/board");
   return { ok: true };
+}
+
+/** Quick log: add to a count habit (negative undoes), or set a check habit to 1 (yes) / 0 (no). null clears today. */
+export async function logHabit(id: string, op: { add: number } | { set: 0 | 1 | null }): Promise<{ value?: number | null; error?: string }> {
+  const me = await currentParticipant();
+  if (!me?.accepted_at) return { error: "Sign in first." };
+  const habit = HABITS.find((h) => h.id === id);
+  if (!habit) return { error: "Unknown habit." };
+  const key = { participant_id: me.id, day: today(), habit: id };
+  let value: number | null;
+  if ("add" in op) {
+    if (habit.kind !== "count" || !Number.isInteger(op.add) || Math.abs(op.add) > 1000) return { error: "That number doesn't look right." };
+    const { data, error } = await db().from("habit_logs").select("value").match(key).maybeSingle();
+    if (error) return { error: "Quick log needs a database update. Ask the organizer." };
+    value = Math.min(10000, Math.max(0, (data?.value ?? 0) + op.add)) || null;
+  } else {
+    if (habit.kind !== "check") return { error: "That habit counts reps." };
+    value = op.set;
+  }
+  const { error } = value == null
+    ? await db().from("habit_logs").delete().match(key)
+    : await db().from("habit_logs").upsert({ ...key, value, updated_at: new Date().toISOString() });
+  if (error) return { error: /habit_logs/.test(error.message) ? "Quick log needs a database update. Ask the organizer." : "Couldn't save. Try again." };
+  revalidatePath("/board");
+  return { value };
+}
+
+/** "Pick streaks": the habits this member chose to follow in their quick log. */
+export async function setHabitsOn(on: string[]): Promise<{ ok?: boolean; error?: string }> {
+  const me = await currentParticipant();
+  if (!me?.accepted_at) return { error: "Sign in first." };
+  const habitsOn = HABITS.filter((h) => on.includes(h.id)).map((h) => h.id);
+  const { error } = await db().from("participants").update({ profile: { ...(me.profile ?? {}), habitsOn } }).eq("id", me.id);
+  return error ? { error: "Couldn't save. Try again." } : { ok: true };
+}
+
+/** A member asks the organizers for something new. Saved for the admin panel and emailed to the organizer inbox. */
+export async function sendRequest(raw: string): Promise<{ ok?: string; error?: string }> {
+  const me = await currentParticipant();
+  if (!me?.accepted_at) return { error: "Sign in first." };
+  const text = raw.replace(/\s+/g, " ").trim().slice(0, 300);
+  if (text.length < 3) return { error: "Tell them what you'd like first." };
+  const since = new Date(Date.now() - 86_400_000).toISOString();
+  const { count } = await db().from("requests").select("id", { count: "exact", head: true }).eq("participant_id", me.id).gte("created_at", since);
+  if ((count ?? 0) >= 5) return { error: "That's 5 requests today. Give the organizers a breather." };
+  const { error } = await db().from("requests").insert({ participant_id: me.id, text });
+  if (error) return { error: /requests/.test(error.message) ? "Requests need a database update. Ask the organizer." : "Couldn't send that. Try again." };
+  const inbox = process.env.SMTP_USER?.trim();
+  if (inbox) {
+    const name = me.nickname || me.name;
+    await sendMail(inbox, `Winter Arc request from ${name}`,
+      emailLayout({ kicker: "New request", title: `${esc(name)} asked for something`, body: [esc(text)], cta: { label: "Open the admin panel", href: `${siteUrl()}/admin` } }),
+      `${name} asked: ${text}\n\n${siteUrl()}/admin`).catch(() => null);
+  }
+  return { ok: "Sent. The organizers will see it in their panel." };
 }

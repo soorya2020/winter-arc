@@ -164,7 +164,7 @@ export default function GearUp({ installed: wasInstalled, lockedIn: wasLocked, n
               : iosNeedsInstall || push === "none" ? <span>Unlocks after step 1. iPhones only allow it from the installed app.</span>
               : push === "blocked" ? <span>Blocked for this site. Allow notifications in your phone settings, then reload.</span>
               : <span>Your daily session, streak and days left, at 6 AM. No email digging.</span>}
-            {!step2 && step1 && push === "off" && <div className="gear-btns"><button type="button" disabled={busy} onClick={allow}>{busy ? "Asking…" : "Allow"}</button></div>}
+            {!step2 && step1 && push === "off" && <div className="gear-btns"><button type="button" disabled={busy} aria-busy={busy} onClick={allow}>{busy ? "Asking…" : "Allow"}</button></div>}
           </div>
         </li>
         <li className={buzzed ? "fin" : step2 ? "now" : ""}>
@@ -174,9 +174,9 @@ export default function GearUp({ installed: wasInstalled, lockedIn: wasLocked, n
             <span>{buzzed ? "Felt it? Lock it in." : "We'll ping your phone once to make sure it works."}</span>
             {step2 && (
               <div className="gear-btns">
-                {!buzzed && <button type="button" disabled={busy} onClick={buzz}>{busy ? "Buzzing…" : "Buzz me"}</button>}
+                {!buzzed && <button type="button" disabled={busy} aria-busy={busy} onClick={buzz}>{busy ? "Buzzing…" : "Buzz me"}</button>}
                 {buzzed && <button type="button" onClick={confirm}>Got it 🔒</button>}
-                {buzzed && <button type="button" className="ghost small" disabled={busy} onClick={buzz}>Buzz again</button>}
+                {buzzed && <button type="button" className="ghost small" disabled={busy} aria-busy={busy} onClick={buzz}>Buzz again</button>}
               </div>
             )}
           </div>

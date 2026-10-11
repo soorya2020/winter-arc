@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import type { BoardRow } from "@/lib/board";
 import Arena from "./Arena";
 import BoardLive from "./BoardLive";
+import StreakBoard from "./StreakBoard";
+import type { StreakBoard as Streaks } from "@/lib/habits";
 import TabBar from "@/components/TabBar";
 
 // The member app: four tabs in a bottom bar. The hash keeps links like /board#you working.
@@ -10,10 +12,11 @@ import TabBar from "@/components/TabBar";
 type Tab = "today" | "ring" | "ranks" | "me";
 const fromHash = (h: string): Tab => (h === "#ring" ? "ring" : h === "#ranks" || h === "#table" ? "ranks" : h === "#me" ? "me" : "today");
 
-export default function AppTabs({ rows: first, meId, events, today, me }: {
-  rows: BoardRow[]; meId: string | null; events: { id: string; name: string; weekend: string }[]; today: React.ReactNode; me: React.ReactNode;
+export default function AppTabs({ rows: first, meId, events, today, me, streaks }: {
+  streaks: Streaks; rows: BoardRow[]; meId: string | null; events: { id: string; name: string; weekend: string }[]; today: React.ReactNode; me: React.ReactNode;
 }) {
   const [tab, setTab] = useState<Tab>("today");
+  const [board, setBoard] = useState<"events" | "streaks">("events");
   const [rows, setRows] = useState(first);
   const [at, setAt] = useState<string | null>(null);
 
@@ -56,7 +59,11 @@ export default function AppTabs({ rows: first, meId, events, today, me }: {
       {tab === "ranks" && (
         <div className="tab">
           <h2 className="tab-h">Ranks</h2>
-          <BoardLive rows={rows} at={at} meId={meId} events={events} />
+          <div className="seg2" role="group" aria-label="Leaderboard">
+            <button type="button" aria-pressed={board === "events"} onClick={() => setBoard("events")}>Events</button>
+            <button type="button" aria-pressed={board === "streaks"} onClick={() => setBoard("streaks")}>Streaks</button>
+          </div>
+          {board === "events" ? <BoardLive rows={rows} at={at} meId={meId} events={events} /> : <StreakBoard board={streaks} meId={meId} />}
         </div>
       )}
       <div className="tab" hidden={tab !== "me"}>{me}</div>

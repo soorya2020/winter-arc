@@ -5,7 +5,7 @@ import { submitQuote } from "../actions";
 
 function Submit() {
   const { pending } = useFormStatus();
-  return <button type="submit" className="small" disabled={pending}>{pending ? "Adding…" : "Add"}</button>;
+  return <button type="submit" className="small" disabled={pending} aria-busy={pending}>{pending ? "Adding…" : "Add"}</button>;
 }
 
 /** One bro talk quote a day, plus a tucked-away box to add your own. */

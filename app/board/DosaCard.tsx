@@ -57,7 +57,7 @@ export default function DosaCard({ total, wall, offeredToday, meId, meName }: { 
                   </button>
                 ))}
               </div>
-              <button type="button" className="dosa-go" disabled={busy} onClick={offer}>{busy ? "Serving…" : `Offer a ${DOSAS[kind].label.toLowerCase()} ${DOSAS[kind].icon}`}</button>
+              <button type="button" className="dosa-go" disabled={busy} aria-busy={busy} onClick={offer}>{busy ? "Serving…" : `Offer a ${DOSAS[kind].label.toLowerCase()} ${DOSAS[kind].icon}`}</button>
             </>
           )}
           {done && <p className="dosa-msg">Innathe dosa kitti, thanks machane! Naale veendum vaa. 🫓</p>}

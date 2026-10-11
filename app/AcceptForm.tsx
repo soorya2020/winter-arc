@@ -5,7 +5,7 @@ import { BasicFields } from "@/components/ProfileFields";
 
 function Submit() {
   const { pending } = useFormStatus();
-  return <button type="submit" disabled={pending} onClick={(e) => { if (e.currentTarget.form?.checkValidity()) window.dispatchEvent(new Event("confetti")); }}>{pending ? "Saving…" : "I'm in"}</button>;
+  return <button type="submit" disabled={pending} aria-busy={pending} onClick={(e) => { if (e.currentTarget.form?.checkValidity()) window.dispatchEvent(new Event("confetti")); }}>{pending ? "Saving…" : "I'm in"}</button>;
 }
 
 export default function AcceptForm({ defaultName }: { defaultName: string }) {

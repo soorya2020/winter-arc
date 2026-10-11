@@ -202,3 +202,9 @@ export async function removeQuote(id: number) {
   await db().from("quotes").delete().eq("id", id);
   revalidatePath("/admin");
 }
+
+export async function closeRequest(id: number) {
+  requireAdmin();
+  await db().from("requests").update({ done: true }).eq("id", id);
+  revalidatePath("/admin");
+}

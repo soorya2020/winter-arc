@@ -4,7 +4,7 @@ import { resendLink, signIn } from "./actions";
 
 function Submit({ idle, busy, ghost }: { idle: string; busy: string; ghost?: boolean }) {
   const { pending } = useFormStatus();
-  return <button type="submit" className={ghost ? "ghost small" : undefined} disabled={pending}>{pending ? busy : idle}</button>;
+  return <button type="submit" className={ghost ? "ghost small" : undefined} disabled={pending} aria-busy={pending}>{pending ? busy : idle}</button>;
 }
 
 /** Members sign in with email and password. Forgot it? Get a one-tap sign-in link by email. */

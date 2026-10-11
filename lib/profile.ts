@@ -17,6 +17,8 @@ export type Profile = {
   lockedInAt?: string;
   // Masala dosa thank-yous this member has offered (virtual, free), set by the site
   dosas?: Partial<Record<DosaKind, number>> & { last?: string };
+  // Quick-log streaks this member chose to follow, set by the site (undefined until they pick)
+  habitsOn?: string[];
   // Asked on join: the only required answers
   trainingSince?: TrainingSince;
   toughest?: string;   // "The toughest challenge you've ever faced"
