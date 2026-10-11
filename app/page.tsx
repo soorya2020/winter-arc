@@ -5,6 +5,7 @@ import AcceptForm from "./AcceptForm";
 import LinkForm from "./LinkForm";
 import AuthPopup from "./AuthPopup";
 import OrgAvatar from "@/components/OrgAvatar";
+import HeroFun from "@/components/HeroFun";
 import { currentParticipant } from "@/lib/auth";
 import { displayName } from "@/lib/db";
 import { EVENTS, SEASON } from "@/lib/season.ts";
@@ -35,6 +36,7 @@ export default async function Home() {
         <div className="hero">
           <p className="hello">{first ? `Hey ${first}` : "By invitation only"}</p>
           <h1>Winter<br /><em>Arc.</em></h1>
+          <HeroFun />
           <p className="lede">{SEASON.spots} athletes. {EVENTS.length} events. Two weekends. <b>No excuses.</b></p>
 
           <Countdown to={ms.at} label={ms.label} when={fmtWhen(ms.at, true)} note={ms.note} />

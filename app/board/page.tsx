@@ -80,7 +80,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
       <Confetti onLoad={searchParams.joined === "1"} />
       <div className="app">
         <header className="appbar">
-          <Link className="mark" href="/board">Winter Arc</Link>
+          <Link className="mark" href="/">Winter Arc</Link>
           <span className="pill">{me ? `#${mine?.rank ?? "–"} · ${first}` : "Admin view"}</span>
         </header>
         <AppTabs rows={rows} meId={me?.id ?? null} events={EVENTS.map((e) => ({ id: e.id, name: e.name, weekend: e.weekend }))} today={todayTab} me={meTab} />
