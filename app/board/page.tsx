@@ -26,9 +26,8 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
   const me = await currentParticipant();
   const admin = isAdmin();
   if (!me?.accepted_at && !admin) redirect("/");
-  const [rows, quote, habits, streaks] = await Promise.all([loadBoard(), quoteOfTheDay(), me ? myHabitLogs(me.id) : null, streakBoard()]);
+  const [rows, quote, habits, streaks, { next: ms }] = await Promise.all([loadBoard(), quoteOfTheDay(), me ? myHabitLogs(me.id) : null, streakBoard(), upcoming()]);
   const mine = rows.find((r) => r.id === me?.id);
-  const { next: ms } = await upcoming();
   const todayPlan = WEEK_PLAN[weekday()];
   const first = me ? displayName(me).split(" ")[0] : "Admin";
   const dosaWall = rows.filter((r) => dosaCount(r.profile) > 0).map((r) => {

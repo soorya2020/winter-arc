@@ -7,6 +7,7 @@ import AuthPopup from "./AuthPopup";
 import OrgAvatar from "@/components/OrgAvatar";
 import HeroFun from "@/components/HeroFun";
 import QuickLog from "@/components/QuickLog";
+import ArenaLink from "@/components/ArenaLink";
 import { myHabitLogs } from "@/lib/habits";
 import { currentParticipant } from "@/lib/auth";
 import { displayName } from "@/lib/db";
@@ -46,7 +47,7 @@ export default async function Home() {
 
           <Countdown to={ms.at} label={ms.label} when={fmtWhen(ms.at, true)} note={ms.note} />
           {me?.accepted_at
-            ? <Link className="cta wide" href="/board">Enter the arena <span>→</span></Link>
+            ? <ArenaLink />
             : me
               ? <AuthPopup label="Claim your spot" title="Claim your spot"><AcceptForm defaultName={me.nickname || me.name} /></AuthPopup>
               : <AuthPopup label="Sign in" title="Members sign in"><LinkForm /></AuthPopup>}
