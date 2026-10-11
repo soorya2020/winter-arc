@@ -48,22 +48,44 @@ export async function pushedPeople(): Promise<Set<string>> {
 
 export type Note = { title: string; body: string; url?: string; tag?: string };
 
-/** Sends to every phone a person turned notifications on for. Returns how many got it. */
-export async function pushTo(participantId: string, note: Note) {
+// Apple's push service rejects placeholder contacts like example.com, so name a real one.
+const subject = () => {
+  const mail = process.env.SMTP_USER?.trim();
+  if (mail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) return `mailto:${mail}`;
+  const host = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  return host ? `https://${host}` : "mailto:winter-arc@winterarc.app";
+};
+
+export type PushResult = { sent: number; phones: number; problem?: string };
+
+/** Sends to every phone a person turned notifications on for, and says why if none got it. */
+export async function pushReport(participantId: string, note: Note): Promise<PushResult> {
   const keys = await pushKeys();
-  if (!keys) return 0;
-  const { data } = await db().from("push_subscriptions").select("*").eq("participant_id", participantId);
-  let ok = 0;
-  for (const s of (data ?? []) as { endpoint: string; p256dh: string; auth: string }[]) {
+  if (!keys) return { sent: 0, phones: 0, problem: "Push keys couldn't be read from the database." };
+  const { data, error } = await db().from("push_subscriptions").select("*").eq("participant_id", participantId);
+  if (error) return { sent: 0, phones: 0, problem: `Couldn't read subscriptions: ${error.message}` };
+  const subs = (data ?? []) as { endpoint: string; p256dh: string; auth: string }[];
+  let sent = 0;
+  let problem: string | undefined;
+  for (const s of subs) {
     try {
       await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(note),
-        { vapidDetails: { subject: "mailto:winter-arc@example.com", ...keys }, TTL: 60 * 60 * 12 });
-      ok++;
+        { vapidDetails: { subject: subject(), ...keys }, TTL: 60 * 60 * 12 });
+      sent++;
     } catch (e) {
-      // The phone unsubscribed or the app was removed: forget it.
-      const code = (e as { statusCode?: number }).statusCode;
-      if (code === 404 || code === 410) await removeSubscription(s.endpoint);
+      const err = e as { statusCode?: number; body?: string; message?: string };
+      const code = err.statusCode;
+      problem = `${code ?? "network"}: ${(err.body || err.message || "").toString().trim().slice(0, 160)}`;
+      console.error("push failed", s.endpoint.slice(0, 60), problem);
+      // 404/410: the phone unsubscribed or the app was removed. 401/403: the subscription was made
+      // with different push keys and can never work. Either way forget it so the phone re-subscribes.
+      if (code === 404 || code === 410 || code === 401 || code === 403) await removeSubscription(s.endpoint);
     }
   }
-  return ok;
+  return { sent, phones: subs.length, problem };
+}
+
+/** Sends to every phone a person turned notifications on for. Returns how many got it. */
+export async function pushTo(participantId: string, note: Note) {
+  return (await pushReport(participantId, note)).sent;
 }
