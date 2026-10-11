@@ -365,6 +365,9 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 :is(.share, .org) .wa:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .share .note { flex-basis: 100%; margin: 0; }
 
+.strip-more { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .75rem; font-size: .9rem; }
+.strip-more span { padding: .3rem .8rem; border: 2px dashed var(--muted); border-radius: 999px; font-weight: 700; font-size: .85rem; color: var(--ink); white-space: nowrap; }
+
 /* home: event chips read as "a · b · c" on wide screens */
 .strip .chip + .chip::before { content: " · "; }
 .why-toggle, .why-more, .m-cta { display: none; }

@@ -10,7 +10,7 @@ import AcceptForm from "./AcceptForm";
 import LinkForm from "./LinkForm";
 import { currentParticipant } from "@/lib/auth";
 import { displayName } from "@/lib/db";
-import { EVENTS, SEASON } from "@/lib/season.ts";
+import { EVENTS, MORE_EVENTS_NOTE, SEASON } from "@/lib/season.ts";
 import { fmtWhen, upcoming } from "@/lib/schedule";
 import { palette } from "@/lib/theme";
 
@@ -42,7 +42,7 @@ export default async function Home() {
             <HeroFun />
           </div>
           <div className="hero-row">
-            <p className="lede">{SEASON.spots} athletes. {EVENTS.length} events. Two weekends. <b>No excuses accepted.</b></p>
+            <p className="lede">{SEASON.spots} athletes. {EVENTS.length} events (for now). Two weekends. <b>No excuses accepted.</b></p>
             <div style={{ display: "grid", gap: "1.25rem" }}>
               <Countdown to={ms.at} label={ms.label} when={when} note={ms.note} then={then ? `${then.label} · ${fmtWhen(then.at)}` : null} />
               {me?.accepted_at
@@ -58,6 +58,7 @@ export default async function Home() {
           {(["running", "strength"] as const).map((w) => (
             <p key={w}><b>{w === "running" ? "Running weekend" : "Strength weekend"}</b>{EVENTS.filter((e) => e.weekend === w).map((e) => <span className="chip" key={e.id}>{e.name}</span>)}</p>
           ))}
+          <p className="strip-more"><span>+ More coming</span>{MORE_EVENTS_NOTE}</p>
         </div>
 
         <div className="rsvp" id="join" data-reveal>

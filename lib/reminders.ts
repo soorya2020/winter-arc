@@ -21,7 +21,7 @@ export async function sendInvite(p: Participant) {
       kicker: "Invite only · 7 spots",
       title: `${first}, you're in the arc`,
       body: [
-        `${esc(first)}, you've been hand-picked for <b>${esc(SEASON.name)}</b>: six events, two weekends and twelve weeks to find out where your limits really are.`,
+        `${esc(first)}, you've been hand-picked for <b>${esc(SEASON.name)}</b>: six events to start (more coming after the group decides), two weekends and twelve weeks to find out where your limits really are.`,
         "Scoring is capped so nobody's specialty runs away with it. Every kilometre and every rep counts.",
         "Tap below to claim your spot and pick your leaderboard name.",
       ],
