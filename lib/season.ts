@@ -131,8 +131,6 @@ export const AWARDS = [
   { title: "Biggest Leap", text: "Most improved from your baseline." },
 ];
 
-export const PRACTICE_KINDS = ["Run", "Strength", "Speed", "Burpees", "Mobility", "Other"];
-
 /** Daily habits in the quick-log button. No points, just streaks. Add one with a single line.
     check: one tap for yes (or "no", which breaks the streak). count: chips that add to today's total.
     training: a logged day also keeps the main 🔥 practice streak alive. Every habit has its own Streaks board, separate from the event ranks. */

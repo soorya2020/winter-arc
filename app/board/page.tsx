@@ -3,7 +3,6 @@ import Link from "next/link";
 import Confetti from "@/components/Confetti";
 import Countdown from "@/components/Countdown";
 import AppTabs from "./AppTabs";
-import PracticeForm from "./PracticeForm";
 import QuoteStrip from "./QuoteStrip";
 import ShareButtons from "./ShareButtons";
 import GearUp from "./GearUp";
@@ -50,7 +49,6 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
           <span className="label">Today</span>
           <h3>{todayPlan.title}</h3>
           <p className="note">{todayPlan.detail}</p>
-          <PracticeForm />
         </div>
       )}
       <div className="card-s">
