@@ -67,6 +67,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
         {me && mine && mine.total > 0 && <li><Link href={`/certificate/${me.id}`}>Your certificate <span>→</span></Link></li>}
         {me && mine && mine.total > 0 && <li><a href={`/api/poster/${me.id}`}>Your poster <span>→</span></a></li>}
         {admin && <li><Link href="/admin">Admin panel <span>→</span></Link></li>}
+        <li><Link href="/">Home page <span>→</span></Link></li>
       </ul>
       {me && mine && <ShareButtons id={me.id} rank={mine.rank} total={mine.total} streak={mine.streak} site={siteUrl()} />}
       {me && <DosaCard total={dosaWall.reduce((n, d) => n + d.count, 0)} wall={dosaWall} offeredToday={me.profile?.dosas?.last === today()} meId={me.id} meName={first} />}

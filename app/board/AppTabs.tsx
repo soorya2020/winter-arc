@@ -5,7 +5,7 @@ import Arena from "./Arena";
 import BoardLive from "./BoardLive";
 import TabBar from "@/components/TabBar";
 
-// The member app: four tabs plus Home (the landing page) in a bottom bar. The hash keeps links like /board#you working.
+// The member app: four tabs in a bottom bar. The hash keeps links like /board#you working.
 
 type Tab = "today" | "ring" | "ranks" | "me";
 const fromHash = (h: string): Tab => (h === "#ring" ? "ring" : h === "#ranks" || h === "#table" ? "ranks" : h === "#me" ? "me" : "today");
