@@ -687,3 +687,18 @@ button.wide, .cta.wide { width: 100%; justify-content: center; }
 .app .unit:first-child b { color: var(--accent); }
 .app .unit span { color: rgb(var(--on-ink-rgb) / .6); font-size: .62rem; }
 .app .count-note { text-align: center; }
+.app .orgs { margin-top: .5rem; }
+.app .orgs h2 { font-size: 2.6rem; }
+.app .org-grid { grid-template-columns: minmax(0, 1fr); }
+.app .org-ava { width: 6.5rem; }
+.app .org h3 { font-size: 1.7rem; }
+.home .hero .cta { margin-top: .25rem; }
+.sheet { border: 0; padding: 0; margin: auto auto 0; width: 100%; max-width: 30rem; max-height: 92dvh; background: var(--paper); color: var(--ink); border-radius: 1.25rem 1.25rem 0 0; }
+.sheet::backdrop { background: rgb(var(--ink-rgb) / .55); }
+.sheet-in { display: grid; gap: 1rem; padding: 1.1rem 16px calc(1.25rem + env(safe-area-inset-bottom, 0px)); }
+.sheet-top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.sheet-top h2 { font-size: 2rem; }
+.sheet .panel h3 { display: none; }
+.sheet .panel, .sheet form.card { border-radius: 1rem; }
+.sheet .grid2 { grid-template-columns: minmax(0, 1fr); }
+@media (prefers-reduced-motion: no-preference) { .sheet[open] { animation: up .3s cubic-bezier(.2,.8,.2,1) both; } }

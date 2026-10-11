@@ -3,16 +3,19 @@ import Countdown from "@/components/Countdown";
 import Confetti from "@/components/Confetti";
 import AcceptForm from "./AcceptForm";
 import LinkForm from "./LinkForm";
+import AuthPopup from "./AuthPopup";
+import OrgAvatar from "@/components/OrgAvatar";
 import { currentParticipant } from "@/lib/auth";
 import { displayName } from "@/lib/db";
 import { EVENTS, SEASON } from "@/lib/season.ts";
 import { fmtWhen, upcoming } from "@/lib/schedule";
+import { palette } from "@/lib/theme";
 
 export const dynamic = "force-dynamic";
 
 const ORGANIZERS = [
-  { tag: "Soorya", wa: "917561071554" },
-  { tag: "Sanat", wa: "917356437300" },
+  { name: "Soorya", wa: "917561071554", kind: "lift" as const, jersey: palette.accent, num: "1", role: "Organizer · built this website", line: "Built the whole site, from the arena to the roasts. Now he has to survive the leaderboard he made." },
+  { name: "Sanat", wa: "917356437300", kind: "run" as const, jersey: palette.jerseys[1], num: "2", role: "Organizer · started it all", line: "Said \"let's make it a competition\". It was supposed to be casual. It ended up being serious stuff like this." },
 ];
 
 export default async function Home() {
@@ -33,23 +36,35 @@ export default async function Home() {
           <p className="hello">{first ? `Hey ${first}` : "By invitation only"}</p>
           <h1>Winter<br /><em>Arc.</em></h1>
           <p className="lede">{SEASON.spots} athletes. {EVENTS.length} events. Two weekends. <b>No excuses.</b></p>
-        </div>
 
-        <div className="card-s">
-          <span className="label">Next up</span>
           <Countdown to={ms.at} label={ms.label} when={fmtWhen(ms.at, true)} note={ms.note} />
-        </div>
-
-        <div id="join">
           {me?.accepted_at
             ? <Link className="cta wide" href="/board">Enter the arena <span>→</span></Link>
             : me
-              ? <><h2 className="tab-h">Claim your spot</h2><AcceptForm defaultName={me.nickname || me.name} /></>
-              : <LinkForm />}
+              ? <AuthPopup label="Claim your spot" title="Claim your spot"><AcceptForm defaultName={me.nickname || me.name} /></AuthPopup>
+              : <AuthPopup label="Sign in" title="Members sign in"><LinkForm /></AuthPopup>}
         </div>
 
+        <section className="orgs" id="organizers">
+          <span className="label">The organizers</span>
+          <h2>Blame <em>these two.</em></h2>
+          <div className="org-grid">
+            {ORGANIZERS.map((o) => (
+              <div className="org" key={o.name}>
+                <div className="org-ava"><OrgAvatar kind={o.kind} jersey={o.jersey} num={o.num} /></div>
+                <div className="org-text">
+                  <h3>{o.name}</h3>
+                  <span className="org-role">{o.role}</span>
+                  <p>{o.line}</p>
+                  <a className="wa" href={`https://wa.me/${o.wa}`} target="_blank" rel="noopener noreferrer">WhatsApp {o.name}</a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <footer className="foot">
-          <span>Questions? WhatsApp {ORGANIZERS.map((o, i) => <span key={o.tag}>{i ? " or " : ""}<a href={`https://wa.me/${o.wa}`} target="_blank" rel="noopener noreferrer">{o.tag}</a></span>)}.</span>
+          <span>Winter Arc · made with love for the crew</span>
           <Link href="/admin">Organizers</Link>
         </footer>
       </div>
