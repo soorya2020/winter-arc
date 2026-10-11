@@ -21,6 +21,10 @@ export type SeasonEvent = {
 
 export const MAX_PER_EVENT = 100;
 
+// The six below are just the opening lineup. More get added after the group
+// talks it through; this line tells visitors that wherever events are listed.
+export const MORE_EVENTS_NOTE = "This is just the opening lineup. More events are coming once the gang decides, and we'll announce them right here.";
+
 export const EVENTS: SeasonEvent[] = [
   {
     id: "long-run",
@@ -121,7 +125,7 @@ export const DRILLS = [
 ];
 
 export const AWARDS = [
-  { title: "Arc Champion", text: "Most points across all six events." },
+  { title: "Arc Champion", text: "Most points across all events." },
   { title: "Iron Lungs", text: "Top score on running weekend." },
   { title: "Steel Core", text: "Top score on strength weekend." },
   { title: "Biggest Leap", text: "Most improved from your baseline." },
