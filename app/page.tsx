@@ -50,7 +50,7 @@ export default async function Home() {
             : me
               ? <AuthPopup label="Claim your spot" title="Claim your spot"><AcceptForm defaultName={me.nickname || me.name} /></AuthPopup>
               : <AuthPopup label="Sign in" title="Members sign in"><LinkForm /></AuthPopup>}
-          {me?.accepted_at && habits && <QuickLog logs={habits.logs} off={me.profile?.habitsOff ?? []} missing={habits.missing} home />}
+          {me?.accepted_at && habits && <QuickLog logs={habits.logs} on={me.profile?.habitsOn ?? null} missing={habits.missing} home />}
         </div>
 
         <section className="orgs" id="organizers">

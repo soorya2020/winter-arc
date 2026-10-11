@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { logHabit, sendRequest, setHabitsOff } from "@/app/actions";
+import { logHabit, sendRequest, setHabitsOn } from "@/app/actions";
 import { HABITS, type Habit } from "@/lib/season.ts";
 import { streak, today } from "@/lib/streak.ts";
 import type { HabitLog } from "@/lib/habits";
@@ -12,10 +12,11 @@ type Op = { add: number } | { set: 0 | 1 | null };
 type Toast = { text: string; id: string; undo?: Op };
 const CLOSED = { open: false, view: "log" as "log" | "pick" | "ask" };
 
-export default function QuickLog({ logs, off: firstOff, missing, home }: { logs: HabitLog[]; off: string[]; missing: boolean; home?: boolean }) {
+// Nobody follows anything by default: the first open asks which streaks this member wants (on = null until they choose).
+export default function QuickLog({ logs, on: firstOn, missing, home }: { logs: HabitLog[]; on: string[] | null; missing: boolean; home?: boolean }) {
   const day = today();
   const [{ open, view }, setSheet] = useState(CLOSED);
-  const [off, setOff] = useState(firstOff);
+  const [on, setOn] = useState(firstOn);
   const [vals, setVals] = useState<Record<string, number | null>>(() =>
     Object.fromEntries(HABITS.map((h) => [h.id, logs.find((l) => l.habit === h.id && l.day === day)?.value ?? null])));
   const [busy, setBusy] = useState<Record<string, string>>({});
@@ -31,7 +32,7 @@ export default function QuickLog({ logs, off: firstOff, missing, home }: { logs:
     return m;
   }, [logs, day]);
 
-  const shown = HABITS.filter((h) => !off.includes(h.id));
+  const shown = HABITS.filter((h) => on?.includes(h.id));
   const left = shown.filter((h) => vals[h.id] == null).length;
   const doneN = shown.length - left;
 
@@ -92,7 +93,7 @@ export default function QuickLog({ logs, off: firstOff, missing, home }: { logs:
     <>
       {home && <button type="button" className="ghost small ask-btn" onClick={() => setSheet({ open: true, view: "ask" })}>💡 Request something new</button>}
       {!open && (
-        <button type="button" className={`fab${home ? " low" : ""}`} aria-label={`Quick log${left && !missing ? `, ${left} left today` : ""}`} aria-expanded={false} onClick={() => setSheet({ open: true, view: "log" })}>
+        <button type="button" className={`fab${home ? " low" : ""}`} aria-label={`Quick log${left && !missing ? `, ${left} left today` : ""}`} aria-expanded={false} onClick={() => setSheet({ open: true, view: on == null ? "pick" : "log" })}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
           {left > 0 && !missing && <span className="fab-badge">{left}</span>}
         </button>
@@ -131,15 +132,15 @@ export default function QuickLog({ logs, off: firstOff, missing, home }: { logs:
                     </div>
                   </div>
                 ))}
-                {!shown.length && <p className="note">All habits are hidden. Tap Pick habits to bring some back.</p>}
+                {!shown.length && <p className="note">You aren't following any streak. Tap Pick streaks to choose some.</p>}
                 <div className="qk-foot">
                   <a href="/board#today" onClick={() => setSheet(CLOSED)}>🏃 Full workout log →</a>
                   <button type="button" onClick={() => setSheet({ open: true, view: "ask" })}>💡 Ask organizers</button>
-                  <button type="button" onClick={() => setSheet({ open: true, view: "pick" })}>Pick habits ⚙</button>
+                  <button type="button" onClick={() => setSheet({ open: true, view: "pick" })}>Pick streaks ⚙</button>
                 </div>
               </>
             )}
-            {view === "pick" && <Pick off={off} onDone={(o) => { if (o) setOff(o); setSheet({ open: true, view: "log" }); }} />}
+            {view === "pick" && <Pick on={on ?? []} first={on == null} onDone={(o) => { if (o) setOn(o); if (o || on != null) setSheet({ open: true, view: "log" }); else setSheet(CLOSED); }} />}
             {view === "ask" && <Ask onBack={() => (home ? setSheet(CLOSED) : setSheet({ open: true, view: "log" }))} />}
           </div>
         </>
@@ -148,30 +149,31 @@ export default function QuickLog({ logs, off: firstOff, missing, home }: { logs:
   );
 }
 
-function Pick({ off, onDone }: { off: string[]; onDone: (off?: string[]) => void }) {
-  const [sel, setSel] = useState(off);
+function Pick({ on, first, onDone }: { on: string[]; first: boolean; onDone: (on?: string[]) => void }) {
+  const [sel, setSel] = useState(on);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const save = async () => {
     setSaving(true); setError("");
-    const r = await setHabitsOff(sel).catch(() => ({ error: "Couldn't save. Check your connection." }) as { error?: string });
+    const r = await setHabitsOn(sel).catch(() => ({ error: "Couldn't save. Check your connection." }) as { error?: string });
     setSaving(false);
     if (r.error) setError(r.error); else onDone(sel);
   };
   return (
     <>
-      <div className="qk-head"><h3>Pick habits</h3><span className="label">Only you see this</span></div>
+      <div className="qk-head"><h3>{first ? "Pick your streaks" : "Your streaks"}</h3><span className="label">Only you see this</span></div>
+      <p className="note">Choose the ones you'll follow every day. Change them any time. Want one that isn't here? Ask the organizers.</p>
       {HABITS.map((h) => (
         <label key={h.id} className="qk-row qk-pick">
           <span className="qk-ic" aria-hidden="true">{h.icon}</span>
           <div className="qk-txt"><b>{h.name}</b></div>
-          <input type="checkbox" checked={!sel.includes(h.id)} onChange={(e) => setSel((s) => (e.target.checked ? s.filter((x) => x !== h.id) : [...s, h.id]))} />
+          <input type="checkbox" checked={sel.includes(h.id)} onChange={(e) => setSel((s) => (e.target.checked ? [...s, h.id] : s.filter((x) => x !== h.id)))} />
         </label>
       ))}
       {error && <p className="err">{error}</p>}
       <div className="qk-actions">
-        <button type="button" className="ghost" onClick={() => onDone()}>Back</button>
-        <button type="button" disabled={saving} aria-busy={saving} onClick={save}>{saving ? "Saving…" : "Save"}</button>
+        <button type="button" className="ghost" onClick={() => onDone()}>{first ? "Later" : "Back"}</button>
+        <button type="button" disabled={saving || (first && !sel.length)} aria-busy={saving} onClick={save}>{saving ? "Saving…" : first ? "Start following" : "Save"}</button>
       </div>
     </>
   );

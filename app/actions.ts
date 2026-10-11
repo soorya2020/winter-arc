@@ -21,7 +21,7 @@ export async function acceptInvite(_: unknown, form: FormData) {
   const password = String(form.get("password") ?? "");
   if (password.length < MIN_PASSWORD) return { error: `Pick a password with at least ${MIN_PASSWORD} characters. You'll use it to sign in.` };
   // Keep what the site itself stored (gear-up progress) when the form saves.
-  const profile = { ...me.profile, ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, habitsOff: me.profile?.habitsOff };
+  const profile = { ...me.profile, ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, habitsOn: me.profile?.habitsOn };
   const missing = missingPersonal(profile);
   if (missing) return { error: missing };
   const { error } = await db().from("participants")
@@ -63,7 +63,7 @@ export async function saveProfile(_: unknown, form: FormData) {
   if (!me?.accepted_at) return { error: "Accept your invite first." };
   const catchphrase = String(form.get("catchphrase") ?? "").trim().slice(0, 80) || null;
   // Keep what the site itself stored (gear-up progress, dosas) when the form saves.
-  const profile = { ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, dosas: me.profile?.dosas, habitsOff: me.profile?.habitsOff };
+  const profile = { ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, dosas: me.profile?.dosas, habitsOn: me.profile?.habitsOn };
   if (profile.rivalId === me.id) delete profile.rivalId;
   const missing = missingPersonal(profile);
   if (missing) return { error: missing };
@@ -216,12 +216,12 @@ export async function logHabit(id: string, op: { add: number } | { set: 0 | 1 | 
   return { value };
 }
 
-/** "Pick habits": the habits this member doesn't want in their quick log. */
-export async function setHabitsOff(off: string[]): Promise<{ ok?: boolean; error?: string }> {
+/** "Pick streaks": the habits this member chose to follow in their quick log. */
+export async function setHabitsOn(on: string[]): Promise<{ ok?: boolean; error?: string }> {
   const me = await currentParticipant();
   if (!me?.accepted_at) return { error: "Sign in first." };
-  const habitsOff = off.filter((id) => HABITS.some((h) => h.id === id));
-  const { error } = await db().from("participants").update({ profile: { ...(me.profile ?? {}), habitsOff } }).eq("id", me.id);
+  const habitsOn = HABITS.filter((h) => on.includes(h.id)).map((h) => h.id);
+  const { error } = await db().from("participants").update({ profile: { ...(me.profile ?? {}), habitsOn } }).eq("id", me.id);
   return error ? { error: "Couldn't save. Try again." } : { ok: true };
 }
 

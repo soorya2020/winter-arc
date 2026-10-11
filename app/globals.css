@@ -752,7 +752,7 @@ button[aria-busy="true"]:disabled { opacity: .8; }
 .qk-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; padding: .3rem .2rem 0; font-size: .82rem; font-weight: 600; }
 .qk-foot a, .qk-foot button { all: unset; cursor: pointer; color: var(--muted); }
 .qk-foot a:focus-visible, .qk-foot button:focus-visible { outline: 3px solid var(--accent); }
-.qk-pick { cursor: pointer; }
+.qk-pick { cursor: pointer; text-transform: none; letter-spacing: normal; font-size: 1rem; font-weight: 400; color: var(--ink); margin: 0; }
 .qk-pick input { width: 1.4rem; height: 1.4rem; accent-color: var(--accent); }
 .qk textarea { width: 100%; box-sizing: border-box; }
 .qk-actions { display: flex; justify-content: flex-end; gap: .5rem; }

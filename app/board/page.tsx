@@ -87,7 +87,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
           <Link className="mark" href="/">Winter Arc</Link>
           <span className="pill">{me ? `#${mine?.rank ?? "–"} · ${first}` : "Admin view"}</span>
         </header>
-        {me && habits && <QuickLog logs={habits.logs} off={me.profile?.habitsOff ?? []} missing={habits.missing} />}
+        {me && habits && <QuickLog logs={habits.logs} on={me.profile?.habitsOn ?? null} missing={habits.missing} />}
         <AppTabs rows={rows} meId={me?.id ?? null} events={EVENTS.map((e) => ({ id: e.id, name: e.name, weekend: e.weekend }))} today={todayTab} me={meTab} />
       </div>
     </>
