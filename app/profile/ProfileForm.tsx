@@ -6,7 +6,7 @@ import type { Profile } from "@/lib/profile.ts";
 
 function Submit() {
   const { pending } = useFormStatus();
-  return <button type="submit" disabled={pending}>{pending ? "Saving…" : "Save my fighter"}</button>;
+  return <button type="submit" disabled={pending} aria-busy={pending}>{pending ? "Saving…" : "Save my fighter"}</button>;
 }
 
 export default function ProfileForm(props: { profile: Profile | null; catchphrase: string | null; rivals: { id: string; name: string }[] }) {

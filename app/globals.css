@@ -706,3 +706,59 @@ button.wide, .cta.wide { width: 100%; justify-content: center; }
 .home .fun--rejected .fun-stage { min-height: 6.5rem; }
 .home .fun--rejected q { font-size: 2.6rem; }
 .home .stamp { font-size: 1.9rem; }
+
+/* Saving spinner: any button with aria-busy shows its own, so only the thing you tapped waits. */
+@keyframes spin { to { transform: rotate(360deg); } }
+button[aria-busy="true"]::before { content: ""; display: inline-block; width: .85em; height: .85em; margin-right: .45em; vertical-align: -.1em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }
+button[aria-busy="true"]:disabled { opacity: .8; }
+
+/* Quick log: floating + button and its bottom sheet */
+.fab { all: unset; box-sizing: border-box; cursor: pointer; position: fixed; z-index: 40; right: max(16px, calc(50% - 15rem + 16px)); bottom: calc(4.9rem + env(safe-area-inset-bottom, 0px)); width: 3.75rem; height: 3.75rem; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; border: 2px solid var(--ink); box-shadow: 0 4px 0 var(--ink); transition: transform .15s; }
+.fab.low { bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px)); }
+.fab:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.fab:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.fab svg { width: 1.75rem; height: 1.75rem; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
+.fab-badge { position: absolute; top: -6px; right: -6px; min-width: 1.4rem; height: 1.4rem; padding: 0 .3rem; box-sizing: border-box; border-radius: 1rem; background: var(--ink); color: var(--on-ink); font-size: .75rem; font-weight: 800; display: grid; place-items: center; border: 2px solid var(--paper); }
+.qk-scrim { position: fixed; inset: 0; z-index: 45; background: rgb(var(--ink-rgb) / .45); }
+.qk { position: fixed; z-index: 50; left: 50%; translate: -50% 0; bottom: 0; width: 100%; max-width: 30rem; max-height: 85dvh; overflow-y: auto; box-sizing: border-box; display: grid; gap: .65rem; padding: .6rem 16px calc(1.2rem + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-top: 2px solid var(--ink); border-radius: 1.4rem 1.4rem 0 0; animation: qk-up .2s ease-out; }
+@keyframes qk-up { from { transform: translateY(40px); opacity: 0; } }
+.qk-x { all: unset; cursor: pointer; position: absolute; top: .7rem; right: 12px; width: 2.5rem; height: 2.5rem; border-radius: 50%; display: grid; place-items: center; background: var(--track); color: var(--ink); }
+.qk-x svg { width: 1.2rem; height: 1.2rem; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; }
+.qk-x:focus-visible { outline: 3px solid var(--accent); }
+.qk-grab { width: 2.75rem; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto .2rem; }
+.qk-head { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; padding-right: 3.5rem; }
+.qk-head h3 { font-size: 1.7rem; line-height: 1; }
+.qk-bar { display: flex; gap: 4px; }
+.qk-bar i { flex: 1; height: 6px; border-radius: 3px; background: var(--track); }
+.qk-bar i.on { background: var(--accent); }
+.qk-row { display: grid; grid-template-columns: 2.25rem minmax(0, 1fr) auto; gap: .6rem; align-items: center; padding: .65rem .75rem; border: 2px solid var(--ink); border-radius: .9rem; }
+.qk-row.done { background: var(--accent-soft); border-color: var(--accent); }
+.qk-ic { font-size: 1.5rem; text-align: center; }
+.qk-txt { display: grid; gap: .1rem; min-width: 0; }
+.qk-txt b { font-size: .98rem; }
+.qk-txt small { font-size: .78rem; color: var(--muted); }
+.qk-row.done .qk-txt small:not(.err) { color: var(--accent); font-weight: 600; }
+.qk-btns { display: flex; gap: .3rem; }
+.qk .chip { all: unset; box-sizing: border-box; cursor: pointer; position: relative; min-width: 2.75rem; min-height: 2.5rem; padding: .4rem .55rem; display: grid; place-items: center; text-align: center; border-radius: .6rem; border: 2px solid var(--ink); background: var(--surface); color: var(--ink); font-weight: 800; font-size: .85rem; white-space: nowrap; }
+.qk .chip.go { background: var(--ink); color: var(--on-ink); }
+.qk .chip.acc { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.qk .chip.ghost { border-color: var(--line); color: var(--muted); }
+.qk .chip:disabled { cursor: default; opacity: .55; }
+.qk .chip[aria-busy="true"] { opacity: 1; color: transparent; }
+.qk .chip[aria-busy="true"]::before { position: absolute; inset: 0; margin: auto; color: var(--ink); }
+.qk .chip.go[aria-busy="true"]::before { color: var(--on-ink); }
+.qk .chip.acc[aria-busy="true"]::before { color: var(--on-accent); }
+.qk .chip:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.qk-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; padding: .3rem .2rem 0; font-size: .82rem; font-weight: 600; }
+.qk-foot a, .qk-foot button { all: unset; cursor: pointer; color: var(--muted); }
+.qk-foot a:focus-visible, .qk-foot button:focus-visible { outline: 3px solid var(--accent); }
+.qk-pick { cursor: pointer; }
+.qk-pick input { width: 1.4rem; height: 1.4rem; accent-color: var(--accent); }
+.qk textarea { width: 100%; box-sizing: border-box; }
+.qk-actions { display: flex; justify-content: flex-end; gap: .5rem; }
+.qk-toast { position: sticky; bottom: 0; z-index: 1; order: 99; box-shadow: 0 -6px 16px rgb(var(--ink-rgb) / .15); display: flex; justify-content: space-between; align-items: center; gap: .75rem; padding: .7rem .9rem; border-radius: .8rem; background: var(--ink); color: var(--on-ink); font-weight: 600; font-size: .9rem; }
+.qk-toast button { all: unset; cursor: pointer; color: var(--accent); font-weight: 800; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; }
+.ask-btn { justify-self: center; }
+.adm-reqs { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .5rem; }
+.adm-reqs li { display: flex; justify-content: space-between; align-items: center; gap: .75rem; padding-top: .5rem; border-top: 1px solid var(--line); }
+.adm-reqs p { margin: 0 0 .15rem; overflow-wrap: anywhere; }

@@ -88,3 +88,24 @@ create table if not exists push_subscriptions (
 alter table push_subscriptions enable row level security;
 create table if not exists app_settings (key text primary key, value text not null);
 alter table app_settings enable row level security;
+
+-- Quick log: one row per member, day and habit (lib/season.ts HABITS) holding the day's total.
+create table if not exists habit_logs (
+  participant_id uuid not null references participants(id) on delete cascade,
+  day date not null,
+  habit text not null,
+  value int not null check (value between 0 and 10000),
+  updated_at timestamptz not null default now(),
+  primary key (participant_id, day, habit)
+);
+alter table habit_logs enable row level security;
+
+-- Requests members send to the organizers from the quick-log button or the home page.
+create table if not exists requests (
+  id bigserial primary key,
+  participant_id uuid references participants(id) on delete set null,
+  text text not null check (char_length(text) between 3 and 300),
+  done boolean not null default false,
+  created_at timestamptz not null default now()
+);
+alter table requests enable row level security;

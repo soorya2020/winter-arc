@@ -6,6 +6,8 @@ import LinkForm from "./LinkForm";
 import AuthPopup from "./AuthPopup";
 import OrgAvatar from "@/components/OrgAvatar";
 import HeroFun from "@/components/HeroFun";
+import QuickLog from "@/components/QuickLog";
+import { myHabitLogs } from "@/lib/habits";
 import { currentParticipant } from "@/lib/auth";
 import { displayName } from "@/lib/db";
 import { EVENTS, SEASON } from "@/lib/season.ts";
@@ -23,6 +25,7 @@ export default async function Home() {
   const me = await currentParticipant().catch(() => null);
   const { next: ms } = await upcoming();
   const first = me ? displayName(me).split(" ")[0] : null;
+  const habits = me?.accepted_at ? await myHabitLogs(me.id).catch(() => null) : null;
 
   return (
     <>
@@ -47,6 +50,7 @@ export default async function Home() {
             : me
               ? <AuthPopup label="Claim your spot" title="Claim your spot"><AcceptForm defaultName={me.nickname || me.name} /></AuthPopup>
               : <AuthPopup label="Sign in" title="Members sign in"><LinkForm /></AuthPopup>}
+          {me?.accepted_at && habits && <QuickLog logs={habits.logs} off={me.profile?.habitsOff ?? []} missing={habits.missing} home />}
         </div>
 
         <section className="orgs" id="organizers">

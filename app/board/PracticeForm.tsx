@@ -6,7 +6,7 @@ import { PRACTICE_KINDS } from "@/lib/season.ts";
 
 function Submit() {
   const { pending } = useFormStatus();
-  return <button type="submit" disabled={pending}>{pending ? "Logging…" : "Log today's session"}</button>;
+  return <button type="submit" disabled={pending} aria-busy={pending}>{pending ? "Logging…" : "Log today's session"}</button>;
 }
 
 export default function PracticeForm() {

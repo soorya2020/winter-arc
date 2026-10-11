@@ -1,14 +1,14 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { addParticipant, addQuote, removeQuote, broadcast, emailInvite, login, removeParticipant, saveResult, sendRemindersNow, testEmail, testPush, saveSchedule, removeSchedule, toggleSchedule, importSeasonDates } from "./actions";
+import { addParticipant, addQuote, removeQuote, broadcast, emailInvite, login, removeParticipant, saveResult, sendRemindersNow, testEmail, testPush, saveSchedule, removeSchedule, toggleSchedule, importSeasonDates, closeRequest } from "./actions";
 
 type Msg = { ok?: string; error?: string } | null;
 const Note = ({ m }: { m: Msg }) => (m?.error ? <p className="err">{m.error}</p> : m?.ok ? <p className="ok">{m.ok}</p> : null);
 
 function Submit({ children }: { children: React.ReactNode }) {
   const { pending } = useFormStatus();
-  return <button type="submit" disabled={pending}>{pending ? "Working…" : children}</button>;
+  return <button type="submit" disabled={pending} aria-busy={pending}>{pending ? "Working…" : children}</button>;
 }
 
 export function LoginForm() {
@@ -49,7 +49,7 @@ export function InviteControls({ id, link, sent, name }: { id: string; link: str
     <div style={{ display: "grid", gap: ".35rem" }}>
       <div style={{ display: "flex", gap: ".4rem", flexWrap: "wrap" }}>
         <a className="btn wa-btn small" href={`https://wa.me/?text=${encodeURIComponent(`Oii ${name.split(" ")[0]} 👀 Winter Arc 2026 thudangaan pokunnu. 7 perkku maathram spot, athil onnu ninakku. Pedichu pinmaaraan pattilla 😤 Six events, two weekends. Claim it: ${link}`)}`} target="_blank" rel="noopener">WhatsApp</a>
-        <button className="ghost small" disabled={pending} onClick={() => start(async () => setM(await emailInvite(id)))}>{pending ? "Sending…" : sent ? "Email again" : "Email"}</button>
+        <button className="ghost small" disabled={pending} aria-busy={pending} onClick={() => start(async () => setM(await emailInvite(id)))}>{pending ? "Sending…" : sent ? "Email again" : "Email"}</button>
         <button className="ghost small" onClick={copy}>Copy link</button>
       </div>
       <Note m={m} />
@@ -64,7 +64,7 @@ export function RemoveButton({ id, name }: { id: string; name: string }) {
   return (
     <div style={{ display: "flex", gap: ".4rem", flexWrap: "wrap", alignItems: "center" }}>
       <span className="note">Remove {name} and their results?</span>
-      <button className="small" style={{ background: "var(--bad)" }} disabled={pending} onClick={() => start(() => removeParticipant(id))}>Yes, remove</button>
+      <button className="small" style={{ background: "var(--bad)" }} disabled={pending} aria-busy={pending} onClick={() => start(() => removeParticipant(id))}>Yes, remove</button>
       <button className="ghost small" onClick={() => setConfirm(false)}>Keep</button>
     </div>
   );
@@ -75,7 +75,7 @@ export function ReminderButton() {
   const [pending, start] = useTransition();
   return (
     <>
-      <button disabled={pending} onClick={() => start(async () => setM(await sendRemindersNow()))}>{pending ? "Sending…" : "Send today's reminder now"}</button>
+      <button disabled={pending} aria-busy={pending} onClick={() => start(async () => setM(await sendRemindersNow()))}>{pending ? "Sending…" : "Send today's reminder now"}</button>
       <Note m={m} />
     </>
   );
@@ -86,7 +86,7 @@ export function TestPushButton() {
   const [pending, start] = useTransition();
   return (
     <>
-      <button className="ghost" disabled={pending} onClick={() => start(async () => setM(await testPush()))}>{pending ? "Sending…" : "Send a test notification"}</button>
+      <button className="ghost" disabled={pending} aria-busy={pending} onClick={() => start(async () => setM(await testPush()))}>{pending ? "Sending…" : "Send a test notification"}</button>
       <Note m={m} />
     </>
   );
@@ -97,7 +97,7 @@ export function TestEmailButton() {
   const [pending, start] = useTransition();
   return (
     <>
-      <button className="ghost" disabled={pending} onClick={() => start(async () => setM(await testEmail()))}>{pending ? "Testing…" : "Send me a test email"}</button>
+      <button className="ghost" disabled={pending} aria-busy={pending} onClick={() => start(async () => setM(await testEmail()))}>{pending ? "Testing…" : "Send me a test email"}</button>
       <Note m={m} />
     </>
   );
@@ -180,7 +180,7 @@ export function Broadcast({ counts, pushOn }: { counts: { accepted: number; pend
           ? <button type="button" disabled={pending || !subject.trim() || !message.trim()} onClick={() => setConfirm(true)}>Send to {n} {n === 1 ? "person" : "people"}</button>
           : <>
               <span className="note">Send "{subject}" to {n} {n === 1 ? "person" : "people"}? This can't be unsent.</span>
-              <button type="button" disabled={pending} onClick={() => run(false)} style={{ background: "var(--accent)" }}>{pending ? "Sending…" : "Yes, send it"}</button>
+              <button type="button" disabled={pending} aria-busy={pending} onClick={() => run(false)} style={{ background: "var(--accent)" }}>{pending ? "Sending…" : "Yes, send it"}</button>
               <button type="button" className="ghost" onClick={() => setConfirm(false)}>Cancel</button>
             </>}
         {!confirm && channel === "email" && <button type="button" className="ghost" disabled={pending || !subject.trim() || !message.trim()} onClick={() => run(true)}>Send me a test</button>}
@@ -208,7 +208,12 @@ export function QuoteForm() {
 
 export function RemoveQuote({ id }: { id: number }) {
   const [pending, start] = useTransition();
-  return <button className="ghost small" disabled={pending} onClick={() => start(() => removeQuote(id))}>Remove</button>;
+  return <button className="ghost small" disabled={pending} aria-busy={pending} onClick={() => start(() => removeQuote(id))}>Remove</button>;
+}
+
+export function CloseRequest({ id }: { id: number }) {
+  const [pending, start] = useTransition();
+  return <button className="ghost small" disabled={pending} aria-busy={pending} onClick={() => start(() => closeRequest(id))}>Done</button>;
 }
 
 export function ScheduleForm({ edit }: { edit?: { id: number; title: string; date: string; time: string; note: string | null; on_home: boolean } }) {
@@ -240,9 +245,9 @@ export function ScheduleActions({ id, onHome }: { id: number; onHome: boolean })
   const [pending, start] = useTransition();
   return (
     <>
-      <button type="button" className="ghost small" disabled={pending} onClick={() => start(() => toggleSchedule(id, !onHome))}>{onHome ? "Hide from home" : "Show on home"}</button>
+      <button type="button" className="ghost small" disabled={pending} aria-busy={pending} onClick={() => start(() => toggleSchedule(id, !onHome))}>{onHome ? "Hide from home" : "Show on home"}</button>
       {confirm
-        ? <button type="button" className="small" style={{ background: "var(--bad)" }} disabled={pending} onClick={() => start(() => removeSchedule(id))}>Yes, delete</button>
+        ? <button type="button" className="small" style={{ background: "var(--bad)" }} disabled={pending} aria-busy={pending} onClick={() => start(() => removeSchedule(id))}>Yes, delete</button>
         : <button type="button" className="ghost small" onClick={() => setConfirm(true)}>Delete</button>}
     </>
   );
@@ -253,7 +258,7 @@ export function ImportSeasonDates() {
   const [pending, start] = useTransition();
   return (
     <>
-      <button type="button" className="ghost" disabled={pending} onClick={() => start(async () => setM(await importSeasonDates()))}>{pending ? "Copying…" : "Start from these dates"}</button>
+      <button type="button" className="ghost" disabled={pending} aria-busy={pending} onClick={() => start(async () => setM(await importSeasonDates()))}>{pending ? "Copying…" : "Start from these dates"}</button>
       <Note m={m} />
     </>
   );

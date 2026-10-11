@@ -8,7 +8,8 @@ import { EVENTS } from "@/lib/season.ts";
 import { formatValue, points } from "@/lib/scoring.ts";
 import { loadBoard } from "@/lib/board";
 import { allQuotes, quoteOfTheDay } from "@/lib/quotes";
-import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell, TestEmailButton, TestPushButton, ScheduleForm, ScheduleActions, ImportSeasonDates } from "./ui";
+import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell, TestEmailButton, TestPushButton, ScheduleForm, ScheduleActions, ImportSeasonDates, CloseRequest } from "./ui";
+import { HABITS_SQL, openRequests } from "@/lib/habits";
 import { logout } from "./actions";
 import { passwordColumnMissing, setupProblems } from "@/lib/health";
 import { DEFAULTS, SCHEDULE_SQL, allScheduled, fmtWhen, scheduleMissing, upcoming } from "@/lib/schedule";
@@ -77,6 +78,7 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
   }
   const accepted = people.filter((p) => p.accepted_at);
   const [noPush, pushOn] = tab === "people" || tab === "broadcast" ? await Promise.all([pushMissing(), pushedPeople().catch(() => new Set<string>())]) : [false, new Set<string>()];
+  const requests = tab === "people" ? await openRequests() : { list: [], missing: false };
   const counts = { accepted: accepted.length, invited: people.filter((p) => !p.accepted_at && p.invited_at).length, waiting: people.filter((p) => !p.invited_at).length };
 
   return (
@@ -108,6 +110,29 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
             <div><b>{counts.invited}</b><span>Invited</span></div>
             <div><b>{counts.waiting}</b><span>Not sent</span></div>
           </div>
+          {requests.missing && (
+            <div className="panel adm-card adm-alert">
+              <b>Quick log and requests need a database update</b>
+              <p className="note">Members' floating + button (daily habits and requests to you) needs two new tables. In Supabase, open SQL Editor, paste this and press Run:</p>
+              <code className="adm-code">{HABITS_SQL}</code>
+            </div>
+          )}
+          {requests.list.length > 0 && (
+            <div className="panel adm-card">
+              <b>Requests from members ({requests.list.length})</b>
+              <ul className="adm-reqs">
+                {requests.list.map((r) => {
+                  const who = people.find((p) => p.id === r.participant_id);
+                  return (
+                    <li key={r.id}>
+                      <div><p>{r.text}</p><span className="note">{who ? displayName(who) : "Someone"} · {new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: TZ })}</span></div>
+                      <CloseRequest id={r.id} />
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
           <details className="adm-fold">
             <summary>+ Add an invitee</summary>
             <AddForm />
