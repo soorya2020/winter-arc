@@ -785,3 +785,16 @@ button[aria-busy="true"]:disabled { opacity: .8; }
 .streak-list .cur { font-family: var(--display); font-size: 1.9rem; line-height: 1; }
 .streak-list .cur i { font-style: normal; font-size: 1.2rem; }
 .streak-list li.me .cur { color: var(--accent); }
+
+/* Loading: Enter the arena reacts on tap, and the arena shows a grey skeleton until it's ready. */
+.cta[aria-busy="true"] { pointer-events: none; opacity: .85; }
+.cta[aria-busy="true"]::before, .spinner { content: ""; display: inline-block; width: .9em; height: .9em; margin-right: .5em; vertical-align: -.12em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes sk-pulse { 50% { opacity: .45; } }
+.sk { display: block; background: var(--track); border-radius: .5rem; animation: sk-pulse 1.2s ease-in-out infinite; }
+.sk-pill { width: 6rem; height: .9rem; }
+.sk-stat { height: 4.6rem; border-radius: 1rem; padding: 0 !important; background: var(--track) !important; }
+.sk-line { height: .75rem; }
+.sk-title { height: 1.9rem; width: 60%; }
+.sk-block { height: 4.2rem; }
+.w30 { width: 30%; } .w80 { width: 80%; }
+.sk-note { margin: 0; text-align: center; color: var(--muted); font-weight: 600; font-size: .9rem; }
