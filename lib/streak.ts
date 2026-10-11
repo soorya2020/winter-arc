@@ -11,7 +11,7 @@ function prevDay(day: string) {
   return d.toISOString().slice(0, 10);
 }
 
-/** Consecutive days with a logged session, ending today (or yesterday if today isn't logged yet). */
+/** Consecutive logged days, ending today (or yesterday if today isn't logged yet). */
 export function streak(days: string[], now = new Date()) {
   const set = new Set(days);
   let d = today(now);

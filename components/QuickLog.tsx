@@ -134,7 +134,6 @@ export default function QuickLog({ logs, on: firstOn, missing, home }: { logs: H
                 ))}
                 {!shown.length && <p className="note">You aren't following any streak. Tap Pick streaks to choose some.</p>}
                 <div className="qk-foot">
-                  <a href="/board#today" onClick={() => setSheet(CLOSED)}>🏃 Full workout log →</a>
                   <button type="button" onClick={() => setSheet({ open: true, view: "ask" })}>💡 Ask organizers</button>
                   <button type="button" onClick={() => setSheet({ open: true, view: "pick" })}>Pick streaks ⚙</button>
                 </div>

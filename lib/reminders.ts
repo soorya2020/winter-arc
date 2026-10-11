@@ -47,11 +47,11 @@ export async function sendDailyReminders(people: Participant[]) {
     const row = board.find((r) => r.id === p.id);
     const name = displayName(p).split(" ")[0];
     // Phone notification first; email only for people who haven't turned notifications on.
-    const streak = row?.streak ? `${row.streak}-day streak, keep it alive.` : "Streak at zero. One session starts it again.";
+    const streak = row?.streak ? `${row.streak}-day streak, keep it alive.` : "Streak at zero. Tap + and log your streaks to start it again.";
     if (await pushTo(p.id, { title: `Today: ${plan.title}`, body: `${name}, ${plan.detail} ${streak} ${days} days to ${ms.label.toLowerCase()}.`, url: "/board#you", tag: "daily" }).catch(() => 0)) { pushed++; continue; }
     const streakLine = row?.streak
-      ? `You're on a <b>${row.streak}-day streak</b>. Log today's session to keep it alive.`
-      : "Your streak is at zero. One session today starts it again.";
+      ? `You're on a <b>${row.streak}-day streak</b>. Tap + in the app and log your streaks to keep it alive.`
+      : "Your streak is at zero. Tap + in the app and log your streaks to start it again.";
     try {
       await sendMail(
         p.email,
