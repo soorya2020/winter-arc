@@ -12,7 +12,16 @@ import { alpha, figure, palette } from "@/lib/theme";
 // results, lands in a timestamped live feed next to the ring.
 
 const JERSEYS = palette.jerseys;
-const QUICK = ["Vidilla machane 💪", "Naale muthal, alle? 😂", "Ninte streak evide?", "Pedikkanda, njan undu", "Ithokke entha!", "Plank-il urangalle"];
+const QUICK = [
+  // hype
+  "Ee winter namukku ullathaa 🔥", "Thee paarum machane 🚀", "Full power, no break ⚡", "Inn PR adikkum 💥", "Nammal vere level aanu 😎",
+  // taunt
+  "Leaderboard-il ninne kaanunilla 👀", "Ninte streak evide? 🫠", "Sofa-yil ninnu ezhunnelkk 🛋️", "Ithrem mathiyo? 😏", "Points okke ente kayyil 😤",
+  // excuse roast
+  "Naale muthal, alle? 😂", "Mazha aanu, pinne ennu 🌧️", "Kaal vedana, alle? 🙄", "Gym adachirunnu, sure 🤡", "Busy aayirunnu… Insta-yil 📱",
+  // respect
+  "Sammathichu mone 🙌", "Poli saadhanam 🔥", "Ithaanu consistency 👏", "Ninne kandu padikkanam 💯", "Legend vibes 👑",
+];
 const SKINS = figure.skins;
 const HITS = ["Smash", "Boom", "Ouch", "Too easy", "Wham"];
 
