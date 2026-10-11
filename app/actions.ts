@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { currentParticipant, participantCookie } from "@/lib/auth";
-import { pushKeys, pushTo, removeSubscription, saveSubscription, type PushSub } from "@/lib/push";
+import { pushKeys, pushReport, removeSubscription, saveSubscription, type PushSub } from "@/lib/push";
 import { cookies } from "next/headers";
 import { checkPassword, hashPassword, MIN_PASSWORD } from "@/lib/password";
 import { db, type Participant } from "@/lib/db";
@@ -163,11 +163,15 @@ async function setGear(key: "installedAt" | "lockedInAt") {
 /** Called when the member opens Winter Arc from their home screen. */
 export async function markInstalled() { await setGear("installedAt"); }
 
-export async function buzzMe(): Promise<{ ok?: boolean; error?: string }> {
+export async function buzzMe(): Promise<{ ok?: boolean; error?: string; resubscribe?: boolean }> {
   const me = await currentParticipant();
   if (!me?.accepted_at) return { error: "Sign in first." };
-  const n = await pushTo(me.id, { title: "Bzzz 🔔 Winter Arc", body: "Test buzz. If you can read this, you're wired in. Tap Got it.", url: "/board#gear", tag: "buzz" }).catch(() => 0);
-  return n ? { ok: true } : { error: "Couldn't reach your phone. Turn notifications off and on again." };
+  const r = await pushReport(me.id, { title: "Bzzz 🔔 Winter Arc", body: "Test buzz. If you can read this, you're wired in. Tap Got it.", url: "/board#gear", tag: "buzz" })
+    .catch((e) => ({ sent: 0, phones: 0, problem: e instanceof Error ? e.message : "unknown error" }));
+  if (r.sent) return { ok: true };
+  // No working subscription on file: the phone should quietly sign up again and retry.
+  if (!r.phones || /^(404|410|401|403):/.test(r.problem ?? "")) return { error: "Couldn't reach your phone.", resubscribe: true };
+  return { error: `Couldn't reach your phone (${r.problem}). Try again in a minute.` };
 }
 
 export async function lockIn() { await setGear("lockedInAt"); }

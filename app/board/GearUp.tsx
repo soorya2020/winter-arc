@@ -18,6 +18,25 @@ const toKey = (b64: string) => {
   const raw = atob((b64 + "=".repeat((4 - (b64.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/"));
   return Uint8Array.from(raw, (c) => c.charCodeAt(0));
 };
+const sameKey = (sub: PushSubscription, key: string) => {
+  const have = sub.options?.applicationServerKey;
+  if (!have) return true;
+  const a = new Uint8Array(have), b = toKey(key);
+  return a.length === b.length && a.every((x, i) => x === b[i]);
+};
+
+/** Makes sure this phone has a subscription made with the site's current key and that the site has it on file. */
+async function connect(fresh = false): Promise<{ ok?: boolean; error?: string }> {
+  const key = await pushPublicKey();
+  if (!key) return { error: "Notifications aren't switched on for the site yet. Ping the organizer." };
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if (sub && (fresh || !sameKey(sub, key))) { await sub.unsubscribe().catch(() => {}); sub = null; }
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toKey(key) });
+  const r = await subscribePush(JSON.parse(JSON.stringify(sub)));
+  if (r.error) { await sub.unsubscribe().catch(() => {}); return r; }
+  return { ok: true };
+}
 const cheer = () => window.dispatchEvent(new Event("confetti"));
 
 export default function GearUp({ installed: wasInstalled, lockedIn: wasLocked, name }: { installed: boolean; lockedIn: boolean; name: string }) {
@@ -51,6 +70,8 @@ export default function GearUp({ installed: wasInstalled, lockedIn: wasLocked, n
         const reg = await navigator.serviceWorker.register("/sw.js").catch(() => null);
         const sub = reg && (await reg.pushManager.getSubscription());
         setPush(sub ? "on" : "off");
+        // Re-send the phone's subscription so the site always has it, and renew it if the site's key changed.
+        if (sub && Notification.permission === "granted") connect().then((r) => { if (r.error) setPush("off"); }).catch(() => {});
       }
       setReady(true);
     })();
@@ -72,14 +93,10 @@ export default function GearUp({ installed: wasInstalled, lockedIn: wasLocked, n
   const allow = async () => {
     setBusy(true); setMsg(null);
     try {
-      const key = await pushPublicKey();
-      if (!key) { setMsg("Notifications aren't switched on for the site yet. Ping the organizer."); return; }
       const perm = await Notification.requestPermission();
       if (perm !== "granted") { setPush(perm === "denied" ? "blocked" : "off"); return; }
-      const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toKey(key) });
-      const r = await subscribePush(JSON.parse(JSON.stringify(sub)));
-      if (r.error) { setMsg(r.error); await sub.unsubscribe(); return; }
+      const r = await connect();
+      if (r.error) { setMsg(r.error); return; }
       setPush("on"); cheer();
     } catch {
       setMsg("Your phone said no. Try again, or allow notifications for this site in settings.");
@@ -87,7 +104,13 @@ export default function GearUp({ installed: wasInstalled, lockedIn: wasLocked, n
   };
   const buzz = async () => {
     setBusy(true); setMsg(null);
-    const r = await buzzMe();
+    let r = await buzzMe();
+    if (r.resubscribe) {
+      // The site lost this phone (or it was signed up with old keys): sign it up again and retry once.
+      const c = await connect(true).catch(() => ({ error: "Your phone said no. Allow notifications for this site in settings." }));
+      r = c.error ? c : await buzzMe();
+      if (r.resubscribe) r = { error: "Couldn't reach your phone. Remove Winter Arc from your home screen, add it again, then retry." };
+    }
     setBusy(false);
     if (r.error) setMsg(r.error); else { setBuzzed(true); setMsg("Buzz sent. Felt it? Tap Got it."); }
   };

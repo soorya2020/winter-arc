@@ -6,7 +6,7 @@ import { sendBroadcast, sendDailyReminders, sendInvite, type Audience } from "@/
 import { EVENTS } from "@/lib/season.ts";
 import { mailCheck, mailError } from "@/lib/email";
 import { DEFAULTS } from "@/lib/schedule";
-import { pushTo, pushedPeople } from "@/lib/push";
+import { pushReport, pushTo, pushedPeople } from "@/lib/push";
 import { parseValue, points } from "@/lib/scoring.ts";
 
 type Msg = { ok?: string; error?: string } | null;
@@ -101,8 +101,12 @@ export async function testPush(): Promise<Msg> {
   const ids = [...(await pushedPeople().catch(() => new Set<string>()))];
   if (!ids.length) return { error: "Nobody has turned on notifications yet. Each member taps Turn on in their arena page." };
   let n = 0;
-  for (const id of ids) n += (await pushTo(id, { title: "Winter Arc test 🔔", body: "If you see this, daily reminders will reach you here.", url: "/board", tag: "test" })) ? 1 : 0;
-  return { ok: `Sent a test notification to ${n} of ${ids.length} people.` };
+  let problem: string | undefined;
+  for (const id of ids) {
+    const r = await pushReport(id, { title: "Winter Arc test 🔔", body: "If you see this, daily reminders will reach you here.", url: "/board", tag: "test" });
+    if (r.sent) n++; else problem ??= r.problem;
+  }
+  return { ok: `Sent a test notification to ${n} of ${ids.length} people.${problem ? ` Push service said ${problem}` : ""}` };
 }
 
 export async function testEmail(): Promise<Msg> {
