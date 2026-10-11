@@ -77,6 +77,8 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
 
   return (
     <>
+      {/* A fresh open of the app always starts on Home; Enter the arena (or a notification link) comes back here. */}
+      <script dangerouslySetInnerHTML={{ __html: `try{if(!sessionStorage.getItem("wa_home")&&!location.hash&&!location.search)location.replace("/")}catch(e){}` }} />
       <Confetti onLoad={searchParams.joined === "1"} />
       <div className="app">
         <header className="appbar">

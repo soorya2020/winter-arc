@@ -26,6 +26,8 @@ export default async function Home() {
 
   return (
     <>
+      {/* Remember Home was seen this session, so Enter the arena isn't bounced back here. */}
+      <script dangerouslySetInnerHTML={{ __html: `try{sessionStorage.setItem("wa_home","1")}catch(e){}` }} />
       <Confetti onLoad={!!me && !me.accepted_at} />
       <div className="app home">
         <header className="appbar">
