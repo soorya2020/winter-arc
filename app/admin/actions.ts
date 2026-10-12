@@ -103,7 +103,7 @@ export async function testPush(): Promise<Msg> {
   let n = 0;
   let problem: string | undefined;
   for (const id of ids) {
-    const r = await pushReport(id, { title: "Winter Arc test 🔔", body: "If you see this, daily reminders will reach you here.", url: "/board", tag: "test" });
+    const r = await pushReport(id, { title: "Winter Arc test 🔔", body: "If you see this, daily reminders will reach you here.", url: "/board#today", tag: "test" });
     if (r.sent) n++; else problem ??= r.problem;
   }
   return { ok: `Sent a test notification to ${n} of ${ids.length} people.${problem ? ` Push service said ${problem}` : ""}` };
@@ -169,7 +169,7 @@ export async function broadcast(audience: Audience, subject: string, message: st
       const on = await pushedPeople().catch(() => new Set<string>());
       const body = message.replace(/\s+/g, " ").slice(0, 180);
       const inGroup = people.filter((p) => audience === "all" ? true : audience === "accepted" ? !!p.accepted_at : !p.accepted_at);
-      for (const p of inGroup.filter((x) => on.has(x.id))) if (await pushTo(p.id, { title: subject, body, url: "/board", tag: `msg-${Date.now()}` })) pushed++;
+      for (const p of inGroup.filter((x) => on.has(x.id))) if (await pushTo(p.id, { title: subject, body, url: "/board#today", tag: `msg-${Date.now()}` })) pushed++;
       const reached = new Set(inGroup.filter((x) => on.has(x.id)).map((x) => x.id));
       people = people.filter((p) => !reached.has(p.id));
     }
