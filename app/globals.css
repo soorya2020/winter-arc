@@ -742,6 +742,8 @@ button[aria-busy="true"]:disabled { opacity: .8; }
 .qk-txt small { font-size: .78rem; color: var(--muted); }
 .qk-row.done .qk-txt small:not(.err) { color: var(--accent); font-weight: 600; }
 .qk-btns { display: flex; gap: .3rem; }
+.qk-row.three .qk-btns { grid-column: 2 / -1; }
+.qk-row.three .qk-btns .chip { flex: 1; }
 .qk .chip { all: unset; box-sizing: border-box; cursor: pointer; position: relative; min-width: 2.75rem; min-height: 2.5rem; padding: .4rem .55rem; display: grid; place-items: center; text-align: center; border-radius: .6rem; border: 2px solid var(--ink); background: var(--surface); color: var(--ink); font-weight: 800; font-size: .85rem; white-space: nowrap; }
 .qk .chip.go { background: var(--ink); color: var(--on-ink); }
 .qk .chip.acc { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }

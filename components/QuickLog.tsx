@@ -77,7 +77,7 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
 
   const add = (h: Habit & { kind: "count" }, n: number) =>
     run(h, `+${n}`, { add: n }, (vals[h.id] ?? 0) + n, (v) => `+${n} ${h.unit} · ${v ?? 0} today`, { add: -n });
-  const SAY = { yes: (h: Habit) => `${h.name} logged. Keep going.`, rest: () => "Rest day logged. Your streak keeps going.", no: (h: Habit) => `${h.name}: slipped today. Day 1 starts tomorrow.` };
+  const SAY = { yes: (h: Habit) => `${h.name} logged. Keep going.`, rest: () => "Rest day logged. Your streak keeps going.", no: (h: Habit) => `${h.name}: ${h.kind === "check" && h.no ? h.no.toLowerCase() : "slipped"} today. Day 1 starts tomorrow.` };
   const check = (h: Habit & { kind: "check" }, key: "yes" | "rest" | "no") => {
     const v = ({ yes: 1, rest: 2, no: 0 } as const)[key];
     return run(h, key, { set: v }, v, () => SAY[key](h), { set: vals[h.id] as 0 | 1 | 2 | null });
@@ -95,7 +95,7 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
       if (v !== 0 && h.claim && claims[h.id]) return `Day ${s} · counting every day`;
       if (v === 1) return `Day ${s} · ${h.no ? "clean" : "done"} today ✓`;
       if (v === 2) return `Day ${s} · rest day ✓`;
-      if (v === 0) return "Slipped today. Day 1 starts tomorrow.";
+      if (v === 0) return `${h.no ?? "Slipped"} today. Day 1 starts tomorrow.`;
       return s ? `Day ${s}` : "Start today";
     }
     const best = Math.max(past[h.id].best, v ?? 0);
@@ -129,7 +129,7 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
                 <div className="qk-bar">{shown.map((h, i) => <i key={h.id} className={i < doneN ? "on" : ""} />)}</div>
                 {missing && <p className="err">Quick log needs a one-time database update. Ask the organizer to run it from the admin panel.</p>}
                 {shown.map((h) => (
-                  <div key={h.id} className={`qk-row${(vals[h.id] != null || auto(h)) && !(h.kind === "check" && vals[h.id] === 0) ? " done" : ""}`}>
+                  <div key={h.id} className={`qk-row${h.kind === "check" && h.rest && h.no && vals[h.id] == null ? " three" : ""}${(vals[h.id] != null || auto(h)) && !(h.kind === "check" && vals[h.id] === 0) ? " done" : ""}`}>
                     <span className="qk-ic" aria-hidden="true">{h.icon}</span>
                     <div className="qk-txt">
                       <b>{h.name}</b><small>{sub(h)}</small>{err[h.id] && <small className="err">{err[h.id]}</small>}
@@ -150,7 +150,7 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
                         : <button type="button" className="chip ghost" disabled={!!busy[h.id]} aria-busy={!!busy[h.id]} onClick={() => run(h, "undo", { set: null }, null)}>Undo</button>)}
                     </div>
                     {editing === h.id && (
-                      <Claim id={h.id} name={h.name} claim={claims[h.id]} onDone={(c) => {
+                      <Claim id={h.id} name={h.name} no={h.kind === "check" && h.no ? h.no : "Slipped"} claim={claims[h.id]} onDone={(c) => {
                         setEditing("");
                         if (c !== undefined) setClaims(({ [h.id]: _, ...rest }) => (c ? { ...rest, [h.id]: c } : rest));
                       }} />
@@ -173,7 +173,7 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
   );
 }
 
-function Claim({ id, name, claim, onDone }: { id: string; name: string; claim?: StreakClaim; onDone: (c?: StreakClaim | null) => void }) {
+function Claim({ id, name, no, claim, onDone }: { id: string; name: string; no: string; claim?: StreakClaim; onDone: (c?: StreakClaim | null) => void }) {
   const [days, setDays] = useState(claim ? String(claim.days) : "");
   const [saving, setSaving] = useState("");
   const [error, setError] = useState("");
@@ -187,7 +187,7 @@ function Claim({ id, name, claim, onDone }: { id: string; name: string; claim?: 
   const ok = Number.isInteger(n) && n >= 1 && n <= 3650;
   return (
     <form className="qk-claim" onSubmit={(e) => { e.preventDefault(); if (ok) save(n); }}>
-      <label htmlFor={`claim-${id}`}>How many days clean are you, counting today? {name} will keep counting up every day from there. Tap Slipped if you slip.</label>
+      <label htmlFor={`claim-${id}`}>How many days clean are you, counting today? {name} will keep counting up every day from there. Tap {no} if you slip.</label>
       <div className="qk-claim-row">
         <input id={`claim-${id}`} type="number" inputMode="numeric" min={1} max={3650} value={days} onChange={(e) => setDays(e.target.value)} placeholder="Days" autoFocus />
         <button type="submit" className="chip acc" disabled={!ok || !!saving} aria-busy={saving === "save"}>Save</button>
