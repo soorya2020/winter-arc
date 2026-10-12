@@ -178,7 +178,7 @@ export async function offerDosa(kind: DosaKind): Promise<{ ok?: boolean; error?:
 }
 
 /** Quick log: add to a count habit (negative undoes), or set a check habit to 1 (yes) / 0 (no). null clears today. */
-export async function logHabit(id: string, op: { add: number } | { set: 0 | 1 | null }): Promise<{ value?: number | null; error?: string }> {
+export async function logHabit(id: string, op: { add: number } | { set: 0 | 1 | 2 | null }): Promise<{ value?: number | null; error?: string }> {
   const me = await currentParticipant();
   if (!me?.accepted_at) return { error: "Sign in first." };
   const habit = HABITS.find((h) => h.id === id);
@@ -192,6 +192,7 @@ export async function logHabit(id: string, op: { add: number } | { set: 0 | 1 | 
     value = Math.min(10000, Math.max(0, (data?.value ?? 0) + op.add)) || null;
   } else {
     if (habit.kind !== "check") return { error: "That habit counts reps." };
+    if ((op.set === 2 && !habit.rest) || (op.set === 0 && !habit.no)) return { error: "That option isn't available for this habit." };
     value = op.set;
   }
   const { error } = value == null
@@ -237,7 +238,7 @@ export async function setStreakClaim(id: string, days: number): Promise<{ ok?: b
   const me = await currentParticipant();
   if (!me?.accepted_at) return { error: "Sign in first." };
   const habit = HABITS.find((h) => h.id === id);
-  if (!habit || habit.kind !== "check") return { error: "That habit doesn't take a starting streak." };
+  if (!habit || habit.kind !== "check" || !habit.claim) return { error: "That habit doesn't take a starting streak." };
   if (!Number.isInteger(days) || days < 0 || days > 3650) return { error: "Enter a number of days between 0 and 3650." };
   const habitClaims = { ...(me.profile?.habitClaims ?? {}) };
   if (days) habitClaims[id] = { days, on: today() }; else delete habitClaims[id];

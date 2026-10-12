@@ -8,7 +8,7 @@ import type { HabitLog } from "@/lib/habits";
 // The floating + button: one tap opens today's habits, one more logs. Each button shows its own
 // spinner while it saves; nothing else on the page waits. Also where members ask the organizers for something.
 
-type Op = { add: number } | { set: 0 | 1 | null };
+type Op = { add: number } | { set: 0 | 1 | 2 | null };
 type Toast = { text: string; id: string; undo?: Op };
 const CLOSED = { open: false, view: "log" as "log" | "pick" | "ask" };
 
@@ -39,7 +39,7 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
 
   const shown = HABITS.filter((h) => on?.includes(h.id));
   // A check habit with a starting streak counts by itself: nothing to log unless they slip.
-  const auto = (h: Habit) => h.kind === "check" && !!claims[h.id] && vals[h.id] !== 0;
+  const auto = (h: Habit) => h.kind === "check" && !!h.claim && !!claims[h.id] && vals[h.id] !== 0;
   const left = shown.filter((h) => vals[h.id] == null && !auto(h)).length;
   const doneN = shown.length - left;
 
@@ -55,7 +55,7 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
     const v = vals[h.id];
     if (h.kind === "check" && v === 0) return 0;
     const good = v ? [...past[h.id].days, day] : past[h.id].days;
-    return streak(h.kind === "check" ? countedDays(good, past[h.id].slips, claims[h.id]) : good);
+    return streak(h.kind === "check" ? countedDays(good, past[h.id].slips, h.claim ? claims[h.id] : null) : good);
   };
 
   async function run(h: Habit, key: string, op: Op, next: number | null, say?: (v: number | null) => string, undo?: Op) {
@@ -77,8 +77,11 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
 
   const add = (h: Habit & { kind: "count" }, n: number) =>
     run(h, `+${n}`, { add: n }, (vals[h.id] ?? 0) + n, (v) => `+${n} ${h.unit} · ${v ?? 0} today`, { add: -n });
-  const check = (h: Habit & { kind: "check" }, yes: boolean) =>
-    run(h, yes ? "yes" : "no", { set: yes ? 1 : 0 }, yes ? 1 : 0, () => (yes ? `${h.name} logged. Keep going.` : `${h.name}: slipped today. Day 1 starts tomorrow.`), { set: vals[h.id] as 0 | 1 | null });
+  const SAY = { yes: (h: Habit) => `${h.name} logged. Keep going.`, rest: () => "Rest day logged. Your streak keeps going.", no: (h: Habit) => `${h.name}: slipped today. Day 1 starts tomorrow.` };
+  const check = (h: Habit & { kind: "check" }, key: "yes" | "rest" | "no") => {
+    const v = ({ yes: 1, rest: 2, no: 0 } as const)[key];
+    return run(h, key, { set: v }, v, () => SAY[key](h), { set: vals[h.id] as 0 | 1 | 2 | null });
+  };
   const undo = (t: Toast) => {
     const h = HABITS.find((x) => x.id === t.id)!;
     const cur = vals[h.id];
@@ -89,8 +92,9 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
   const sub = (h: Habit) => {
     const v = vals[h.id], s = streakOf(h);
     if (h.kind === "check") {
-      if (v !== 0 && claims[h.id]) return `Day ${s} · counting every day`;
-      if (v === 1) return `Day ${s} · clean today ✓`;
+      if (v !== 0 && h.claim && claims[h.id]) return `Day ${s} · counting every day`;
+      if (v === 1) return `Day ${s} · ${h.no ? "clean" : "done"} today ✓`;
+      if (v === 2) return `Day ${s} · rest day ✓`;
       if (v === 0) return "Slipped today. Day 1 starts tomorrow.";
       return s ? `Day ${s}` : "Start today";
     }
@@ -129,18 +133,19 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
                     <span className="qk-ic" aria-hidden="true">{h.icon}</span>
                     <div className="qk-txt">
                       <b>{h.name}</b><small>{sub(h)}</small>{err[h.id] && <small className="err">{err[h.id]}</small>}
-                      {h.kind === "check" && editing !== h.id && <button type="button" className="qk-link" onClick={() => setEditing(h.id)}>{claims[h.id] ? "Edit starting days" : "Add current streak"}</button>}
+                      {h.kind === "check" && h.claim && editing !== h.id && <button type="button" className="qk-link" onClick={() => setEditing(h.id)}>{claims[h.id] ? "Edit starting days" : "Add current streak"}</button>}
                     </div>
                     <div className="qk-btns">
                       {h.kind === "count" && h.steps.map((n, i) => (
                         <button key={n} type="button" className={`chip${i === 1 ? " go" : ""}`} disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === `+${n}`} onClick={() => add(h, n)}>+{n}</button>
                       ))}
                       {h.kind === "check" && (vals[h.id] == null && auto(h)
-                        ? h.no && <button type="button" className="chip ghost" disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === "no"} onClick={() => check(h, false)}>{h.no}</button>
+                        ? h.no && <button type="button" className="chip ghost" disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === "no"} onClick={() => check(h, "no")}>{h.no}</button>
                         : vals[h.id] == null
                         ? <>
-                          <button type="button" className="chip acc" disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === "yes"} onClick={() => check(h, true)}>{h.yes}</button>
-                          {h.no && <button type="button" className="chip ghost" disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === "no"} onClick={() => check(h, false)}>{h.no}</button>}
+                          <button type="button" className="chip acc" disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === "yes"} onClick={() => check(h, "yes")}>{h.yes}</button>
+                          {h.rest && <button type="button" className="chip" disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === "rest"} onClick={() => check(h, "rest")}>{h.rest}</button>}
+                          {h.no && <button type="button" className="chip ghost" disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === "no"} onClick={() => check(h, "no")}>{h.no}</button>}
                         </>
                         : <button type="button" className="chip ghost" disabled={!!busy[h.id]} aria-busy={!!busy[h.id]} onClick={() => run(h, "undo", { set: null }, null)}>Undo</button>)}
                     </div>

@@ -132,16 +132,18 @@ export const AWARDS = [
 ];
 
 /** Daily habits in the quick-log button. No points, just streaks. Add one with a single line.
-    check: one tap for yes (or "no", which breaks the streak). count: chips that add to today's total.
-    training: a logged day also keeps the main 🔥 practice streak alive. Every habit has its own Streaks board, separate from the event ranks. */
+    check: one tap for yes (or "no", which breaks the streak). rest: a second button that also keeps the streak going.
+    claim: members can enter the streak they're already on, and it then counts up by itself until they slip.
+    count: chips that add to today's total. training: a logged day (not a rest day) also keeps the main 🔥 practice streak alive.
+    Every habit has its own Streaks board, separate from the event ranks. */
 export type Habit = { id: string; name: string; icon: string } & (
-  | { kind: "check"; yes: string; no?: string }
+  | { kind: "check"; yes: string; no?: string; rest?: string; claim?: boolean; training?: boolean }
   | { kind: "count"; steps: number[]; unit: string; training?: boolean }
 );
 export const HABITS: Habit[] = [
-  { id: "nofap", name: "No-fap", icon: "🔒", kind: "check", yes: "Clean ✓", no: "Slipped" },
-  { id: "pushups", name: "Push-ups", icon: "💪", kind: "count", steps: [10, 20, 50], unit: "push-ups", training: true },
-  { id: "squats", name: "Squats", icon: "🦵", kind: "count", steps: [10, 20, 50], unit: "squats", training: true },
+  { id: "nofap", name: "No-fap", icon: "🔒", kind: "check", yes: "Clean ✓", no: "Slipped", claim: true },
+  { id: "running", name: "Running", icon: "🏃", kind: "check", yes: "Ran ✓", training: true },
+  { id: "gym", name: "Gym", icon: "🏋️", kind: "check", yes: "Trained ✓", rest: "Rest day", training: true },
 ];
 
 export function nextMilestone(now = new Date()) {
