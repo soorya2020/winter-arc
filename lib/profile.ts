@@ -19,6 +19,8 @@ export type Profile = {
   dosas?: Partial<Record<DosaKind, number>> & { last?: string };
   // Quick-log streaks this member chose to follow, set by the site (undefined until they pick)
   habitsOn?: string[];
+  // Self-reported starting streaks ("I'm already N days in"), per check habit, set by the site
+  habitClaims?: Record<string, { days: number; on: string }>;
   // Asked on join: the only required answers
   trainingSince?: TrainingSince;
   toughest?: string;   // "The toughest challenge you've ever faced"

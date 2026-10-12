@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { longest, streak } from "./streak.ts";
+import { countedDays, longest, streak } from "./streak.ts";
 
 test("longest finds the best run, ignoring gaps and duplicates", () => {
   assert.equal(longest([]), 0);
@@ -14,4 +14,15 @@ test("streak counts back from today, or yesterday if today isn't logged", () => 
   assert.equal(streak(["2026-10-09", "2026-10-10", "2026-10-11"], now), 3);
   assert.equal(streak(["2026-10-09", "2026-10-10"], now), 2);
   assert.equal(streak(["2026-10-08"], now), 0);
+});
+
+test("a claimed streak keeps counting by itself and restarts after a slip", () => {
+  const set = new Date("2026-10-11T06:00:00Z"), later = new Date("2026-10-14T06:00:00Z");
+  const claim = { days: 12, on: "2026-10-11" };
+  assert.equal(streak(countedDays([], [], claim, set), set), 12);
+  assert.equal(streak(countedDays([], [], claim, later), later), 15);
+  assert.equal(streak(countedDays([], ["2026-10-12"], claim, later), later), 2);
+  assert.equal(streak(countedDays([], ["2026-10-14"], claim, later), later), 0);
+  assert.equal(streak(countedDays([], ["2026-10-05"], claim, set), set), 12, "older slips don't override the member's number");
+  assert.deepEqual(countedDays(["2026-10-01"], [], null, set), ["2026-10-01"]);
 });

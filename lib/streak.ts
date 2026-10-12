@@ -21,6 +21,27 @@ export function streak(days: string[], now = new Date()) {
   return n;
 }
 
+/** A member's own "I'm already N days in" for a check habit, set on day `on`. */
+export type StreakClaim = { days: number; on: string };
+
+function addDays(day: string, n: number) {
+  const d = new Date(`${day}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Days that count toward a streak. Without a claim, just the logged clean days. With one, the counter
+    runs by itself: every day from the claimed start through today counts, restarting the day after a slip.
+    Slips logged before the claim was made don't break it: the member's own number is the newer word. */
+export function countedDays(good: string[], slips: string[], claim?: StreakClaim | null, now = new Date()) {
+  if (!claim || claim.days < 1) return good;
+  let from = addDays(claim.on, 1 - claim.days);
+  for (const s of [...slips].sort()) if (s >= claim.on && s >= from) from = addDays(s, 1);
+  const out = new Set(good);
+  for (let d = from, end = today(now); d <= end; d = addDays(d, 1)) out.add(d);
+  return [...out];
+}
+
 /** Longest run of consecutive days ever. */
 export function longest(days: string[]) {
   const sorted = [...new Set(days)].sort();

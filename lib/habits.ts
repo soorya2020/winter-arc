@@ -1,7 +1,7 @@
 import "server-only";
 import { allParticipants, db, displayName } from "./db";
 import { HABITS } from "./season.ts";
-import { longest, streak, today } from "./streak.ts";
+import { countedDays, longest, streak, today, type StreakClaim } from "./streak.ts";
 
 export const HABITS_SQL = `create table if not exists habit_logs (participant_id uuid not null references participants(id) on delete cascade, day date not null, habit text not null, value int not null check (value between 0 and 10000), updated_at timestamptz not null default now(), primary key (participant_id, day, habit)); alter table habit_logs enable row level security; create table if not exists requests (id bigserial primary key, participant_id uuid references participants(id) on delete set null, text text not null check (char_length(text) between 3 and 300), done boolean not null default false, created_at timestamptz not null default now()); alter table requests enable row level security;`;
 
@@ -41,7 +41,7 @@ export async function openRequests(): Promise<{ list: Request[]; missing: boolea
   return { list: (data ?? []) as Request[], missing: false };
 }
 
-export type StreakRow = { id: string; name: string; current: number; best: number; days: number; total: number; last: string | null; slippedToday: boolean };
+export type StreakRow = { id: string; name: string; current: number; best: number; days: number; total: number; last: string | null; slippedToday: boolean; claim: StreakClaim | null };
 export type StreakBoard = { id: string; name: string; icon: string; unit: string | null; rows: StreakRow[] }[];
 
 /** The Streaks board, one per habit and separate from the event ranks: everyone who follows it,
@@ -52,13 +52,14 @@ export async function streakBoard(): Promise<StreakBoard> {
   const day = today();
   return HABITS.map((h) => {
     const mine = logs.filter((l) => l.habit === h.id);
-    const rows = people.filter((p) => p.accepted_at && (p.profile?.habitsOn?.includes(h.id) || mine.some((l) => l.participant_id === p.id))).map((p) => {
+    const rows = people.filter((p) => p.accepted_at && (p.profile?.habitsOn?.includes(h.id) || p.profile?.habitClaims?.[h.id] || mine.some((l) => l.participant_id === p.id))).map((p) => {
       const own = mine.filter((l) => l.participant_id === p.id);
-      const good = own.filter((l) => l.value > 0).map((l) => l.day);
+      const claim = (h.kind === "check" && p.profile?.habitClaims?.[h.id]) || null;
+      const good = countedDays(own.filter((l) => l.value > 0).map((l) => l.day), own.filter((l) => l.value === 0).map((l) => l.day), claim);
       const slippedToday = own.some((l) => l.day === day && l.value === 0);
       return {
-        id: p.id, name: displayName(p), current: slippedToday ? 0 : streak(good), best: longest(good), days: good.length,
-        total: own.reduce((n, l) => n + l.value, 0), last: own.map((l) => l.day).sort().pop() ?? null, slippedToday,
+        id: p.id, name: displayName(p), current: slippedToday ? 0 : streak(good), best: longest(good), days: own.filter((l) => l.value > 0).length,
+        total: own.reduce((n, l) => n + l.value, 0), last: own.map((l) => l.day).sort().pop() ?? null, slippedToday, claim,
       };
     }).sort((a, b) => b.current - a.current || b.best - a.best || b.total - a.total || a.name.localeCompare(b.name));
     return { id: h.id, name: h.name, icon: h.icon, unit: h.kind === "count" ? h.unit : null, rows };

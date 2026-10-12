@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { logHabit, sendRequest, setHabitsOn } from "@/app/actions";
+import { logHabit, sendRequest, setHabitsOn, setStreakClaim } from "@/app/actions";
 import { HABITS, type Habit } from "@/lib/season.ts";
-import { streak, today } from "@/lib/streak.ts";
+import { countedDays, streak, today, type StreakClaim } from "@/lib/streak.ts";
 import type { HabitLog } from "@/lib/habits";
 
 // The floating + button: one tap opens today's habits, one more logs. Each button shows its own
@@ -13,10 +13,12 @@ type Toast = { text: string; id: string; undo?: Op };
 const CLOSED = { open: false, view: "log" as "log" | "pick" | "ask" };
 
 // Nobody follows anything by default: the first open asks which streaks this member wants (on = null until they choose).
-export default function QuickLog({ logs, on: firstOn, missing, home }: { logs: HabitLog[]; on: string[] | null; missing: boolean; home?: boolean }) {
+export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missing, home }: { logs: HabitLog[]; on: string[] | null; claims: Record<string, StreakClaim>; missing: boolean; home?: boolean }) {
   const day = today();
   const [{ open, view }, setSheet] = useState(CLOSED);
   const [on, setOn] = useState(firstOn);
+  const [claims, setClaims] = useState(firstClaims);
+  const [editing, setEditing] = useState("");
   const [vals, setVals] = useState<Record<string, number | null>>(() =>
     Object.fromEntries(HABITS.map((h) => [h.id, logs.find((l) => l.habit === h.id && l.day === day)?.value ?? null])));
   const [busy, setBusy] = useState<Record<string, string>>({});
@@ -26,14 +28,19 @@ export default function QuickLog({ logs, on: firstOn, missing, home }: { logs: H
 
   // Past days (not today) per habit: which ones count toward the streak, and the best single day.
   const past = useMemo(() => {
-    const m: Record<string, { days: string[]; best: number }> = {};
-    for (const h of HABITS) m[h.id] = { days: [], best: 0 };
-    for (const l of logs) if (m[l.habit] && l.day !== day && l.value > 0) { m[l.habit].days.push(l.day); m[l.habit].best = Math.max(m[l.habit].best, l.value); }
+    const m: Record<string, { days: string[]; slips: string[]; best: number }> = {};
+    for (const h of HABITS) m[h.id] = { days: [], slips: [], best: 0 };
+    for (const l of logs) {
+      if (!m[l.habit] || l.day === day) continue;
+      if (l.value > 0) { m[l.habit].days.push(l.day); m[l.habit].best = Math.max(m[l.habit].best, l.value); } else m[l.habit].slips.push(l.day);
+    }
     return m;
   }, [logs, day]);
 
   const shown = HABITS.filter((h) => on?.includes(h.id));
-  const left = shown.filter((h) => vals[h.id] == null).length;
+  // A check habit with a starting streak counts by itself: nothing to log unless they slip.
+  const auto = (h: Habit) => h.kind === "check" && !!claims[h.id] && vals[h.id] !== 0;
+  const left = shown.filter((h) => vals[h.id] == null && !auto(h)).length;
   const doneN = shown.length - left;
 
   useEffect(() => {
@@ -47,7 +54,8 @@ export default function QuickLog({ logs, on: firstOn, missing, home }: { logs: H
   const streakOf = (h: Habit) => {
     const v = vals[h.id];
     if (h.kind === "check" && v === 0) return 0;
-    return streak(v ? [...past[h.id].days, day] : past[h.id].days);
+    const good = v ? [...past[h.id].days, day] : past[h.id].days;
+    return streak(h.kind === "check" ? countedDays(good, past[h.id].slips, claims[h.id]) : good);
   };
 
   async function run(h: Habit, key: string, op: Op, next: number | null, say?: (v: number | null) => string, undo?: Op) {
@@ -81,6 +89,7 @@ export default function QuickLog({ logs, on: firstOn, missing, home }: { logs: H
   const sub = (h: Habit) => {
     const v = vals[h.id], s = streakOf(h);
     if (h.kind === "check") {
+      if (v !== 0 && claims[h.id]) return `Day ${s} · counting every day`;
       if (v === 1) return `Day ${s} · clean today ✓`;
       if (v === 0) return "Slipped today. Day 1 starts tomorrow.";
       return s ? `Day ${s}` : "Start today";
@@ -116,20 +125,31 @@ export default function QuickLog({ logs, on: firstOn, missing, home }: { logs: H
                 <div className="qk-bar">{shown.map((h, i) => <i key={h.id} className={i < doneN ? "on" : ""} />)}</div>
                 {missing && <p className="err">Quick log needs a one-time database update. Ask the organizer to run it from the admin panel.</p>}
                 {shown.map((h) => (
-                  <div key={h.id} className={`qk-row${vals[h.id] != null && !(h.kind === "check" && vals[h.id] === 0) ? " done" : ""}`}>
+                  <div key={h.id} className={`qk-row${(vals[h.id] != null || auto(h)) && !(h.kind === "check" && vals[h.id] === 0) ? " done" : ""}`}>
                     <span className="qk-ic" aria-hidden="true">{h.icon}</span>
-                    <div className="qk-txt"><b>{h.name}</b><small>{sub(h)}</small>{err[h.id] && <small className="err">{err[h.id]}</small>}</div>
+                    <div className="qk-txt">
+                      <b>{h.name}</b><small>{sub(h)}</small>{err[h.id] && <small className="err">{err[h.id]}</small>}
+                      {h.kind === "check" && editing !== h.id && <button type="button" className="qk-link" onClick={() => setEditing(h.id)}>{claims[h.id] ? "Edit starting days" : "Add current streak"}</button>}
+                    </div>
                     <div className="qk-btns">
                       {h.kind === "count" && h.steps.map((n, i) => (
                         <button key={n} type="button" className={`chip${i === 1 ? " go" : ""}`} disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === `+${n}`} onClick={() => add(h, n)}>+{n}</button>
                       ))}
-                      {h.kind === "check" && (vals[h.id] == null
+                      {h.kind === "check" && (vals[h.id] == null && auto(h)
+                        ? h.no && <button type="button" className="chip ghost" disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === "no"} onClick={() => check(h, false)}>{h.no}</button>
+                        : vals[h.id] == null
                         ? <>
                           <button type="button" className="chip acc" disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === "yes"} onClick={() => check(h, true)}>{h.yes}</button>
                           {h.no && <button type="button" className="chip ghost" disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === "no"} onClick={() => check(h, false)}>{h.no}</button>}
                         </>
                         : <button type="button" className="chip ghost" disabled={!!busy[h.id]} aria-busy={!!busy[h.id]} onClick={() => run(h, "undo", { set: null }, null)}>Undo</button>)}
                     </div>
+                    {editing === h.id && (
+                      <Claim id={h.id} name={h.name} claim={claims[h.id]} onDone={(c) => {
+                        setEditing("");
+                        if (c !== undefined) setClaims(({ [h.id]: _, ...rest }) => (c ? { ...rest, [h.id]: c } : rest));
+                      }} />
+                    )}
                   </div>
                 ))}
                 {!shown.length && <p className="note">You aren't following any streak. Tap Pick streaks to choose some.</p>}
@@ -145,6 +165,32 @@ export default function QuickLog({ logs, on: firstOn, missing, home }: { logs: H
         </>
       )}
     </>
+  );
+}
+
+function Claim({ id, name, claim, onDone }: { id: string; name: string; claim?: StreakClaim; onDone: (c?: StreakClaim | null) => void }) {
+  const [days, setDays] = useState(claim ? String(claim.days) : "");
+  const [saving, setSaving] = useState("");
+  const [error, setError] = useState("");
+  const save = async (n: number) => {
+    setSaving(n ? "save" : "clear"); setError("");
+    const r = await setStreakClaim(id, n).catch(() => ({ error: "Couldn't save. Check your connection." }) as { error?: string });
+    setSaving("");
+    if (r.error) setError(r.error); else onDone(n ? { days: n, on: today() } : null);
+  };
+  const n = Number(days);
+  const ok = Number.isInteger(n) && n >= 1 && n <= 3650;
+  return (
+    <form className="qk-claim" onSubmit={(e) => { e.preventDefault(); if (ok) save(n); }}>
+      <label htmlFor={`claim-${id}`}>How many days clean are you, counting today? {name} will keep counting up every day from there. Tap Slipped if you slip.</label>
+      <div className="qk-claim-row">
+        <input id={`claim-${id}`} type="number" inputMode="numeric" min={1} max={3650} value={days} onChange={(e) => setDays(e.target.value)} placeholder="Days" autoFocus />
+        <button type="submit" className="chip acc" disabled={!ok || !!saving} aria-busy={saving === "save"}>Save</button>
+        {claim && <button type="button" className="chip ghost" disabled={!!saving} aria-busy={saving === "clear"} onClick={() => save(0)}>Remove</button>}
+        <button type="button" className="chip ghost" disabled={!!saving} onClick={() => onDone()}>Cancel</button>
+      </div>
+      {error && <small className="err">{error}</small>}
+    </form>
   );
 }
 

@@ -21,7 +21,7 @@ export async function acceptInvite(_: unknown, form: FormData) {
   const password = String(form.get("password") ?? "");
   if (password.length < MIN_PASSWORD) return { error: `Pick a password with at least ${MIN_PASSWORD} characters. You'll use it to sign in.` };
   // Keep what the site itself stored (gear-up progress) when the form saves.
-  const profile = { ...me.profile, ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, habitsOn: me.profile?.habitsOn };
+  const profile = { ...me.profile, ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, habitsOn: me.profile?.habitsOn, habitClaims: me.profile?.habitClaims };
   const missing = missingPersonal(profile);
   if (missing) return { error: missing };
   const { error } = await db().from("participants")
@@ -49,7 +49,7 @@ export async function saveProfile(_: unknown, form: FormData) {
   if (!me?.accepted_at) return { error: "Accept your invite first." };
   const catchphrase = String(form.get("catchphrase") ?? "").trim().slice(0, 80) || null;
   // Keep what the site itself stored (gear-up progress, dosas) when the form saves.
-  const profile = { ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, dosas: me.profile?.dosas, habitsOn: me.profile?.habitsOn };
+  const profile = { ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, dosas: me.profile?.dosas, habitsOn: me.profile?.habitsOn, habitClaims: me.profile?.habitClaims };
   if (profile.rivalId === me.id) delete profile.rivalId;
   const missing = missingPersonal(profile);
   if (missing) return { error: missing };
@@ -230,4 +230,19 @@ export async function sendRequest(raw: string): Promise<{ ok?: string; error?: s
       `${name} asked: ${text}\n\n${siteUrl()}/admin`).catch(() => null);
   }
   return { ok: "Sent. The organizers will see it in their panel." };
+}
+
+/** "Already on a streak?": the member says they're N days in; the counter carries on from there by itself. 0 clears it. */
+export async function setStreakClaim(id: string, days: number): Promise<{ ok?: boolean; error?: string }> {
+  const me = await currentParticipant();
+  if (!me?.accepted_at) return { error: "Sign in first." };
+  const habit = HABITS.find((h) => h.id === id);
+  if (!habit || habit.kind !== "check") return { error: "That habit doesn't take a starting streak." };
+  if (!Number.isInteger(days) || days < 0 || days > 3650) return { error: "Enter a number of days between 0 and 3650." };
+  const habitClaims = { ...(me.profile?.habitClaims ?? {}) };
+  if (days) habitClaims[id] = { days, on: today() }; else delete habitClaims[id];
+  const { error } = await db().from("participants").update({ profile: { ...(me.profile ?? {}), habitClaims } }).eq("id", me.id);
+  if (error) return { error: "Couldn't save. Try again." };
+  revalidatePath("/board");
+  return { ok: true };
 }
