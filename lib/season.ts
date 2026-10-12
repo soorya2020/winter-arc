@@ -141,10 +141,10 @@ export type Habit = { id: string; name: string; icon: string } & (
   | { kind: "count"; steps: number[]; unit: string; training?: boolean }
 );
 export const HABITS: Habit[] = [
-  { id: "nofap", name: "No-fap", icon: "🔒", kind: "check", yes: "Clean ✓", no: "Slipped", claim: true },
+  { id: "nofap", name: "Kai Lock", icon: "🔒", kind: "check", yes: "Clean ✓", no: "Slipped", claim: true },
   { id: "nosmoke", name: "Beedi Break-up", icon: "🚭", kind: "check", yes: "Clean ✓", no: "Lit one", claim: true },
-  { id: "running", name: "Running", icon: "🏃", kind: "check", yes: "Ran ✓", training: true },
-  { id: "gym", name: "Gym", icon: "🏋️", kind: "check", yes: "Trained ✓", rest: "Rest day", no: "Skipped", training: true },
+  { id: "running", name: "Ottam Club", icon: "🏃", kind: "check", yes: "Ran ✓", training: true },
+  { id: "gym", name: "Gym Pooja", icon: "🏋️", kind: "check", yes: "Trained ✓", rest: "Rest day", no: "Skipped", training: true },
 ];
 
 export function nextMilestone(now = new Date()) {
