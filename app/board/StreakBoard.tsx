@@ -16,9 +16,11 @@ export default function StreakBoard({ board, meId }: { board: Board; meId: strin
         <ol className="streak-list">
           {b.rows.map((r, i) => (
             <li key={r.id} className={r.id === meId ? "me" : ""}>
-              <span className="rk">{r.current ? i + 1 : "–"}</span>
-              <div><b>{r.id === meId ? "You" : r.name}</b><small>Best {r.best} {r.best === 1 ? "day" : "days"}{b.unit && r.total ? ` · ${r.total} ${b.unit} total` : ""}{r.slippedToday ? " · slipped today" : ""}</small></div>
-              <span className="cur">{r.current}<i>🔥</i></span>
+              <span className="rk">{(b.byTotal ? r.total : r.current) ? i + 1 : "–"}</span>
+              <div><b>{r.id === meId ? "You" : r.name}</b><small>{b.byTotal
+                ? `${r.days} ${r.days === 1 ? "day" : "days"} logged${r.current > 1 ? ` · ${r.current}-day streak` : ""}`
+                : `Best ${r.best} ${r.best === 1 ? "day" : "days"}${b.unit && r.total ? ` · ${r.total.toLocaleString("en-IN")} ${b.unit} total` : ""}${r.slippedToday ? " · slipped today" : ""}`}</small></div>
+              {b.byTotal ? <span className="cur">{r.total.toLocaleString("en-IN")}<i>{b.icon}</i></span> : <span className="cur">{r.current}<i>🔥</i></span>}
             </li>
           ))}
         </ol>

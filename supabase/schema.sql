@@ -94,11 +94,14 @@ create table if not exists habit_logs (
   participant_id uuid not null references participants(id) on delete cascade,
   day date not null,
   habit text not null,
-  value int not null check (value between 0 and 10000),
+  value int not null check (value between 0 and 1000000),
   updated_at timestamptz not null default now(),
   primary key (participant_id, day, habit)
 );
 alter table habit_logs enable row level security;
+-- Daily steps go past 10,000: widen the old limit on tables created before the steps tracker.
+alter table habit_logs drop constraint if exists habit_logs_value_check;
+alter table habit_logs add constraint habit_logs_value_check check (value between 0 and 1000000);
 
 -- Requests members send to the organizers from the quick-log button or the home page.
 create table if not exists requests (

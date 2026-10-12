@@ -10,6 +10,7 @@ import type { HabitLog } from "@/lib/habits";
 
 type Op = { add: number } | { set: 0 | 1 | 2 | null };
 type Toast = { text: string; id: string; undo?: Op };
+const fmt = (n: number) => n.toLocaleString("en-IN");
 const CLOSED = { open: false, view: "log" as "log" | "pick" | "ask" };
 
 // Nobody follows anything by default: the first open asks which streaks this member wants (on = null until they choose).
@@ -26,13 +27,13 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
   const [toast, setToast] = useState<Toast | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>();
 
-  // Past days (not today) per habit: which ones count toward the streak, and the best single day.
+  // Past days (not today) per habit: which ones count toward the streak, the best single day, and the running total.
   const past = useMemo(() => {
-    const m: Record<string, { days: string[]; slips: string[]; best: number }> = {};
-    for (const h of HABITS) m[h.id] = { days: [], slips: [], best: 0 };
+    const m: Record<string, { days: string[]; slips: string[]; best: number; sum: number }> = {};
+    for (const h of HABITS) m[h.id] = { days: [], slips: [], best: 0, sum: 0 };
     for (const l of logs) {
       if (!m[l.habit] || l.day === day) continue;
-      if (l.value > 0) { m[l.habit].days.push(l.day); m[l.habit].best = Math.max(m[l.habit].best, l.value); } else m[l.habit].slips.push(l.day);
+      if (l.value > 0) { m[l.habit].sum += l.value; m[l.habit].days.push(l.day); m[l.habit].best = Math.max(m[l.habit].best, l.value); } else m[l.habit].slips.push(l.day);
     }
     return m;
   }, [logs, day]);
@@ -75,8 +76,8 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
     } else setToast(null);
   }
 
-  const add = (h: Habit & { kind: "count" }, n: number) =>
-    run(h, `+${n}`, { add: n }, (vals[h.id] ?? 0) + n, (v) => `+${n} ${h.unit} · ${v ?? 0} today`, { add: -n });
+  const add = (h: Habit & { kind: "count" }, n: number, key = `+${n}`) =>
+    run(h, key, { add: n }, (vals[h.id] ?? 0) + n || null, (v) => `${key === "set" ? "Today" : `+${fmt(n)} ${h.unit} ·`} ${fmt(v ?? 0)} ${key === "set" ? h.unit : "today"}`, { add: -n });
   const SAY = { yes: (h: Habit) => `${h.name} logged. Keep going.`, rest: () => "Rest day logged. Your streak keeps going.", no: (h: Habit) => `${h.name}: ${h.kind === "check" && h.no ? h.no.toLowerCase() : "slipped"} today. Day 1 starts tomorrow.` };
   const check = (h: Habit & { kind: "check" }, key: "yes" | "rest" | "no") => {
     const v = ({ yes: 1, rest: 2, no: 0 } as const)[key];
@@ -98,6 +99,7 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
       if (v === 0) return `${h.no ?? "Slipped"} today. Day 1 starts tomorrow.`;
       return s ? `Day ${s}` : "Start today";
     }
+    if (h.rankBy === "total") return `${fmt(v ?? 0)} today · ${fmt(past[h.id].sum + (v ?? 0))} total`;
     const best = Math.max(past[h.id].best, v ?? 0);
     return v ? `${v} today${s > 1 ? ` · ${s}-day streak` : ""}` : `0 today${best ? ` · best ${best}` : ""}`;
   };
@@ -134,10 +136,11 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
                     <div className="qk-txt">
                       <b>{h.name}</b><small>{sub(h)}</small>{err[h.id] && <small className="err">{err[h.id]}</small>}
                       {h.kind === "check" && h.claim && editing !== h.id && <button type="button" className="qk-link" onClick={() => setEditing(h.id)}>{claims[h.id] ? "Edit starting days" : "Add current streak"}</button>}
+                      {h.kind === "count" && h.custom && editing !== h.id && <button type="button" className="qk-link" onClick={() => setEditing(h.id)}>Enter today&apos;s total</button>}
                     </div>
                     <div className="qk-btns">
                       {h.kind === "count" && h.steps.map((n, i) => (
-                        <button key={n} type="button" className={`chip${i === 1 ? " go" : ""}`} disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === `+${n}`} onClick={() => add(h, n)}>+{n}</button>
+                        <button key={n} type="button" className={`chip${i === 1 ? " go" : ""}`} disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === `+${n}`} onClick={() => add(h, n)}>+{n >= 1000 ? `${n / 1000}k` : n}</button>
                       ))}
                       {h.kind === "check" && (vals[h.id] == null && auto(h)
                         ? h.no && <button type="button" className="chip ghost" disabled={!!busy[h.id] || missing} aria-busy={busy[h.id] === "no"} onClick={() => check(h, "no")}>{h.no}</button>
@@ -149,7 +152,13 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
                         </>
                         : <button type="button" className="chip ghost" disabled={!!busy[h.id]} aria-busy={!!busy[h.id]} onClick={() => run(h, "undo", { set: null }, null)}>Undo</button>)}
                     </div>
-                    {editing === h.id && (
+                    {editing === h.id && h.kind === "count" && (
+                      <Exact unit={h.unit} now={vals[h.id] ?? 0} busy={busy[h.id] === "set"} onDone={(n) => {
+                        setEditing("");
+                        if (n != null && n !== (vals[h.id] ?? 0)) add(h, n - (vals[h.id] ?? 0), "set");
+                      }} />
+                    )}
+                    {editing === h.id && h.kind === "check" && (
                       <Claim id={h.id} name={h.name} no={h.kind === "check" && h.no ? h.no : "Slipped"} claim={claims[h.id]} onDone={(c) => {
                         setEditing("");
                         if (c !== undefined) setClaims(({ [h.id]: _, ...rest }) => (c ? { ...rest, [h.id]: c } : rest));
@@ -195,6 +204,22 @@ function Claim({ id, name, no, claim, onDone }: { id: string; name: string; no: 
         <button type="button" className="chip ghost" disabled={!!saving} onClick={() => onDone()}>Cancel</button>
       </div>
       {error && <small className="err">{error}</small>}
+    </form>
+  );
+}
+
+function Exact({ unit, now, busy, onDone }: { unit: string; now: number; busy: boolean; onDone: (n?: number) => void }) {
+  const [val, setVal] = useState(now ? String(now) : "");
+  const n = Number(val);
+  const ok = val !== "" && Number.isInteger(n) && n >= 0 && n <= 100000;
+  return (
+    <form className="qk-claim" onSubmit={(e) => { e.preventDefault(); if (ok) onDone(n); }}>
+      <label htmlFor="exact-total">Today&apos;s total {unit}, from your phone or watch. It replaces what you&apos;ve added today.</label>
+      <div className="qk-claim-row">
+        <input id="exact-total" type="number" inputMode="numeric" min={0} max={100000} value={val} onChange={(e) => setVal(e.target.value)} placeholder="e.g. 7500" autoFocus />
+        <button type="submit" className="chip acc" disabled={!ok || busy}>Save</button>
+        <button type="button" className="chip ghost" onClick={() => onDone()}>Cancel</button>
+      </div>
     </form>
   );
 }

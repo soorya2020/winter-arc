@@ -268,7 +268,7 @@ async function Awards() {
                 <span className="adm-rk">{i + 1}</span>
                 <div style={{ minWidth: 0 }}>
                   <b>{r.name}</b>
-                  <div className="note">Now {r.current} 🔥 · longest {r.best} · {r.days} days logged{h.unit ? ` · ${r.total} ${h.unit}` : ""}{r.last ? ` · last ${r.last}` : ""}{r.rests ? ` · ${r.rests} rest days` : ""}{r.slippedToday ? " · slipped today" : ""}{r.claim ? ` · self-reported ${r.claim.days} days on ${r.claim.on}` : ""}</div>
+                  <div className="note">Now {r.current} 🔥 · longest {r.best} · {r.days} days logged{h.unit ? ` · ${r.total.toLocaleString("en-IN")} ${h.unit}` : ""}{r.last ? ` · last ${r.last}` : ""}{r.rests ? ` · ${r.rests} rest days` : ""}{r.slippedToday ? " · slipped today" : ""}{r.claim ? ` · self-reported ${r.claim.days} days on ${r.claim.on}` : ""}</div>
                 </div>
               </li>
             ))}

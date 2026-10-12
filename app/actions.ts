@@ -186,10 +186,10 @@ export async function logHabit(id: string, op: { add: number } | { set: 0 | 1 | 
   const key = { participant_id: me.id, day: today(), habit: id };
   let value: number | null;
   if ("add" in op) {
-    if (habit.kind !== "count" || !Number.isInteger(op.add) || Math.abs(op.add) > 1000) return { error: "That number doesn't look right." };
+    if (habit.kind !== "count" || !Number.isInteger(op.add) || Math.abs(op.add) > 100000) return { error: "That number doesn't look right." };
     const { data, error } = await db().from("habit_logs").select("value").match(key).maybeSingle();
     if (error) return { error: "Quick log needs a database update. Ask the organizer." };
-    value = Math.min(10000, Math.max(0, (data?.value ?? 0) + op.add)) || null;
+    value = Math.min(100000, Math.max(0, (data?.value ?? 0) + op.add)) || null;
   } else {
     if (habit.kind !== "check") return { error: "That habit counts reps." };
     if ((op.set === 2 && !habit.rest) || (op.set === 0 && !habit.no)) return { error: "That option isn't available for this habit." };
@@ -198,7 +198,7 @@ export async function logHabit(id: string, op: { add: number } | { set: 0 | 1 | 
   const { error } = value == null
     ? await db().from("habit_logs").delete().match(key)
     : await db().from("habit_logs").upsert({ ...key, value, updated_at: new Date().toISOString() });
-  if (error) return { error: /habit_logs/.test(error.message) ? "Quick log needs a database update. Ask the organizer." : "Couldn't save. Try again." };
+  if (error) return { error: /habit_logs/.test(error.message) || error.code === "23514" ? "Quick log needs a database update. Ask the organizer." : "Couldn't save. Try again." };
   revalidatePath("/board");
   return { value };
 }

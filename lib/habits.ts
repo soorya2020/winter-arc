@@ -3,7 +3,7 @@ import { allParticipants, db, displayName } from "./db";
 import { HABITS } from "./season.ts";
 import { countedDays, longest, streak, today, type StreakClaim } from "./streak.ts";
 
-export const HABITS_SQL = `create table if not exists habit_logs (participant_id uuid not null references participants(id) on delete cascade, day date not null, habit text not null, value int not null check (value between 0 and 10000), updated_at timestamptz not null default now(), primary key (participant_id, day, habit)); alter table habit_logs enable row level security; create table if not exists requests (id bigserial primary key, participant_id uuid references participants(id) on delete set null, text text not null check (char_length(text) between 3 and 300), done boolean not null default false, created_at timestamptz not null default now()); alter table requests enable row level security;`;
+export const HABITS_SQL = `create table if not exists habit_logs (participant_id uuid not null references participants(id) on delete cascade, day date not null, habit text not null, value int not null check (value between 0 and 1000000), updated_at timestamptz not null default now(), primary key (participant_id, day, habit)); alter table habit_logs enable row level security; alter table habit_logs drop constraint if exists habit_logs_value_check; alter table habit_logs add constraint habit_logs_value_check check (value between 0 and 1000000); create table if not exists requests (id bigserial primary key, participant_id uuid references participants(id) on delete set null, text text not null check (char_length(text) between 3 and 300), done boolean not null default false, created_at timestamptz not null default now()); alter table requests enable row level security;`;
 
 /** Every row of a habit_logs query, a page at a time (Supabase returns at most 1000 per request). Null if the table is missing. */
 async function allHabitRows<T>(columns: string, where: (q: any) => any = (q) => q): Promise<T[] | null> { // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -43,7 +43,7 @@ export async function openRequests(): Promise<{ list: Request[]; missing: boolea
 }
 
 export type StreakRow = { id: string; name: string; current: number; best: number; days: number; total: number; last: string | null; slippedToday: boolean; rests: number; claim: StreakClaim | null };
-export type StreakBoard = { id: string; name: string; icon: string; unit: string | null; rows: StreakRow[] }[];
+export type StreakBoard = { id: string; name: string; icon: string; unit: string | null; byTotal: boolean; rows: StreakRow[] }[];
 
 /** The Streaks board, one per habit and separate from the event ranks: everyone who follows it,
     ranked by current streak, then their longest. */
@@ -63,7 +63,9 @@ export async function streakBoard(): Promise<StreakBoard> {
         total: own.reduce((n, l) => n + l.value, 0), last: own.map((l) => l.day).sort().pop() ?? null, slippedToday, claim,
         rests: h.kind === "check" && h.rest ? own.filter((l) => l.value === 2).length : 0,
       };
-    }).sort((a, b) => b.current - a.current || b.best - a.best || b.total - a.total || a.name.localeCompare(b.name));
-    return { id: h.id, name: h.name, icon: h.icon, unit: h.kind === "count" ? h.unit : null, rows };
+    });
+    const byTotal = h.kind === "count" && h.rankBy === "total";
+    rows.sort((a, b) => (byTotal ? b.total - a.total : 0) || b.current - a.current || b.best - a.best || b.total - a.total || a.name.localeCompare(b.name));
+    return { id: h.id, name: h.name, icon: h.icon, unit: h.kind === "count" ? h.unit : null, byTotal, rows };
   });
 }
