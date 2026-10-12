@@ -158,7 +158,6 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
           </ul>
           <div className="panel adm-card">
             <b>Phone notifications</b>
-            {!process.env.CRON_SECRET?.trim() && <p className="err">The 6 AM reminder never runs: CRON_SECRET is missing in Vercel. Add it under Settings &gt; Environment Variables (any long random text), then redeploy.</p>}
             {noPush
               ? <><p className="note">Daily reminders can go to phones as notifications instead of email. The database needs one update first. In Supabase, open SQL Editor, paste this and press Run:</p><code className="adm-code">{PUSH_SQL}</code></>
               : <><p className="note"><b>{pushOn.size}</b> of {counts.accepted} have them on, <b>{accepted.filter((p) => p.profile?.lockedInAt).length}</b> fully Locked In 🔒. Members tap "Turn on" in their arena page (on iPhone, after adding Winter Arc to the home screen). Everyone else still gets the email.</p><TestPushButton /></>}
