@@ -532,10 +532,10 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 @media (min-width: 760px) { .adm-fold { max-width: 36rem; } }
 
 /* admin: event schedule */
-.sched-now { display: grid; gap: .15rem; background: var(--ink); color: var(--on-ink); border-radius: 1rem; padding: .9rem 1.1rem; }
-.sched-now .label { color: var(--night-muted); }
+.sched-now { display: grid; gap: .15rem; background: var(--track); color: var(--ink); border-radius: 1rem; padding: .9rem 1.1rem; }
+.sched-now .label { color: var(--muted); }
 .sched-now b { font-family: var(--display); font-weight: 400; font-size: 1.8rem; text-transform: uppercase; line-height: 1; color: var(--accent); }
-.sched-now .note { color: rgb(var(--on-ink-rgb) / .75); }
+.sched-now .note { color: var(--muted); }
 .sched-form { display: grid; gap: .8rem; }
 .sched-when { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .6rem; }
 .sched-check { display: flex; gap: .6rem; align-items: center; font-weight: 700; font-size: .92rem; }
