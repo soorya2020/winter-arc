@@ -34,6 +34,14 @@ export function autoClaims(p: Pick<Participant, "profile" | "accepted_at">, logs
   return out;
 }
 
+/** A member's longest run on one habit, from their logs and starting point plus the best already saved. */
+export async function bestStreak(p: Pick<Participant, "id" | "profile" | "accepted_at">, id: string) {
+  const { data } = await db().from("habit_logs").select("day, habit, value").eq("participant_id", p.id).eq("habit", id);
+  const own = (data ?? []) as HabitLog[];
+  const good = countedDays(own.filter((l) => l.value > 0).map((l) => l.day), own.filter((l) => l.value === 0).map((l) => l.day), autoClaims(p, own)[id]);
+  return Math.max(longest(good), p.profile?.habitBest?.[id] ?? 0);
+}
+
 /** One member's habit history for the quick-log sheet. `missing` means the table isn't there yet. */
 export async function myHabitLogs(participantId: string): Promise<{ logs: HabitLog[]; missing: boolean }> {
   const { data, error } = await db().from("habit_logs").select("day, habit, value").eq("participant_id", participantId).order("day", { ascending: false }).limit(1500);
@@ -75,7 +83,7 @@ export async function streakBoard(): Promise<StreakBoard> {
       const good = countedDays(own.filter((l) => l.value > 0).map((l) => l.day), own.filter((l) => l.value === 0).map((l) => l.day), claim);
       const slippedToday = own.some((l) => l.day === day && l.value === 0);
       return {
-        id: p.id, name: displayName(p), current: slippedToday ? 0 : streak(good), best: longest(good), days: own.filter((l) => l.value > 0).length,
+        id: p.id, name: displayName(p), current: slippedToday ? 0 : streak(good), best: Math.max(longest(good), p.profile?.habitBest?.[h.id] ?? 0), days: own.filter((l) => l.value > 0).length,
         total: own.reduce((n, l) => n + l.value, 0), last: own.map((l) => l.day).sort().pop() ?? null, slippedToday, claim,
         rests: h.kind === "check" && h.rest ? own.filter((l) => l.value === 2).length : 0,
       };

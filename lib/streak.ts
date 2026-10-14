@@ -31,14 +31,14 @@ function addDays(day: string, n: number) {
 }
 
 /** Days that count toward a streak. Without a claim, just the logged clean days. With one, the counter
-    runs by itself: every day from the claimed start through today counts, restarting the day after a slip.
-    Slips logged before the claim was made don't break it: the member's own number is the newer word. */
+    runs by itself: every day from the claimed start through today counts except slip days, so a slip ends
+    the current run but the run before it still counts toward the best. Slips logged before the claim was
+    made don't break it: the member's own number is the newer word. */
 export function countedDays(good: string[], slips: string[], claim?: StreakClaim | null, now = new Date()) {
   if (!claim || claim.days < 1) return good;
-  let from = addDays(claim.on, 1 - claim.days);
-  for (const s of [...slips].sort()) if (s >= claim.on && s >= from) from = addDays(s, 1);
+  const broke = new Set(slips.filter((s) => s >= claim.on));
   const out = new Set(good);
-  for (let d = from, end = today(now); d <= end; d = addDays(d, 1)) out.add(d);
+  for (let d = addDays(claim.on, 1 - claim.days), end = today(now); d <= end; d = addDays(d, 1)) if (!broke.has(d)) out.add(d);
   return [...out];
 }
 

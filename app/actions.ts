@@ -10,6 +10,7 @@ import { sendInvite } from "@/lib/reminders";
 import { HABITS } from "@/lib/season.ts";
 import { emailLayout, esc, sendMail, siteUrl } from "@/lib/email";
 import { today } from "@/lib/streak.ts";
+import { bestStreak } from "@/lib/habits";
 import { DOSAS, missingPersonal, profileFromForm, type DosaKind } from "@/lib/profile.ts";
 
 export async function acceptInvite(_: unknown, form: FormData) {
@@ -21,7 +22,7 @@ export async function acceptInvite(_: unknown, form: FormData) {
   const password = String(form.get("password") ?? "");
   if (password.length < MIN_PASSWORD) return { error: `Pick a password with at least ${MIN_PASSWORD} characters. You'll use it to sign in.` };
   // Keep what the site itself stored (gear-up progress) when the form saves.
-  const profile = { ...me.profile, ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, habitsOn: me.profile?.habitsOn, habitClaims: me.profile?.habitClaims };
+  const profile = { ...me.profile, ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, habitsOn: me.profile?.habitsOn, habitClaims: me.profile?.habitClaims, habitBest: me.profile?.habitBest };
   const missing = missingPersonal(profile);
   if (missing) return { error: missing };
   const { error } = await db().from("participants")
@@ -49,7 +50,7 @@ export async function saveProfile(_: unknown, form: FormData) {
   if (!me?.accepted_at) return { error: "Accept your invite first." };
   const catchphrase = String(form.get("catchphrase") ?? "").trim().slice(0, 80) || null;
   // Keep what the site itself stored (gear-up progress, dosas) when the form saves.
-  const profile = { ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, dosas: me.profile?.dosas, habitsOn: me.profile?.habitsOn, habitClaims: me.profile?.habitClaims };
+  const profile = { ...profileFromForm(form), installedAt: me.profile?.installedAt, lockedInAt: me.profile?.lockedInAt, dosas: me.profile?.dosas, habitsOn: me.profile?.habitsOn, habitClaims: me.profile?.habitClaims, habitBest: me.profile?.habitBest };
   if (profile.rivalId === me.id) delete profile.rivalId;
   const missing = missingPersonal(profile);
   if (missing) return { error: missing };
@@ -194,6 +195,11 @@ export async function logHabit(id: string, op: { add: number } | { set: 0 | 1 | 
     if (habit.kind !== "check") return { error: "That habit counts reps." };
     if ((op.set === 2 && !habit.rest) || (op.set === 0 && !habit.no)) return { error: "That option isn't available for this habit." };
     value = op.set;
+    // A slip ends the run: lock in the best so far first.
+    if (value === 0 && habit.claim) {
+      const best = await bestStreak(me, id);
+      if (best > (me.profile?.habitBest?.[id] ?? 0)) await db().from("participants").update({ profile: { ...(me.profile ?? {}), habitBest: { ...(me.profile?.habitBest ?? {}), [id]: best } } }).eq("id", me.id);
+    }
   }
   const { error } = value == null
     ? await db().from("habit_logs").delete().match(key)
@@ -245,7 +251,10 @@ export async function setStreakClaim(id: string, days: number): Promise<{ ok?: b
   if (!Number.isInteger(days) || days < 0 || days > 3650) return { error: "Enter a number of days between 0 and 3650." };
   const habitClaims = { ...(me.profile?.habitClaims ?? {}) };
   if (days) habitClaims[id] = { days, on: today() }; else delete habitClaims[id];
-  const { error } = await db().from("participants").update({ profile: { ...(me.profile ?? {}), habitClaims } }).eq("id", me.id);
+  // A new starting number replaces the old run, so keep its best first.
+  const habitBest = { ...(me.profile?.habitBest ?? {}) };
+  habitBest[id] = Math.max(habitBest[id] ?? 0, await bestStreak(me, id), days);
+  const { error } = await db().from("participants").update({ profile: { ...(me.profile ?? {}), habitClaims, habitBest } }).eq("id", me.id);
   if (error) return { error: "Couldn't save. Try again." };
   revalidatePath("/board");
   return { ok: true };

@@ -22,7 +22,15 @@ test("a claimed streak keeps counting by itself and restarts after a slip", () =
   assert.equal(streak(countedDays([], [], claim, set), set), 12);
   assert.equal(streak(countedDays([], [], claim, later), later), 15);
   assert.equal(streak(countedDays([], ["2026-10-12"], claim, later), later), 2);
-  assert.equal(streak(countedDays([], ["2026-10-14"], claim, later), later), 0);
+  assert.ok(!countedDays([], ["2026-10-14"], claim, later).includes("2026-10-14"), "a slip today doesn't count");
   assert.equal(streak(countedDays([], ["2026-10-05"], claim, set), set), 12, "older slips don't override the member's number");
   assert.deepEqual(countedDays(["2026-10-01"], [], null, set), ["2026-10-01"]);
+});
+
+test("a slip ends the run but the best before it stays", () => {
+  const now = new Date("2026-10-14T06:00:00Z");
+  const claim = { days: 30, on: "2026-10-11" }; // 30 days in on Oct 11, so the run started Sep 12
+  const days = countedDays([], ["2026-10-12"], claim, now);
+  assert.equal(streak(days, now), 2);
+  assert.equal(longest(days), 30);
 });
