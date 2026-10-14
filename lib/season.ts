@@ -118,6 +118,17 @@ export const WEEK_PLAN = [
   { day: "Sat", title: "Long run", detail: "Add 1 km every week until you reach 10 km." },
 ];
 
+/** Today tab's "Hard truth": one per day, in order. Keep each one a real finding, worded no stronger than its source. */
+export const HARD_TRUTHS = [
+  { text: "Fitness illenkil smoking-inekkaal danger aanu, machane. Ettavum unfit aaya aalkkarkku nerathe marikkaan 5 iratti chance.", source: "JAMA Network Open, 2018 (122,007 people)" },
+  { text: "Sofa-yil kidakkunnavarkku 20-30% kooduthal maranam risk. Netflix ninne rakshikkilla.", source: "World Health Organization" },
+  { text: "Divasam 30 min nadannaal erectile dysfunction risk 41% kurayum. Thaazhe ullavanum workout venam, bro.", source: "Harvard Health Professionals Follow-up Study" },
+  { text: "Grip strength 5 kg kuranjaal maranam risk 16% koodum. Kai-kku balam illenkil aayussinum balam illa.", source: "The Lancet, PURE study, 2015 (139,691 people)" },
+  { text: "Divasam 8 manikkoor irunnaal smoking-um obesity-um pole thanne risk. Oru manikkoor odiyaal theernu.", source: "The Lancet, 2016 (over 1 million people)" },
+  { text: "Kurachu anangiyaal varshathil 50 lakh maranam ozhivaakkaam. Statistics-il ninte peru varanda.", source: "World Health Organization" },
+  { text: "Depression-inu workout nalla marunnu aanu. Nadathavum jogging-um therapy-de athrem work aakum. Mood off aano? Odu.", source: "BMJ, 2024 (218 trials)" },
+];
+
 export const DRILLS = [
   "Air squats", "Walking lunges", "Incline push-ups", "Knee push-ups", "Mountain climbers",
   "Wall sit", "Dead hang", "Glute bridge", "Jump rope", "Side plank", "Step-ups",

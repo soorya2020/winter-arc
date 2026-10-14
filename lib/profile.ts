@@ -21,6 +21,8 @@ export type Profile = {
   habitsOn?: string[];
   // Self-reported starting streaks ("I'm already N days in"), per check habit, set by the site
   habitClaims?: Record<string, { days: number; on: string }>;
+  // Best streak ever per habit, saved before a slip or a new starting number can lower it, set by the site
+  habitBest?: Record<string, number>;
   // Asked on join: the only required answers
   trainingSince?: TrainingSince;
   toughest?: string;   // "The toughest challenge you've ever faced"

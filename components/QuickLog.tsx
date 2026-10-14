@@ -50,6 +50,12 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
     return () => window.removeEventListener("keydown", esc);
   }, [open]);
   useEffect(() => () => clearTimeout(timer.current), []);
+  // The Today tab's "My streaks" card opens the sheet too.
+  useEffect(() => {
+    const show = () => setSheet({ open: true, view: on == null ? "pick" : "log" });
+    window.addEventListener("quicklog:open", show);
+    return () => window.removeEventListener("quicklog:open", show);
+  }, [on]);
 
   const streakOf = (h: Habit) => {
     const v = vals[h.id];

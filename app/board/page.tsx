@@ -8,6 +8,7 @@ import ShareButtons from "./ShareButtons";
 import GearUp from "./GearUp";
 import DosaCard from "./DosaCard";
 import QuickLog from "@/components/QuickLog";
+import MyStreaks from "@/components/MyStreaks";
 import { autoClaims, myHabitLogs, streakBoard } from "@/lib/habits";
 import { siteUrl } from "@/lib/email";
 import { quoteOfTheDay } from "@/lib/quotes";
@@ -15,7 +16,7 @@ import { signOut } from "../actions";
 import { currentParticipant, isAdmin } from "@/lib/auth";
 import { loadBoard } from "@/lib/board";
 import { displayName } from "@/lib/db";
-import { EVENTS, WEEK_PLAN } from "@/lib/season.ts";
+import { EVENTS, HARD_TRUTHS, WEEK_PLAN } from "@/lib/season.ts";
 import { fmtWhen, upcoming } from "@/lib/schedule";
 import { today, weekday } from "@/lib/streak.ts";
 import { DOSAS, dosaCount, type DosaKind } from "@/lib/profile.ts";
@@ -29,11 +30,22 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
   const [rows, quote, habits, streaks, { next: ms }] = await Promise.all([loadBoard(), quoteOfTheDay(), me ? myHabitLogs(me.id) : null, streakBoard(), upcoming()]);
   const mine = rows.find((r) => r.id === me?.id);
   const todayPlan = WEEK_PLAN[weekday()];
+  const truth = HARD_TRUTHS[Math.floor(Date.parse(today()) / 864e5) % HARD_TRUTHS.length];
   const first = me ? displayName(me).split(" ")[0] : "Admin";
   const dosaWall = rows.filter((r) => dosaCount(r.profile) > 0).map((r) => {
     const fav = (Object.keys(DOSAS) as DosaKind[]).reduce((a, k) => ((r.profile.dosas?.[k] ?? 0) > (r.profile.dosas?.[a] ?? 0) ? k : a), "masala");
     return { id: r.id, name: r.name.split(" ")[0], count: dosaCount(r.profile), icon: DOSAS[fav].icon };
   }).sort((a, b) => b.count - a.count);
+
+  // Each streak this member follows, with where they stand on its board.
+  const myStreaks = me ? streaks.filter((b) => me.profile?.habitsOn?.includes(b.id)).map((b) => {
+    const i = b.rows.findIndex((r) => r.id === me.id), r = b.rows[i];
+    const cur = r?.current ?? 0;
+    return {
+      id: b.id, icon: b.icon, name: b.name, current: cur, rank: cur ? i + 1 : null, of: b.rows.length,
+      note: r?.slippedToday ? "Reset today. Day 1 starts tomorrow." : cur ? `#${i + 1} of ${b.rows.length} · best ${r.best}` : "Log today to start",
+    };
+  }) : [];
 
   const todayTab = (
     <>
@@ -41,13 +53,22 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
       <div className="stats3" id="you">
         <div><b>#{mine?.rank ?? "–"}</b><span>Rank</span></div>
         <div><b>{mine?.total ?? 0}</b><span>Points</span></div>
-        <div><b>{mine?.streak ?? 0}🔥</b><span>Streak</span></div>
+        <div><b>{mine?.streak ?? 0}🔥</b><span>Training</span></div>
+      </div>
+      {me && <MyStreaks items={myStreaks} />}
+      <div className="truth">
+        <span className="label">Hard truth</span>
+        <p>{truth.text}</p>
+        <small>{truth.source}</small>
       </div>
       {me && (
         <div className="card-s">
           <span className="label">Today</span>
           <h3>{todayPlan.title}</h3>
           <p className="note">{todayPlan.detail}</p>
+          <ol className="week" aria-label="This week's plan">
+            {[1, 2, 3, 4, 5, 6, 0].map((d) => <li key={d} className={d === weekday() ? "on" : ""} title={WEEK_PLAN[d].title}><b>{WEEK_PLAN[d].day[0]}</b><small>{WEEK_PLAN[d].title.split(" ")[0]}</small></li>)}
+          </ol>
         </div>
       )}
       <div className="card-s">
