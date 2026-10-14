@@ -198,7 +198,9 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
               {accepted.map((p) => {
                 const r = results.find((x) => x.participant_id === p.id && x.event_id === ev.id && x.baseline === baseline);
                 return (
-                  <li key={p.id}>
+                  // Keyed by event too, so switching events gives each box a fresh
+                  // state instead of keeping the last event's typed value.
+                  <li key={`${p.id}-${ev.id}-${baseline}`}>
                     <b>{displayName(p)}</b>
                     <ResultCell participantId={p.id} eventId={ev.id} baseline={baseline} label={`${displayName(p)}, ${ev.name}`}
                       initial={formatValue(ev, r?.value)} initialPoints={r ? points(ev.scoring, r.value) : null}
