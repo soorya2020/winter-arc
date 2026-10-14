@@ -1,7 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { addParticipant, addQuote, removeQuote, broadcast, emailInvite, login, removeParticipant, saveResult, sendRemindersNow, testEmail, testPush, saveSchedule, removeSchedule, toggleSchedule, importSeasonDates, closeRequest } from "./actions";
+import { addParticipant, addQuote, removeQuote, broadcast, emailInvite, login, removeParticipant, saveResult, sendRemindersNow, testEmail, testPush, saveSchedule, removeSchedule, toggleSchedule, importSeasonDates, closeRequest, addBonus, removeBonus } from "./actions";
 
 type Msg = { ok?: string; error?: string } | null;
 const Note = ({ m }: { m: Msg }) => (m?.error ? <p className="err">{m.error}</p> : m?.ok ? <p className="ok">{m.ok}</p> : null);
@@ -209,6 +209,44 @@ export function QuoteForm() {
 export function RemoveQuote({ id }: { id: number }) {
   const [pending, start] = useTransition();
   return <button className="ghost small" disabled={pending} aria-busy={pending} onClick={() => start(() => removeQuote(id))}>Remove</button>;
+}
+
+export function BonusForm({ people }: { people: { id: string; name: string }[] }) {
+  const [m, action] = useFormState(async (p: Msg, fd: FormData) => {
+    const r = await addBonus(p, fd);
+    if (r?.ok) {
+      const f = document.getElementById("bonus-form") as HTMLFormElement | null;
+      // Keep the member picked so several awards in a row are quick; clear the rest.
+      f?.querySelectorAll<HTMLInputElement>("input").forEach((i) => { i.value = ""; });
+    }
+    return r;
+  }, null as Msg);
+  return (
+    <form id="bonus-form" className="card bonus-form" action={action}>
+      <div className="field"><label htmlFor="b-who">Member</label>
+        <select id="b-who" name="participant" required defaultValue="">
+          <option value="" disabled>Pick someone</option>
+          {people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+        </select>
+      </div>
+      <div className="field"><label htmlFor="b-pts">Points</label><input id="b-pts" name="points" inputMode="decimal" required placeholder="10 or -5" pattern="[+-]?[0-9]*[.]?[0-9]+" /></div>
+      <div className="field bonus-reason"><label htmlFor="b-why">Reason (optional)</label><input id="b-why" name="reason" maxLength={120} placeholder="Showed up at 5am in the rain" /></div>
+      <Submit>Give points</Submit>
+      <Note m={m} />
+    </form>
+  );
+}
+
+export function RemoveBonus({ id }: { id: number }) {
+  const [confirm, setConfirm] = useState(false);
+  const [pending, start] = useTransition();
+  if (!confirm) return <button type="button" className="ghost small" onClick={() => setConfirm(true)}>Delete</button>;
+  return (
+    <span className="adm-actions">
+      <button type="button" className="small" style={{ background: "var(--bad)" }} disabled={pending} aria-busy={pending} onClick={() => start(() => removeBonus(id))}>Yes, delete</button>
+      <button type="button" className="ghost small" onClick={() => setConfirm(false)}>Keep</button>
+    </span>
+  );
 }
 
 export function CloseRequest({ id }: { id: number }) {

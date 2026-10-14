@@ -483,8 +483,8 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 .adm-row { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; }
 .adm-row:not(:has(.adm-rk)) { grid-template-columns: minmax(0, 1fr) auto; }
 .adm-rk { font-family: var(--display); font-size: 1.6rem; width: 1.6rem; text-align: center; }
-.adm .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 2px solid var(--ink); border-radius: 999px; padding: 3px; }
-.adm .seg a { text-align: center; padding: .65rem .3rem; border-radius: 999px; font-weight: 800; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink); text-decoration: none; }
+.adm .seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border: 2px solid var(--ink); border-radius: 999px; padding: 3px; }
+.adm .seg a { text-align: center; padding: .65rem .3rem; border-radius: 999px; font-weight: 800; font-size: .78rem; letter-spacing: .03em; text-transform: uppercase; color: var(--ink); text-decoration: none; }
 .adm .seg a.on { background: var(--ink); color: var(--on-ink); }
 .chips-row { display: flex; gap: .45rem; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
 .chips-row::-webkit-scrollbar { display: none; }
@@ -585,7 +585,7 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 .adm-actions > div:first-child > div > * { flex: 1 1 0; justify-content: center; text-align: center; padding-inline: .4rem !important; white-space: nowrap; }
 .adm-actions > button.ghost:last-child { margin-left: auto; min-height: 2rem; }
 .adm .nudge { border-color: var(--wa); color: var(--wa-deep); }
-.adm .seg.chan { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.adm .seg.chan { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row; }
 .adm .seg.chan button { all: unset; cursor: pointer; text-align: center; padding: .65rem .3rem; border-radius: 999px; font-weight: 800; font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; }
 .adm .seg.chan button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
 .adm .seg.chan button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
@@ -831,3 +831,11 @@ button[aria-busy="true"]:disabled { opacity: .8; }
 .truth .label { color: var(--accent); }
 .truth p { margin: 0; font-family: var(--display); font-size: 1.45rem; line-height: 1.05; text-transform: uppercase; }
 .truth small { font-size: .72rem; color: var(--night-muted); }
+
+/* Admin > Results > Bonus: custom points */
+.bonus-form { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: start; }
+.bonus-form .bonus-reason, .bonus-form button, .bonus-form .err, .bonus-form .ok { grid-column: 1 / -1; }
+.adm-row:has(.bonus-pts) { grid-template-columns: auto minmax(0, 1fr) auto; }
+.bonus-totals { display: flex; flex-wrap: wrap; gap: .4rem; }
+.bonus-pts { font-weight: 900; font-size: 1.05rem; min-width: 3.2rem; color: var(--good, var(--ink)); font-variant-numeric: tabular-nums; }
+.bonus-pts.neg { color: var(--bad); }

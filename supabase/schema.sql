@@ -109,3 +109,13 @@ create table if not exists requests (
   created_at timestamptz not null default now()
 );
 alter table requests enable row level security;
+
+-- Custom points the organizer awards from Admin > Results > Bonus. They count toward the total.
+create table if not exists bonus_points (
+  id bigserial primary key,
+  participant_id uuid not null references participants(id) on delete cascade,
+  points numeric not null check (points between -1000 and 1000 and points <> 0),
+  reason text,
+  created_at timestamptz not null default now()
+);
+alter table bonus_points enable row level security;

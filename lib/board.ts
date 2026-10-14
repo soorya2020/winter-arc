@@ -5,18 +5,19 @@ import { EVENTS } from "./season.ts";
 import type { Profile } from "./profile.ts";
 import { streak, lastDays } from "./streak.ts";
 import { trainingHabitDays } from "./habits";
+import { allBonuses } from "./bonus";
 
 export type BoardRow = Standing & { rank: number; streak: number; sessions: number; recent: boolean[]; catchphrase: string | null; best: string | null; profile: Profile };
 
 /** Leaderboard of everyone who accepted their invite. */
 export async function loadBoard(): Promise<BoardRow[]> {
-  const [people, results, sessions, habitDays] = await Promise.all([allParticipants(), allResults(), practiceDays(), trainingHabitDays()]);
+  const [people, results, sessions, habitDays, bonuses] = await Promise.all([allParticipants(), allResults(), practiceDays(), trainingHabitDays(), allBonuses()]);
   const days = [...sessions, ...habitDays];
   const accepted = people.filter((p) => p.accepted_at);
   const byPerson = new Map<string, string[]>();
   for (const d of days) byPerson.set(d.participant_id, [...(byPerson.get(d.participant_id) ?? []), d.day]);
   let rank = 0, last = Number.NaN;
-  return standings(accepted.map((p) => ({ id: p.id, name: displayName(p) })), results).map((s, i) => {
+  return standings(accepted.map((p) => ({ id: p.id, name: displayName(p) })), results, bonuses).map((s, i) => {
     if (s.total !== last) { rank = i + 1; last = s.total; }
     const mine = [...new Set(byPerson.get(s.id) ?? [])];
     const scored = EVENTS.filter((e) => s.perEvent[e.id] != null);

@@ -42,19 +42,22 @@ export function formatValue(ev: SeasonEvent, value: number | null | undefined): 
 
 export type ResultRow = { participant_id: string; event_id: string; value: number; baseline: boolean };
 
+export type BonusRow = { participant_id: string; points: number };
+
 export type Standing = {
   id: string;
   name: string;
   perEvent: Record<string, number>; // event id -> points
   running: number;
   strength: number;
-  total: number;
+  bonus: number; // custom points from the organizer, can be negative
+  total: number; // event points plus bonus
   baselineTotal: number;
   leap: number;
   limit: string | null; // event with the lowest share of its cap, once all are scored
 };
 
-export function standings(people: { id: string; name: string }[], results: ResultRow[]): Standing[] {
+export function standings(people: { id: string; name: string }[], results: ResultRow[], bonuses: BonusRow[] = []): Standing[] {
   const rows = people.map((p) => {
     const perEvent: Record<string, number> = {};
     const base: Record<string, number> = {};
@@ -66,7 +69,9 @@ export function standings(people: { id: string; name: string }[], results: Resul
     }
     const sum = (w?: string) =>
       round1(EVENTS.filter((e) => !w || e.weekend === w).reduce((a, e) => a + (perEvent[e.id] ?? 0), 0));
-    const total = sum();
+    const events = sum();
+    const bonus = round1(bonuses.filter((b) => b.participant_id === p.id).reduce((a, b) => a + Number(b.points), 0));
+    const total = round1(events + bonus);
     const baselineTotal = round1(Object.values(base).reduce((a, b) => a + b, 0));
     const scored = EVENTS.filter((e) => perEvent[e.id] != null);
     const limitEv = scored.length === EVENTS.length
@@ -78,9 +83,10 @@ export function standings(people: { id: string; name: string }[], results: Resul
       perEvent,
       running: sum("running"),
       strength: sum("strength"),
+      bonus,
       total,
       baselineTotal,
-      leap: Object.keys(base).length ? round1(total - baselineTotal) : 0,
+      leap: Object.keys(base).length ? round1(events - baselineTotal) : 0,
       limit: limitEv?.name ?? null,
     };
   });

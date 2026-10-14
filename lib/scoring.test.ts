@@ -45,6 +45,23 @@ test("standings total, rank and limit", () => {
   assert.equal(second.limit, null);
 });
 
+test("bonus points add to the total, can be negative, and don't inflate the leap", () => {
+  const people = [{ id: "a", name: "A" }, { id: "b", name: "B" }];
+  const res = [
+    { participant_id: "a", event_id: "long-run", value: 5, baseline: false },
+    { participant_id: "a", event_id: "long-run", value: 3, baseline: true },
+    { participant_id: "b", event_id: "long-run", value: 6, baseline: false },
+  ];
+  const bonuses = [{ participant_id: "a", points: 25 }, { participant_id: "a", points: 2.5 }, { participant_id: "b", points: -10 }];
+  const [first, second] = standings(people, res, bonuses);
+  assert.equal(first.id, "a");
+  assert.equal(first.bonus, 27.5);
+  assert.equal(first.total, 77.5);
+  assert.equal(first.leap, 20);
+  assert.equal(second.bonus, -10);
+  assert.equal(second.total, 50);
+});
+
 import { trashTalk, comeback, pickTarget, type Talker } from "./trash.ts";
 
 const base = (o: Partial<Talker>): Talker => ({ id: "x", name: "X", rank: 1, total: 0, streak: 0, limit: null, best: null, catchphrase: null, profile: {}, ...o });
