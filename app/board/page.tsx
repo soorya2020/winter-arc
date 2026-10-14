@@ -8,6 +8,7 @@ import ShareButtons from "./ShareButtons";
 import GearUp from "./GearUp";
 import DosaCard from "./DosaCard";
 import QuickLog from "@/components/QuickLog";
+import MyStreaks from "@/components/MyStreaks";
 import { autoClaims, myHabitLogs, streakBoard } from "@/lib/habits";
 import { siteUrl } from "@/lib/email";
 import { quoteOfTheDay } from "@/lib/quotes";
@@ -35,19 +36,33 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
     return { id: r.id, name: r.name.split(" ")[0], count: dosaCount(r.profile), icon: DOSAS[fav].icon };
   }).sort((a, b) => b.count - a.count);
 
+  // Each streak this member follows, with where they stand on its board.
+  const myStreaks = me ? streaks.filter((b) => me.profile?.habitsOn?.includes(b.id)).map((b) => {
+    const i = b.rows.findIndex((r) => r.id === me.id), r = b.rows[i];
+    const cur = r?.current ?? 0;
+    return {
+      id: b.id, icon: b.icon, name: b.name, current: cur, rank: cur ? i + 1 : null, of: b.rows.length,
+      note: r?.slippedToday ? "Reset today. Day 1 starts tomorrow." : cur ? `#${i + 1} of ${b.rows.length} · best ${r.best}` : "Log today to start",
+    };
+  }) : [];
+
   const todayTab = (
     <>
       {me && <GearUp installed={!!me.profile?.installedAt} lockedIn={!!me.profile?.lockedInAt} name={first} />}
       <div className="stats3" id="you">
         <div><b>#{mine?.rank ?? "–"}</b><span>Rank</span></div>
         <div><b>{mine?.total ?? 0}</b><span>Points</span></div>
-        <div><b>{mine?.streak ?? 0}🔥</b><span>Streak</span></div>
+        <div><b>{mine?.streak ?? 0}🔥</b><span>Training</span></div>
       </div>
+      {me && <MyStreaks items={myStreaks} />}
       {me && (
         <div className="card-s">
           <span className="label">Today</span>
           <h3>{todayPlan.title}</h3>
           <p className="note">{todayPlan.detail}</p>
+          <ol className="week" aria-label="This week's plan">
+            {[1, 2, 3, 4, 5, 6, 0].map((d) => <li key={d} className={d === weekday() ? "on" : ""} title={WEEK_PLAN[d].title}><b>{WEEK_PLAN[d].day[0]}</b><small>{WEEK_PLAN[d].title.split(" ")[0]}</small></li>)}
+          </ol>
         </div>
       )}
       <div className="card-s">
