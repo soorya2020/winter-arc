@@ -8,7 +8,8 @@ import { EVENTS } from "@/lib/season.ts";
 import { formatValue, points } from "@/lib/scoring.ts";
 import { loadBoard } from "@/lib/board";
 import { allQuotes, quoteOfTheDay } from "@/lib/quotes";
-import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell, TestEmailButton, TestPushButton, ScheduleForm, ScheduleActions, ImportSeasonDates, CloseRequest } from "./ui";
+import { AddForm, QuoteForm, RemoveQuote, Broadcast, InviteControls, LoginForm, ReminderButton, RemoveButton, ResultCell, TestEmailButton, TestPushButton, ScheduleForm, ScheduleActions, ImportSeasonDates, CloseRequest, BonusForm, RemoveBonus } from "./ui";
+import { BONUS_SQL, allBonuses, bonusMissing } from "@/lib/bonus";
 import { HABITS_SQL, openRequests, streakBoard } from "@/lib/habits";
 import { logout } from "./actions";
 import { passwordColumnMissing, setupProblems } from "@/lib/health";
@@ -40,6 +41,7 @@ const WEEKENDS = [
   { id: "running", label: "Running" },
   { id: "strength", label: "Strength" },
   { id: "baseline", label: "Baseline" },
+  { id: "bonus", label: "Bonus" },
 ] as const;
 // Old links (?tab=running) still land on the right weekend.
 const OLD: Record<string, string> = { running: "running", strength: "strength", baseline: "baseline" };
@@ -177,15 +179,19 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
 
       {tab === "results" && (() => {
         const w = (WEEKENDS.find((x) => x.id === (OLD[asked] ?? searchParams.w)) ?? WEEKENDS[0]).id;
+        const seg = (
+          <div className="seg" role="group" aria-label="Weekend">
+            {WEEKENDS.map((x) => <Link key={x.id} href={`/admin?tab=results&w=${x.id}`} className={x.id === w ? "on" : ""}>{x.label}</Link>)}
+          </div>
+        );
+        if (w === "bonus") return <BonusPoints seg={seg} people={accepted.map((p) => ({ id: p.id, name: displayName(p) }))} />;
         const baseline = w === "baseline";
         const evs = baseline ? EVENTS : EVENTS.filter((e) => e.weekend === w);
         const ev = evs.find((e) => e.id === searchParams.ev) ?? evs[0];
         const done = accepted.filter((p) => results.some((x) => x.participant_id === p.id && x.event_id === ev.id && x.baseline === baseline)).length;
         return (
           <div className="adm-body">
-            <div className="seg" role="group" aria-label="Weekend">
-              {WEEKENDS.map((x) => <Link key={x.id} href={`/admin?tab=results&w=${x.id}`} className={x.id === w ? "on" : ""}>{x.label}</Link>)}
-            </div>
+            {seg}
             <div className="chips-row" role="group" aria-label="Event">
               {evs.map((e) => <Link key={e.id} href={`/admin?tab=results&w=${w}&ev=${e.id}`} className={e.id === ev.id ? "on" : ""}>{e.name}</Link>)}
             </div>
@@ -230,6 +236,44 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
   );
 }
 
+async function BonusPoints({ seg, people }: { seg: React.ReactNode; people: { id: string; name: string }[] }) {
+  const [missing, list, rows] = await Promise.all([bonusMissing(), allBonuses(), loadBoard()]);
+  const name = (id: string) => people.find((p) => p.id === id)?.name ?? "Someone";
+  const given = rows.filter((r) => r.bonus);
+  return (
+    <div className="adm-body">
+      {seg}
+      <div className="adm-ev"><div><h2>Bonus points</h2><p className="note">Give anyone extra points, or take some away with a minus. They add straight to their total on the leaderboard, on top of event scores.</p></div></div>
+      {missing ? (
+        <div className="panel adm-alert">
+          <h3>One database update needed</h3>
+          <p className="note">Bonus points need one new table. In Supabase, open SQL Editor, paste this and press Run, then reload this page:</p>
+          <code className="adm-code">{BONUS_SQL}</code>
+        </div>
+      ) : (
+        <>
+          {people.length ? <BonusForm people={people} /> : <p className="note">Nobody has accepted their invite yet.</p>}
+          {given.length > 0 && (
+            <div className="bonus-totals">
+              {given.map((r) => <span key={r.id} className="tag on">{r.name} {r.bonus > 0 ? "+" : ""}{r.bonus}</span>)}
+            </div>
+          )}
+          <ul className="adm-list">
+            {list.map((b) => (
+              <li key={b.id} className="adm-card adm-row">
+                <span className={`bonus-pts${b.points < 0 ? " neg" : ""}`}>{b.points > 0 ? "+" : ""}{b.points}</span>
+                <div style={{ minWidth: 0 }}><b>{name(b.participant_id)}</b><div className="note">{b.reason ? `${b.reason} · ` : ""}{new Date(b.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: TZ })}</div></div>
+                <RemoveBonus id={b.id} />
+              </li>
+            ))}
+            {!list.length && <li className="note">No bonus points given yet.</li>}
+          </ul>
+        </>
+      )}
+    </div>
+  );
+}
+
 async function Awards() {
   const [rows, streaks] = await Promise.all([loadBoard(), streakBoard()]);
   const top = (k: "total" | "running" | "strength" | "leap") => [...rows].sort((a, b) => b[k] - a[k])[0];
@@ -247,7 +291,7 @@ async function Awards() {
         {rows.map((r) => (
           <li key={r.id} className="adm-card adm-row">
             <span className="adm-rk">{r.rank}</span>
-            <div style={{ minWidth: 0 }}><b>{r.name}</b><div className="note">{r.total} pts</div></div>
+            <div style={{ minWidth: 0 }}><b>{r.name}</b><div className="note">{r.total} pts{r.bonus ? ` · ${r.bonus > 0 ? "+" : ""}${r.bonus} bonus` : ""}</div></div>
             <div className="adm-actions"><Link className="btn ghost" href={`/certificate/${r.id}`}>Certificate</Link><a className="btn ghost" href={`/api/poster/${r.id}`}>Poster</a></div>
           </li>
         ))}

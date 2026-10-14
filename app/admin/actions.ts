@@ -208,3 +208,25 @@ export async function closeRequest(id: number) {
   await db().from("requests").update({ done: true }).eq("id", id);
   revalidatePath("/admin");
 }
+
+export async function addBonus(_: Msg, form: FormData): Promise<Msg> {
+  requireAdmin();
+  const participantId = String(form.get("participant") ?? "");
+  const pts = Math.round(Number(String(form.get("points") ?? "").trim().replace(/^\+/, "")) * 10) / 10;
+  const reason = String(form.get("reason") ?? "").replace(/\s+/g, " ").trim().slice(0, 120) || null;
+  if (!participantId) return { error: "Pick who gets the points." };
+  if (!Number.isFinite(pts) || pts === 0) return { error: "Enter the points, like 10 or -5." };
+  if (Math.abs(pts) > 1000) return { error: "Keep it between -1000 and 1000." };
+  const { data: who } = await db().from("participants").select("name, nickname").eq("id", participantId).maybeSingle();
+  if (!who) return { error: "That member isn't on the list." };
+  const { error } = await db().from("bonus_points").insert({ participant_id: participantId, points: pts, reason });
+  if (error) return { error: /bonus_points/i.test(error.message) ? "The bonus table isn't in the database yet. Run the line shown above in Supabase first." : "Couldn't save it. Try again." };
+  revalidatePath("/admin"); revalidatePath("/board");
+  return { ok: `${pts > 0 ? "+" : ""}${pts} for ${who.nickname || who.name}.` };
+}
+
+export async function removeBonus(id: number) {
+  requireAdmin();
+  await db().from("bonus_points").delete().eq("id", id);
+  revalidatePath("/admin"); revalidatePath("/board");
+}
