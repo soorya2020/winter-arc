@@ -21,6 +21,7 @@ test("timed events lose points per step and keep a floor", () => {
   assert.equal(points(ev("3k"), 3000), 20);
   assert.equal(points(ev("sprint"), 13.2), 100);
   assert.equal(points(ev("sprint"), 14.5), 90);
+  assert.equal(points(ev("sprint"), 15), 80);
   assert.equal(points(ev("sprint"), 15.1), 70);
   assert.equal(points(ev("sprint"), 0), 0);
 });
