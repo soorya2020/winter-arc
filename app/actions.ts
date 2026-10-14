@@ -208,7 +208,10 @@ export async function setHabitsOn(on: string[]): Promise<{ ok?: boolean; error?:
   const me = await currentParticipant();
   if (!me?.accepted_at) return { error: "Sign in first." };
   const habitsOn = HABITS.filter((h) => on.includes(h.id)).map((h) => h.id);
-  const { error } = await db().from("participants").update({ profile: { ...(me.profile ?? {}), habitsOn } }).eq("id", me.id);
+  // Auto-counting habits start counting the day they're picked, unless the member already entered a streak.
+  const habitClaims = { ...(me.profile?.habitClaims ?? {}) };
+  for (const h of HABITS) if (h.kind === "check" && h.claim && habitsOn.includes(h.id) && !habitClaims[h.id]) habitClaims[h.id] = { days: 1, on: today() };
+  const { error } = await db().from("participants").update({ profile: { ...(me.profile ?? {}), habitsOn, habitClaims } }).eq("id", me.id);
   return error ? { error: "Couldn't save. Try again." } : { ok: true };
 }
 

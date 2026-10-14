@@ -164,7 +164,11 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
                 </div>
               </>
             )}
-            {view === "pick" && <Pick on={on ?? []} first={on == null} onDone={(o) => { if (o) setOn(o); if (o || on != null) setSheet({ open: true, view: "log" }); else setSheet(CLOSED); }} />}
+            {view === "pick" && <Pick on={on ?? []} first={on == null} onDone={(o) => {
+              if (o) {
+                setOn(o);
+                setClaims((c) => { const n = { ...c }; for (const h of HABITS) if (h.kind === "check" && h.claim && o.includes(h.id) && !n[h.id]) n[h.id] = { days: 1, on: day }; return n; });
+              } if (o || on != null) setSheet({ open: true, view: "log" }); else setSheet(CLOSED); }} />}
             {view === "ask" && <Ask onBack={() => (home ? setSheet(CLOSED) : setSheet({ open: true, view: "log" }))} />}
           </div>
         </>
@@ -191,7 +195,6 @@ function Claim({ id, name, no, claim, onDone }: { id: string; name: string; no: 
       <div className="qk-claim-row">
         <input id={`claim-${id}`} type="number" inputMode="numeric" min={1} max={3650} value={days} onChange={(e) => setDays(e.target.value)} placeholder="Days" autoFocus />
         <button type="submit" className="chip acc" disabled={!ok || !!saving} aria-busy={saving === "save"}>Save</button>
-        {claim && <button type="button" className="chip ghost" disabled={!!saving} aria-busy={saving === "clear"} onClick={() => save(0)}>Remove</button>}
         <button type="button" className="chip ghost" disabled={!!saving} onClick={() => onDone()}>Cancel</button>
       </div>
       {error && <small className="err">{error}</small>}

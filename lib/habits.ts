@@ -1,5 +1,5 @@
 import "server-only";
-import { allParticipants, db, displayName } from "./db";
+import { allParticipants, db, displayName, type Participant } from "./db";
 import { HABITS } from "./season.ts";
 import { countedDays, longest, streak, today, type StreakClaim } from "./streak.ts";
 
@@ -17,6 +17,22 @@ async function allHabitRows<T>(columns: string, where: (q: any) => any = (q) => 
 }
 
 export type HabitLog = { day: string; habit: string; value: number };
+
+/** Starting points for the auto-counting habits (no-fap, Beedi Break): the member's own entered streak, or else the day
+    they started following it. Following since before this was recorded counts from their first log, or the day they joined. */
+export function autoClaims(p: Pick<Participant, "profile" | "accepted_at">, logs: { day: string; habit: string }[]): Record<string, StreakClaim> {
+  const out: Record<string, StreakClaim> = {};
+  for (const h of HABITS) {
+    if (h.kind !== "check" || !h.claim) continue;
+    const own = p.profile?.habitClaims?.[h.id];
+    if (own) { out[h.id] = own; continue; }
+    if (!p.profile?.habitsOn?.includes(h.id)) continue;
+    const first = logs.filter((l) => l.habit === h.id).map((l) => l.day).sort()[0];
+    const joined = p.accepted_at ? today(new Date(p.accepted_at)) : today();
+    out[h.id] = { days: 1, on: first && first < joined ? first : joined };
+  }
+  return out;
+}
 
 /** One member's habit history for the quick-log sheet. `missing` means the table isn't there yet. */
 export async function myHabitLogs(participantId: string): Promise<{ logs: HabitLog[]; missing: boolean }> {
@@ -55,7 +71,7 @@ export async function streakBoard(): Promise<StreakBoard> {
     const mine = logs.filter((l) => l.habit === h.id);
     const rows = people.filter((p) => p.accepted_at && (p.profile?.habitsOn?.includes(h.id) || p.profile?.habitClaims?.[h.id] || mine.some((l) => l.participant_id === p.id))).map((p) => {
       const own = mine.filter((l) => l.participant_id === p.id);
-      const claim = (h.kind === "check" && h.claim && p.profile?.habitClaims?.[h.id]) || null;
+      const claim = autoClaims(p, own)[h.id] ?? null;
       const good = countedDays(own.filter((l) => l.value > 0).map((l) => l.day), own.filter((l) => l.value === 0).map((l) => l.day), claim);
       const slippedToday = own.some((l) => l.day === day && l.value === 0);
       return {
