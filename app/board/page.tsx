@@ -16,7 +16,7 @@ import { signOut } from "../actions";
 import { currentParticipant, isAdmin } from "@/lib/auth";
 import { loadBoard } from "@/lib/board";
 import { displayName } from "@/lib/db";
-import { EVENTS, WEEK_PLAN } from "@/lib/season.ts";
+import { EVENTS, HARD_TRUTHS, WEEK_PLAN } from "@/lib/season.ts";
 import { fmtWhen, upcoming } from "@/lib/schedule";
 import { today, weekday } from "@/lib/streak.ts";
 import { DOSAS, dosaCount, type DosaKind } from "@/lib/profile.ts";
@@ -30,6 +30,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
   const [rows, quote, habits, streaks, { next: ms }] = await Promise.all([loadBoard(), quoteOfTheDay(), me ? myHabitLogs(me.id) : null, streakBoard(), upcoming()]);
   const mine = rows.find((r) => r.id === me?.id);
   const todayPlan = WEEK_PLAN[weekday()];
+  const truth = HARD_TRUTHS[Math.floor(Date.parse(today()) / 864e5) % HARD_TRUTHS.length];
   const first = me ? displayName(me).split(" ")[0] : "Admin";
   const dosaWall = rows.filter((r) => dosaCount(r.profile) > 0).map((r) => {
     const fav = (Object.keys(DOSAS) as DosaKind[]).reduce((a, k) => ((r.profile.dosas?.[k] ?? 0) > (r.profile.dosas?.[a] ?? 0) ? k : a), "masala");
@@ -55,6 +56,11 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
         <div><b>{mine?.streak ?? 0}🔥</b><span>Training</span></div>
       </div>
       {me && <MyStreaks items={myStreaks} />}
+      <div className="truth">
+        <span className="label">Hard truth</span>
+        <p>{truth.text}</p>
+        <small>{truth.source}</small>
+      </div>
       {me && (
         <div className="card-s">
           <span className="label">Today</span>

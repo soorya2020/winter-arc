@@ -685,10 +685,10 @@ button.wide, .cta.wide { width: 100%; justify-content: center; }
 .foot { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: .8rem; color: var(--muted); padding-top: 1rem; border-top: 1px solid var(--line); }
 .foot a { color: var(--ink); font-weight: 700; }
 .app .count { gap: .4rem; }
-.app .unit { border-top: 0; background: var(--ink); color: var(--on-ink); padding: .55rem .4rem .45rem; border-radius: .6rem; text-align: center; justify-items: center; }
+.app .unit { border-top: 0; background: var(--track); color: var(--ink); padding: .55rem .4rem .45rem; border-radius: .6rem; text-align: center; justify-items: center; }
 .app .unit b { font-size: 2rem; }
 .app .unit:first-child b { color: var(--accent); }
-.app .unit span { color: rgb(var(--on-ink-rgb) / .6); font-size: .62rem; }
+.app .unit span { color: var(--muted); font-size: .62rem; }
 .app .count-note { text-align: center; }
 .app .orgs { margin-top: .5rem; }
 .app .orgs h2 { font-size: 2.6rem; }
@@ -825,3 +825,9 @@ button[aria-busy="true"]:disabled { opacity: .8; }
 .week li small { font-size: .58rem; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 .1rem; }
 .week li.on { background: var(--ink); color: var(--on-ink); }
 .week li.on small { color: var(--on-ink); }
+
+/* Today tab: the daily hard truth */
+.truth { display: grid; gap: .4rem; padding: 1rem 1.1rem; border-radius: 1rem; background: var(--night); color: var(--on-ink); border-left: 6px solid var(--accent); }
+.truth .label { color: var(--accent); }
+.truth p { margin: 0; font-family: var(--display); font-size: 1.45rem; line-height: 1.05; text-transform: uppercase; }
+.truth small { font-size: .72rem; color: var(--night-muted); }
