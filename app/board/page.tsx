@@ -8,7 +8,7 @@ import ShareButtons from "./ShareButtons";
 import GearUp from "./GearUp";
 import DosaCard from "./DosaCard";
 import QuickLog from "@/components/QuickLog";
-import { myHabitLogs, streakBoard } from "@/lib/habits";
+import { autoClaims, myHabitLogs, streakBoard } from "@/lib/habits";
 import { siteUrl } from "@/lib/email";
 import { quoteOfTheDay } from "@/lib/quotes";
 import { signOut } from "../actions";
@@ -84,7 +84,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
           <Link className="mark" href="/">Winter Arc</Link>
           <span className="pill">{me ? `#${mine?.rank ?? "–"} · ${first}` : "Admin view"}</span>
         </header>
-        {me && habits && <QuickLog logs={habits.logs} on={me.profile?.habitsOn ?? null} claims={me.profile?.habitClaims ?? {}} missing={habits.missing} />}
+        {me && habits && <QuickLog logs={habits.logs} on={me.profile?.habitsOn ?? null} claims={autoClaims(me, habits.logs)} missing={habits.missing} />}
         <AppTabs streaks={streaks} rows={rows} meId={me?.id ?? null} events={EVENTS.map((e) => ({ id: e.id, name: e.name, weekend: e.weekend }))} today={todayTab} me={meTab} />
       </div>
     </>
