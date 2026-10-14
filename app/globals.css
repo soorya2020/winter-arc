@@ -650,10 +650,10 @@ form.join > .note { margin: 0; text-align: center; }
 .card-s .count { gap: .5rem; }
 .card-s .unit b { font-size: 2rem; }
 .stats3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
-.stats3 div { display: grid; gap: .1rem; padding: .8rem .6rem; border-radius: 1rem; background: var(--ink); color: var(--on-ink); text-align: center; }
+.stats3 div { display: grid; gap: .1rem; padding: .8rem .6rem; border-radius: 1rem; background: var(--track); color: var(--ink); text-align: center; }
 .stats3 b { font-family: var(--display); font-weight: 400; font-size: 1.9rem; line-height: 1; }
 .stats3 div:first-child b { color: var(--accent); }
-.stats3 span { font-size: .66rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; opacity: .7; }
+.stats3 span { font-size: .66rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .app .quote { border: 0; margin: 0; padding: 0 .25rem; }
 .app .quote > p { font-size: 1.4rem; }
 .app .gear { margin: 0; }
