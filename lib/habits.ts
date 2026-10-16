@@ -18,7 +18,7 @@ async function allHabitRows<T>(columns: string, where: (q: any) => any = (q) => 
 
 export type HabitLog = { day: string; habit: string; value: number };
 
-/** Starting points for the auto-counting habits (no-fap, Beedi Break): the member's own entered streak, or else the day
+/** Starting points for the auto-counting habits (No-fap, Beedi Break, Gym): the member's own entered streak, or else the day
     they started following it. Following since before this was recorded counts from their first log, or the day they joined. */
 export function autoClaims(p: Pick<Participant, "profile" | "accepted_at">, logs: { day: string; habit: string }[]): Record<string, StreakClaim> {
   const out: Record<string, StreakClaim> = {};
