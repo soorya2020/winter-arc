@@ -135,7 +135,7 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
                 <div className="qk-bar">{shown.map((h, i) => <i key={h.id} className={i < doneN ? "on" : ""} />)}</div>
                 {missing && <p className="err">Quick log needs a one-time database update. Ask the organizer to run it from the admin panel.</p>}
                 {shown.map((h) => (
-                  <div key={h.id} className={`qk-row${h.kind === "check" && h.rest && h.no && vals[h.id] == null ? " three" : ""}${(vals[h.id] != null || auto(h)) && !(h.kind === "check" && vals[h.id] === 0) ? " done" : ""}`}>
+                  <div key={h.id} className={`qk-row${h.kind === "check" && h.rest && h.no && vals[h.id] == null && !auto(h) ? " three" : ""}${(vals[h.id] != null || auto(h)) && !(h.kind === "check" && vals[h.id] === 0) ? " done" : ""}`}>
                     <span className="qk-ic" aria-hidden="true">{h.icon}</span>
                     <div className="qk-txt">
                       <b>{h.name}</b><small>{sub(h)}</small>{err[h.id] && <small className="err">{err[h.id]}</small>}
@@ -197,7 +197,7 @@ function Claim({ id, name, no, claim, onDone }: { id: string; name: string; no: 
   const ok = Number.isInteger(n) && n >= 1 && n <= 3650;
   return (
     <form className="qk-claim" onSubmit={(e) => { e.preventDefault(); if (ok) save(n); }}>
-      <label htmlFor={`claim-${id}`}>How many days clean are you, counting today? {name} will keep counting up every day from there. Tap {no} if you slip.</label>
+      <label htmlFor={`claim-${id}`}>How many days in a row are you, counting today? {name} will keep counting up every day from there. Tap {no} if you slip.</label>
       <div className="qk-claim-row">
         <input id={`claim-${id}`} type="number" inputMode="numeric" min={1} max={3650} value={days} onChange={(e) => setDays(e.target.value)} placeholder="Days" autoFocus />
         <button type="submit" className="chip acc" disabled={!ok || !!saving} aria-busy={saving === "save"}>Save</button>

@@ -155,7 +155,7 @@ export const HABITS: Habit[] = [
   { id: "nofap", name: "No-fap", icon: "🔒", kind: "check", yes: "Clean ✓", no: "Slipped", claim: true },
   { id: "nosmoke", name: "Beedi Break", icon: "🚭", kind: "check", yes: "Clean ✓", no: "Lit one", claim: true },
   { id: "running", name: "Running", icon: "🏃", kind: "check", yes: "Ran ✓", training: true },
-  { id: "gym", name: "Gym", icon: "🏋️", kind: "check", yes: "Trained ✓", rest: "Rest day", no: "Skipped", training: true },
+  { id: "gym", name: "Gym", icon: "🏋️", kind: "check", yes: "Trained ✓", rest: "Rest day", no: "Skipped", claim: true, training: true },
 ];
 
 export function nextMilestone(now = new Date()) {
