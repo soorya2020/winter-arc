@@ -13,7 +13,7 @@ type Tab = "today" | "ring" | "ranks" | "me";
 const fromHash = (h: string): Tab => (h === "#ring" ? "ring" : h === "#ranks" || h === "#table" ? "ranks" : h === "#me" ? "me" : "today");
 
 export default function AppTabs({ rows: first, meId, events, today, me, streaks }: {
-  streaks: Streaks; rows: BoardRow[]; meId: string | null; events: { id: string; name: string; weekend: string }[]; today: React.ReactNode; me: React.ReactNode;
+  streaks: Streaks; rows: BoardRow[]; meId: string | null; events: { id: string; name: string; category: string; tba: boolean }[]; today: React.ReactNode; me: React.ReactNode;
 }) {
   const [tab, setTab] = useState<Tab>("today");
   const [board, setBoard] = useState<"events" | "streaks">("events");

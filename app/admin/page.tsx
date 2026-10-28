@@ -4,7 +4,7 @@ import { isAdmin } from "@/lib/auth";
 import { allParticipants, allResults, displayName } from "@/lib/db";
 import { inviteLink } from "@/lib/reminders";
 import { siteUrl } from "@/lib/email";
-import { EVENTS } from "@/lib/season.ts";
+import { AWARDS, CATEGORIES, EVENTS } from "@/lib/season.ts";
 import { formatValue, points } from "@/lib/scoring.ts";
 import { loadBoard } from "@/lib/board";
 import { allQuotes, quoteOfTheDay } from "@/lib/quotes";
@@ -37,14 +37,14 @@ const TABS = [
   { id: "quotes", label: "Bro talk" },
   { id: "awards", label: "Awards" },
 ];
-const WEEKENDS = [
-  { id: "running", label: "Running" },
-  { id: "strength", label: "Strength" },
+// Result entry: one tab per event-day category, then baseline and bonus.
+const GROUPS = [
+  ...CATEGORIES.map((c) => ({ id: c.id as string, label: c.short })),
   { id: "baseline", label: "Baseline" },
   { id: "bonus", label: "Bonus" },
-] as const;
-// Old links (?tab=running) still land on the right weekend.
-const OLD: Record<string, string> = { running: "running", strength: "strength", baseline: "baseline" };
+];
+// Old links (?tab=running, ?w=running) still land on the right group.
+const OLD: Record<string, string> = { running: "explosive", strength: "strength", baseline: "baseline" };
 
 export default async function Admin({ searchParams }: { searchParams: { tab?: string; w?: string; ev?: string } }) {
   if (!isAdmin()) {
@@ -178,15 +178,15 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
       )}
 
       {tab === "results" && (() => {
-        const w = (WEEKENDS.find((x) => x.id === (OLD[asked] ?? searchParams.w)) ?? WEEKENDS[0]).id;
+        const w = (GROUPS.find((x) => x.id === (OLD[asked] ?? OLD[searchParams.w ?? ""] ?? searchParams.w)) ?? GROUPS[0]).id;
         const seg = (
-          <div className="seg" role="group" aria-label="Weekend">
-            {WEEKENDS.map((x) => <Link key={x.id} href={`/admin?tab=results&w=${x.id}`} className={x.id === w ? "on" : ""}>{x.label}</Link>)}
+          <div className="seg wrap" role="group" aria-label="Category">
+            {GROUPS.map((x) => <Link key={x.id} href={`/admin?tab=results&w=${x.id}`} className={x.id === w ? "on" : ""}>{x.label}</Link>)}
           </div>
         );
         if (w === "bonus") return <BonusPoints seg={seg} people={accepted.map((p) => ({ id: p.id, name: displayName(p) }))} />;
         const baseline = w === "baseline";
-        const evs = baseline ? EVENTS : EVENTS.filter((e) => e.weekend === w);
+        const evs = baseline ? EVENTS : EVENTS.filter((e) => e.category === w);
         const ev = evs.find((e) => e.id === searchParams.ev) ?? evs[0];
         const done = accepted.filter((p) => results.some((x) => x.participant_id === p.id && x.event_id === ev.id && x.baseline === baseline)).length;
         return (
@@ -196,10 +196,10 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
               {evs.map((e) => <Link key={e.id} href={`/admin?tab=results&w=${w}&ev=${e.id}`} className={e.id === ev.id ? "on" : ""}>{e.name}</Link>)}
             </div>
             <div className="adm-ev">
-              <div><h2>{ev.name}</h2><p className="note">{ev.rule}</p></div>
+              <div><h2>{ev.name}</h2><p className="note">{ev.rule}{ev.scoring.kind === "tba" ? ". Enter results anyway; they score once the rule is set." : ""}</p></div>
               <span className="adm-done"><b>{done}</b>/{accepted.length} in</span>
             </div>
-            <p className="note">Type each result and tap Next on the keyboard to jump to the next person. It saves by itself. {ev.unit.startsWith("time (mm") ? "Times as 15:30. " : ev.unit.startsWith("time") ? "Times in seconds, like 14.2. " : ""}Clear a box to remove a result.{baseline ? " Baseline doesn't count toward the total; it powers Biggest Leap." : ""}</p>
+            <p className="note">Type each result and tap Next on the keyboard to jump to the next person. It saves by itself. {ev.unit.startsWith("time (mm") ? "Times as 15:30. " : ev.unit.startsWith("time") ? "Times in seconds, like 14.2. " : ""}Clear a box to remove a result.{baseline ? " Baseline doesn't count toward the total; it powers Under Dog to Beast." : ""}</p>
             <ul className="adm-entry">
               {accepted.map((p) => {
                 const r = results.find((x) => x.participant_id === p.id && x.event_id === ev.id && x.baseline === baseline);
@@ -276,14 +276,22 @@ async function BonusPoints({ seg, people }: { seg: React.ReactNode; people: { id
 
 async function Awards() {
   const [rows, streaks] = await Promise.all([loadBoard(), streakBoard()]);
-  const top = (k: "total" | "running" | "strength" | "leap") => [...rows].sort((a, b) => b[k] - a[k])[0];
-  const picks = [["Arc Champion", top("total")], ["Iron Lungs", top("running")], ["Steel Core", top("strength")], ["Biggest Leap", top("leap")]] as const;
+  // Everyone tied on the best score shares the title; nobody wins on zero.
+  const winners = (score: (r: (typeof rows)[number]) => number | undefined) => {
+    const best = Math.max(...rows.map((r) => score(r) ?? 0));
+    return best > 0 ? rows.filter((r) => score(r) === best).map((r) => r.name).join(" & ") : null;
+  };
+  const picks = AWARDS.map((a) => {
+    const p = a.pick;
+    const name = winners((r) => p.kind === "total" ? r.total : p.kind === "leap" ? r.leap : p.kind === "event" ? r.perEvent[p.id] : r.byCategory[p.id]);
+    return [a.title, a.text, name] as const;
+  });
   return (
     <div className="adm-body">
       <div className="awards">
-        {picks.map(([title, r]) => (
+        {picks.map(([title, text, name]) => (
           <div key={title} className="award">
-            <h3>{title}</h3><p>{r ? r.name : "Not decided yet"}</p>
+            <h3>{title}</h3><p>{name ?? "Not decided yet"}</p><p className="note">{text}</p>
           </div>
         ))}
       </div>

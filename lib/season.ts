@@ -6,13 +6,22 @@ export type Scoring =
   | { kind: "per_unit"; perUnit: number; cap: number }
   // Time against a target. Full points at or under the target, then lose
   // `stepPoints` for every `step` seconds slower, never below `floor`.
-  | { kind: "time"; target: number; step: number; stepPoints: number; floor: number };
+  | { kind: "time"; target: number; step: number; stepPoints: number; floor: number }
+  // Rules not decided yet. Results can still be entered; they score once a rule replaces this.
+  | { kind: "tba" };
+
+// Event-day categories, in the order they're shown.
+export const CATEGORIES = [
+  { id: "strength", name: "Strength", short: "Strength" },
+  { id: "last-man", name: "Last Man Standing", short: "Last man" },
+  { id: "explosive", name: "Explosive & Endurance", short: "Explosive" },
+] as const;
+export type CategoryId = (typeof CATEGORIES)[number]["id"];
 
 export type SeasonEvent = {
   id: string;
   name: string;
-  weekend: "running" | "strength";
-  day: "Sat" | "Sun";
+  category: CategoryId;
   unit: string; // what the admin types in: km, reps, seconds
   rule: string; // one line shown to participants
   blurb: string;
@@ -21,72 +30,74 @@ export type SeasonEvent = {
 
 export const MAX_PER_EVENT = 100;
 
-// The six below are just the opening lineup. More get added after the group
-// talks it through; this line tells visitors that wherever events are listed.
-export const MORE_EVENTS_NOTE = "This is just the opening lineup. More events are coming once the gang decides, and we'll announce them right here.";
-
 export const EVENTS: SeasonEvent[] = [
-  {
-    id: "long-run",
-    name: "Long run",
-    weekend: "running",
-    day: "Sun",
-    unit: "km",
-    rule: "10 pts per km · cap 10 km · 80 min limit",
-    blurb: "Run as far as you can, up to 10 km. Stop at 5 km and you still bank half.",
-    scoring: { kind: "per_unit", perUnit: 10, cap: 10 },
-  },
-  {
-    id: "3k",
-    name: "3 km run",
-    weekend: "running",
-    day: "Sat",
-    unit: "time (mm:ss)",
-    rule: "100 at 15:00 or under · −5 per 30 s slower · 20 for finishing",
-    blurb: "One steady effort against the clock.",
-    scoring: { kind: "time", target: 900, step: 30, stepPoints: 5, floor: 20 },
-  },
-  {
-    id: "sprint",
-    name: "100 m sprint",
-    weekend: "running",
-    day: "Sat",
-    unit: "time (seconds)",
-    rule: "100 at 14.0 s or under · −10 per 0.5 s slower · 20 for finishing",
-    blurb: "Two attempts, best time counts.",
-    scoring: { kind: "time", target: 14, step: 0.5, stepPoints: 10, floor: 20 },
-  },
   {
     id: "push-ups",
     name: "Push-ups",
-    weekend: "strength",
-    day: "Sat",
+    category: "strength",
     unit: "reps",
     rule: "2 pts per rep · cap 50 reps",
     blurb: "Max strict reps in 2 minutes. Chest to fist height, full lockout.",
     scoring: { kind: "per_unit", perUnit: 2, cap: 50 },
   },
   {
+    id: "burpees",
+    name: "Burpees",
+    category: "strength",
+    unit: "reps",
+    rule: "2 pts per rep · cap 50 reps",
+    blurb: "Five minutes, chest to floor, jump at the top.",
+    scoring: { kind: "per_unit", perUnit: 2, cap: 50 },
+  },
+  {
     id: "plank",
     name: "Plank hold",
-    weekend: "strength",
-    day: "Sat",
+    category: "last-man",
     unit: "time (mm:ss)",
     rule: "1 pt per 3 s · cap 5:00",
     blurb: "Forearm plank. Hips drop twice and the clock stops.",
     scoring: { kind: "per_unit", perUnit: 1 / 3, cap: 300 },
   },
   {
-    id: "burpees",
-    name: "Burpees",
-    weekend: "strength",
-    day: "Sun",
+    id: "sit-ups",
+    name: "Sit-ups",
+    category: "last-man",
     unit: "reps",
-    rule: "2 pts per rep · cap 50 reps",
-    blurb: "Five minutes, chest to floor, jump at the top.",
-    scoring: { kind: "per_unit", perUnit: 2, cap: 50 },
+    rule: "Points TBA",
+    blurb: "Keep going until you can't. Last one still moving wins.",
+    scoring: { kind: "tba" },
+  },
+  {
+    id: "sprint",
+    name: "100 m sprint",
+    category: "explosive",
+    unit: "time (seconds)",
+    rule: "100 at 14.0 s or under · −10 per 0.5 s slower · 20 for finishing",
+    blurb: "Two attempts, best time counts.",
+    scoring: { kind: "time", target: 14, step: 0.5, stepPoints: 10, floor: 20 },
+  },
+  {
+    id: "long-run",
+    name: "Long run",
+    category: "explosive",
+    unit: "km",
+    rule: "10 pts per km · cap 10 km · 80 min limit",
+    blurb: "Run as far as you can in 80 minutes, up to 10 km. Stop at 5 km and you still bank half.",
+    scoring: { kind: "per_unit", perUnit: 10, cap: 10 },
+  },
+  {
+    id: "dead-hang",
+    name: "Dead hang",
+    category: "explosive",
+    unit: "time (mm:ss)",
+    rule: "Points TBA",
+    blurb: "Hang from the bar, arms straight. Clock stops when you let go.",
+    scoring: { kind: "tba" },
   },
 ];
+
+/** Events that score points right now (rules decided). */
+export const SCORED_EVENTS = EVENTS.filter((e) => e.scoring.kind !== "tba");
 
 // Dates are in India Standard Time. Placeholders until the group confirms.
 export const TZ = "Asia/Kolkata";
@@ -100,10 +111,10 @@ export const SEASON = {
 };
 
 export const TIMELINE = [
-  { when: "Sat 17 Oct", title: "Kickoff + baseline", text: "Everyone tries all six events once. No points, just your starting numbers." },
+  { when: "Sat 17 Oct", title: "Kickoff + baseline", text: "Everyone tries every event once. No points, just your starting numbers." },
   { when: "Oct to Dec", title: "Training block", text: "A daily email with today's practice, your streak and the days left." },
-  { when: "2 to 3 Jan", title: "Running weekend", text: "Sprint and 3 km on Saturday. The long run on Sunday." },
-  { when: "9 to 10 Jan", title: "Strength weekend", text: "Push-ups and plank on Saturday. Burpees on Sunday." },
+  { when: "2 to 3 Jan", title: "Running weekend", text: "Explosive & Endurance: sprint, timed long run and dead hang." },
+  { when: "9 to 10 Jan", title: "Strength weekend", text: "Strength: push-ups and burpees. Last Man Standing: plank and sit-ups." },
   { when: "Sun 10 Jan", title: "Awards night", text: "Final board, titles, certificates and your poster." },
 ];
 
@@ -135,11 +146,15 @@ export const DRILLS = [
   "Bear crawl", "High knees", "Superman hold",
 ];
 
-export const AWARDS = [
-  { title: "Arc Champion", text: "Most points across all events." },
-  { title: "Iron Lungs", text: "Top score on running weekend." },
-  { title: "Steel Core", text: "Top score on strength weekend." },
-  { title: "Biggest Leap", text: "Most improved from your baseline." },
+/** Event-day titles. `pick` says who wins: most points overall, biggest jump from
+    baseline, best score in one event, or best score in one category. */
+export type AwardPick = { kind: "total" } | { kind: "leap" } | { kind: "event"; id: string } | { kind: "category"; id: CategoryId };
+export const AWARDS: { title: string; text: string; pick: AwardPick }[] = [
+  { title: "Winter Arc Champ", text: "Most points across all events.", pick: { kind: "total" } },
+  { title: "Under Dog to Beast", text: "Biggest jump from your baseline.", pick: { kind: "leap" } },
+  { title: "Speed King", text: "Fastest 100 m sprint.", pick: { kind: "event", id: "sprint" } },
+  { title: "Last Man Standing", text: "Top score in plank and sit-ups.", pick: { kind: "category", id: "last-man" } },
+  { title: "Enduro Monster", text: "Furthest on the timed long run.", pick: { kind: "event", id: "long-run" } },
 ];
 
 /** Daily habits in the quick-log button. No points, just streaks. Add one with a single line.

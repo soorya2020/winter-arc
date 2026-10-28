@@ -586,6 +586,8 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink); 
 .adm-actions > button.ghost:last-child { margin-left: auto; min-height: 2rem; }
 .adm .nudge { border-color: var(--wa); color: var(--wa-deep); }
 .adm .seg.chan { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row; }
+/* Results: three categories on top, Baseline and Bonus underneath. */
+.adm .seg.wrap { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-flow: row; border-radius: 1.6rem; width: 100%; box-sizing: border-box; }
 .adm .seg.chan button { all: unset; cursor: pointer; text-align: center; padding: .65rem .3rem; border-radius: 999px; font-weight: 800; font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; }
 .adm .seg.chan button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
 .adm .seg.chan button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
