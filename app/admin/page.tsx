@@ -39,7 +39,7 @@ const TABS = [
 ];
 // Result entry: one tab per event-day category, then baseline and bonus.
 const GROUPS = [
-  ...CATEGORIES.map((c) => ({ id: c.id as string, label: c.name })),
+  ...CATEGORIES.map((c) => ({ id: c.id as string, label: c.short })),
   { id: "baseline", label: "Baseline" },
   { id: "bonus", label: "Bonus" },
 ];
@@ -180,7 +180,7 @@ export default async function Admin({ searchParams }: { searchParams: { tab?: st
       {tab === "results" && (() => {
         const w = (GROUPS.find((x) => x.id === (OLD[asked] ?? OLD[searchParams.w ?? ""] ?? searchParams.w)) ?? GROUPS[0]).id;
         const seg = (
-          <div className="seg" role="group" aria-label="Category">
+          <div className="seg wrap" role="group" aria-label="Category">
             {GROUPS.map((x) => <Link key={x.id} href={`/admin?tab=results&w=${x.id}`} className={x.id === w ? "on" : ""}>{x.label}</Link>)}
           </div>
         );

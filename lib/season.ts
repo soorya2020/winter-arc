@@ -12,9 +12,9 @@ export type Scoring =
 
 // Event-day categories, in the order they're shown.
 export const CATEGORIES = [
-  { id: "strength", name: "Strength" },
-  { id: "last-man", name: "Last Man Standing" },
-  { id: "explosive", name: "Explosive & Endurance" },
+  { id: "strength", name: "Strength", short: "Strength" },
+  { id: "last-man", name: "Last Man Standing", short: "Last man" },
+  { id: "explosive", name: "Explosive & Endurance", short: "Explosive" },
 ] as const;
 export type CategoryId = (typeof CATEGORIES)[number]["id"];
 
