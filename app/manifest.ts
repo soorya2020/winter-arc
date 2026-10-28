@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Winter Arc 2026",
     short_name: "Winter Arc",
-    description: "Six events. Two weekends. No excuses accepted.",
+    description: "Seven events. Two weekends. No excuses accepted.",
     start_url: "/",
     scope: "/",
     display: "standalone",

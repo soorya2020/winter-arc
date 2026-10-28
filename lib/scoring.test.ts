@@ -15,15 +15,16 @@ test("per-unit events cap at 100", () => {
 });
 
 test("timed events lose points per step and keep a floor", () => {
-  assert.equal(points(ev("3k"), 900), 100);
-  assert.equal(points(ev("3k"), 901), 95);
-  assert.equal(points(ev("3k"), 960), 90);
-  assert.equal(points(ev("3k"), 3000), 20);
   assert.equal(points(ev("sprint"), 13.2), 100);
   assert.equal(points(ev("sprint"), 14.5), 90);
   assert.equal(points(ev("sprint"), 15), 80);
   assert.equal(points(ev("sprint"), 15.1), 70);
   assert.equal(points(ev("sprint"), 0), 0);
+});
+
+test("events without rules yet score nothing", () => {
+  assert.equal(points(ev("sit-ups"), 80), 0);
+  assert.equal(points(ev("dead-hang"), 90), 0);
 });
 
 test("parses times and numbers", () => {
@@ -34,13 +35,15 @@ test("parses times and numbers", () => {
 
 test("standings total, rank and limit", () => {
   const people = [{ id: "a", name: "A" }, { id: "b", name: "B" }];
-  const vals: Record<string, number> = { "long-run": 10, "3k": 900, sprint: 14, "push-ups": 20, plank: 300, burpees: 50 };
+  const vals: Record<string, number> = { "long-run": 10, sprint: 14, "push-ups": 20, plank: 300, burpees: 50, "sit-ups": 60, "dead-hang": 75 };
   const res = Object.entries(vals).map(([event_id, value]) => ({ participant_id: "a", event_id, value, baseline: false }));
   res.push({ participant_id: "b", event_id: "long-run", value: 5, baseline: false });
   const [first, second] = standings(people, res);
   assert.equal(first.id, "a");
-  assert.equal(first.total, 540);
+  assert.equal(first.total, 440);
   assert.equal(first.limit, "Push-ups");
+  assert.deepEqual(first.byCategory, { strength: 140, "last-man": 100, explosive: 200 });
+  assert.equal(first.perEvent["sit-ups"], undefined);
   assert.equal(second.total, 50);
   assert.equal(second.limit, null);
 });

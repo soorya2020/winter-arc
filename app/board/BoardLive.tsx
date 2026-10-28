@@ -1,7 +1,7 @@
 "use client";
 import type { BoardRow } from "@/lib/board";
 import CountUp from "@/components/CountUp";
-import { MAX_PER_EVENT } from "@/lib/season.ts";
+import { CATEGORIES, MAX_PER_EVENT } from "@/lib/season.ts";
 import { palette } from "@/lib/theme";
 import { useEffect, useRef, useState } from "react";
 
@@ -9,7 +9,7 @@ const COLORS = palette.jerseys;
 
 // Race track: one lane per person, their token placed by points on the way to the finish
 // (every event maxed). Tap a lane for the event-by-event scores.
-export default function BoardLive({ rows, at, meId, events }: { rows: BoardRow[]; at: string | null; meId: string | null; events: { id: string; name: string; weekend: string }[] }) {
+export default function BoardLive({ rows, at, meId, events }: { rows: BoardRow[]; at: string | null; meId: string | null; events: { id: string; name: string; category: string; tba: boolean }[] }) {
   // Tokens run out from the start line the first time the board scrolls into view.
   const ref = useRef<HTMLDivElement>(null);
   const [seen, setSeen] = useState(false);
@@ -23,14 +23,14 @@ export default function BoardLive({ rows, at, meId, events }: { rows: BoardRow[]
 
   if (!rows.length) return <div className="panel"><p className="note">Nobody has accepted yet. The board fills up as invites are accepted.</p></div>;
 
-  const finish = events.length * MAX_PER_EVENT;
-  const runDone = events.filter((e) => e.weekend === "running").length * MAX_PER_EVENT;
+  // Events with points still TBA don't count toward the finish line yet.
+  const finish = events.filter((e) => !e.tba).length * MAX_PER_EVENT;
 
   return (
     <div ref={ref} className={`race${seen ? " in" : ""}`}>
       <div className="race-axis" aria-hidden="true">
         <span />
-        <span className="marks"><span>Start</span><span style={{ left: `${(runDone / finish) * 100}%` }}>Running done</span><span>Finish · {finish}</span></span>
+        <span className="marks"><span>Start</span><span>Finish · {finish}</span></span>
         <span>Pts</span>
       </div>
       {rows.map((r, i) => {
@@ -51,14 +51,14 @@ export default function BoardLive({ rows, at, meId, events }: { rows: BoardRow[]
               <span className="tot"><CountUp value={r.total} run={seen} /></span>
             </summary>
             <div className="lane-more">
-              <p className="sub">{r.name}{me ? " (you)" : ""} · Run {r.running} · Strength {r.strength}{r.leap ? ` · ${r.leap > 0 ? "+" : ""}${r.leap} vs baseline` : ""} · {r.streak}-day streak</p>
+              <p className="sub">{r.name}{me ? " (you)" : ""} {CATEGORIES.map((c) => ` · ${c.name} ${r.byCategory[c.id]}`).join("")}{r.leap ? ` · ${r.leap > 0 ? "+" : ""}${r.leap} vs baseline` : ""} · {r.streak}-day streak</p>
               <div className="bars">
                 {events.map((e) => {
                   const p = r.perEvent[e.id];
                   return (
-                    <div key={e.id} title={`${e.name}: ${p ?? "not scored yet"}`}>
-                      <span>{e.name.replace("100 m ", "")} {p != null ? Math.round(p) : "–"}</span>
-                      <span className="track"><i style={{ width: `${p ?? 0}%`, background: e.weekend === "running" ? "var(--accent)" : "var(--ink)" }} /></span>
+                    <div key={e.id} title={`${e.name}: ${e.tba ? "points TBA" : p ?? "not scored yet"}`}>
+                      <span>{e.name.replace("100 m ", "")} {e.tba ? "TBA" : p != null ? Math.round(p) : "–"}</span>
+                      <span className="track"><i style={{ width: `${p ?? 0}%`, background: e.category === "explosive" ? "var(--accent)" : "var(--ink)" }} /></span>
                     </div>
                   );
                 })}

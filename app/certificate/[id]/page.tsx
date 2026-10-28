@@ -34,7 +34,7 @@ export default async function Certificate({ params }: { params: { id: string } }
           {EVENTS.map((e) => (
             <div key={e.id} style={{ borderTop: "2px solid var(--ink)", paddingTop: ".4rem", minWidth: 0 }}>
               <div className="label" style={{ fontSize: ".6rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</div>
-              <div style={{ fontFamily: "var(--display)", fontSize: "clamp(1.4rem, 3vw, 2.2rem)", lineHeight: 1 }}>{r.perEvent[e.id] ?? "–"}</div>
+              <div style={{ fontFamily: "var(--display)", fontSize: "clamp(1.4rem, 3vw, 2.2rem)", lineHeight: 1 }}>{e.scoring.kind === "tba" ? "TBA" : r.perEvent[e.id] ?? "–"}</div>
             </div>
           ))}
         </div>

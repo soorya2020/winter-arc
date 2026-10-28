@@ -106,7 +106,7 @@ export default async function Board({ searchParams }: { searchParams: { joined?:
           <span className="pill">{me ? `#${mine?.rank ?? "–"} · ${first}` : "Admin view"}</span>
         </header>
         {me && habits && <QuickLog logs={habits.logs} on={me.profile?.habitsOn ?? null} claims={autoClaims(me, habits.logs)} missing={habits.missing} />}
-        <AppTabs streaks={streaks} rows={rows} meId={me?.id ?? null} events={EVENTS.map((e) => ({ id: e.id, name: e.name, weekend: e.weekend }))} today={todayTab} me={meTab} />
+        <AppTabs streaks={streaks} rows={rows} meId={me?.id ?? null} events={EVENTS.map((e) => ({ id: e.id, name: e.name, category: e.category, tba: e.scoring.kind === "tba" }))} today={todayTab} me={meTab} />
       </div>
     </>
   );

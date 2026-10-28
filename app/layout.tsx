@@ -8,7 +8,7 @@ const body = Archivo({ subsets: ["latin"], weight: ["400", "600", "800"], variab
 
 export const metadata: Metadata = {
   title: "Winter Arc 2026",
-  description: "Six athletes. Six events. Two weekends to find your limits. By invitation.",
+  description: "Seven athletes. Seven events. Two weekends to find your limits. By invitation.",
   robots: { index: false, follow: false },
   applicationName: "Winter Arc",
   appleWebApp: { capable: true, title: "Winter Arc", statusBarStyle: "default" },

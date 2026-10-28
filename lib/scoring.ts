@@ -1,10 +1,10 @@
-import { EVENTS, MAX_PER_EVENT, type Scoring, type SeasonEvent } from "./season.ts";
+import { CATEGORIES, EVENTS, MAX_PER_EVENT, SCORED_EVENTS, type CategoryId, type Scoring, type SeasonEvent } from "./season.ts";
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
 /** Points for one raw result. 0 or less means did not finish. */
 export function points(scoring: Scoring, value: number | null | undefined): number {
-  if (value == null || !Number.isFinite(value) || value <= 0) return 0;
+  if (scoring.kind === "tba" || value == null || !Number.isFinite(value) || value <= 0) return 0;
   if (scoring.kind === "per_unit") {
     return round1(Math.min(MAX_PER_EVENT, Math.min(value, scoring.cap) * scoring.perUnit));
   }
@@ -47,9 +47,8 @@ export type BonusRow = { participant_id: string; points: number };
 export type Standing = {
   id: string;
   name: string;
-  perEvent: Record<string, number>; // event id -> points
-  running: number;
-  strength: number;
+  perEvent: Record<string, number>; // event id -> points, only events with rules decided
+  byCategory: Record<CategoryId, number>;
   bonus: number; // custom points from the organizer, can be negative
   total: number; // event points plus bonus
   baselineTotal: number;
@@ -63,26 +62,25 @@ export function standings(people: { id: string; name: string }[], results: Resul
     const base: Record<string, number> = {};
     for (const r of results) {
       if (r.participant_id !== p.id) continue;
-      const ev = EVENTS.find((e) => e.id === r.event_id);
+      const ev = SCORED_EVENTS.find((e) => e.id === r.event_id);
       if (!ev) continue;
       (r.baseline ? base : perEvent)[ev.id] = points(ev.scoring, Number(r.value));
     }
-    const sum = (w?: string) =>
-      round1(EVENTS.filter((e) => !w || e.weekend === w).reduce((a, e) => a + (perEvent[e.id] ?? 0), 0));
+    const sum = (c?: CategoryId) =>
+      round1(EVENTS.filter((e) => !c || e.category === c).reduce((a, e) => a + (perEvent[e.id] ?? 0), 0));
     const events = sum();
     const bonus = round1(bonuses.filter((b) => b.participant_id === p.id).reduce((a, b) => a + Number(b.points), 0));
     const total = round1(events + bonus);
     const baselineTotal = round1(Object.values(base).reduce((a, b) => a + b, 0));
-    const scored = EVENTS.filter((e) => perEvent[e.id] != null);
-    const limitEv = scored.length === EVENTS.length
+    const scored = SCORED_EVENTS.filter((e) => perEvent[e.id] != null);
+    const limitEv = scored.length === SCORED_EVENTS.length
       ? scored.reduce((lo, e) => (perEvent[e.id] < perEvent[lo.id] ? e : lo))
       : null;
     return {
       id: p.id,
       name: p.name,
       perEvent,
-      running: sum("running"),
-      strength: sum("strength"),
+      byCategory: Object.fromEntries(CATEGORIES.map((c) => [c.id, sum(c.id)])) as Record<CategoryId, number>,
       bonus,
       total,
       baselineTotal,
