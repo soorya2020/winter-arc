@@ -173,7 +173,7 @@ export default function QuickLog({ logs, on: firstOn, claims: firstClaims, missi
             {view === "pick" && <Pick on={on ?? []} first={on == null} onDone={(o) => {
               if (o) {
                 setOn(o);
-                setClaims((c) => { const n = { ...c }; for (const h of HABITS) if (h.kind === "check" && h.claim && o.includes(h.id) && !n[h.id]) n[h.id] = { days: 1, on: day }; return n; });
+                setClaims((c) => { const n = { ...c }; for (const h of HABITS) if (h.kind === "check" && h.claim) { if (!o.includes(h.id)) delete n[h.id]; else if (!n[h.id]) n[h.id] = { days: 1, on: day }; } return n; });
               } if (o || on != null) setSheet({ open: true, view: "log" }); else setSheet(CLOSED); }} />}
             {view === "ask" && <Ask onBack={() => (home ? setSheet(CLOSED) : setSheet({ open: true, view: "log" }))} />}
           </div>
