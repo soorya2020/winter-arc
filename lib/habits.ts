@@ -77,7 +77,8 @@ export async function streakBoard(): Promise<StreakBoard> {
   const day = today();
   return HABITS.map((h) => {
     const mine = logs.filter((l) => l.habit === h.id);
-    const rows = people.filter((p) => p.accepted_at && (p.profile?.habitsOn?.includes(h.id) || p.profile?.habitClaims?.[h.id] || mine.some((l) => l.participant_id === p.id))).map((p) => {
+    // Only people following it now: unpicking a streak takes you off its board (your logs are kept if you pick it again).
+    const rows = people.filter((p) => p.accepted_at && p.profile?.habitsOn?.includes(h.id)).map((p) => {
       const own = mine.filter((l) => l.participant_id === p.id);
       const claim = autoClaims(p, own)[h.id] ?? null;
       const good = countedDays(own.filter((l) => l.value > 0).map((l) => l.day), own.filter((l) => l.value === 0).map((l) => l.day), claim);

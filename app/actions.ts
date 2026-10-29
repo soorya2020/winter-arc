@@ -216,9 +216,19 @@ export async function setHabitsOn(on: string[]): Promise<{ ok?: boolean; error?:
   const habitsOn = HABITS.filter((h) => on.includes(h.id)).map((h) => h.id);
   // Auto-counting habits start counting the day they're picked, unless the member already entered a streak.
   const habitClaims = { ...(me.profile?.habitClaims ?? {}) };
-  for (const h of HABITS) if (h.kind === "check" && h.claim && habitsOn.includes(h.id) && !habitClaims[h.id]) habitClaims[h.id] = { days: 1, on: today() };
-  const { error } = await db().from("participants").update({ profile: { ...(me.profile ?? {}), habitsOn, habitClaims } }).eq("id", me.id);
-  return error ? { error: "Couldn't save. Try again." } : { ok: true };
+  const habitBest = { ...(me.profile?.habitBest ?? {}) };
+  for (const h of HABITS) {
+    if (h.kind !== "check" || !h.claim) continue;
+    if (habitsOn.includes(h.id)) { if (!habitClaims[h.id]) habitClaims[h.id] = { days: 1, on: today() }; continue; }
+    // Unpicked: keep the best run, then stop it counting by itself. Picking it again starts at day 1.
+    if (!habitClaims[h.id]) continue;
+    habitBest[h.id] = Math.max(habitBest[h.id] ?? 0, await bestStreak(me, h.id));
+    delete habitClaims[h.id];
+  }
+  const { error } = await db().from("participants").update({ profile: { ...(me.profile ?? {}), habitsOn, habitClaims, habitBest } }).eq("id", me.id);
+  if (error) return { error: "Couldn't save. Try again." };
+  revalidatePath("/board");
+  return { ok: true };
 }
 
 /** A member asks the organizers for something new. Saved for the admin panel and emailed to the organizer inbox. */
