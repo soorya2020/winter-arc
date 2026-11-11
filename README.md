@@ -33,7 +33,7 @@ Every event is worth 100, so nobody's specialty outweighs the rest.
    - `SITE_URL`: only needed outside Vercel; on Vercel, links use the project's production address automatically
    - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
    - `ADMIN_PASSWORD`: what you'll type to open `/admin`
-   - `SESSION_SECRET`, `CRON_SECRET`: any long random strings
+   - `SESSION_SECRET`: any long random string (the daily cron key is built into vercel.json)
    - `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465`, `SMTP_USER`, `SMTP_PASS` (the app password), `MAIL_FROM`
    Deploy.
 4. **Run it.** Open `/admin`, sign in, add each invitee's name and email, then press *Email invite*
