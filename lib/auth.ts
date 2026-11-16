@@ -39,7 +39,7 @@ export function adminLogin(password: string) {
   const pw = process.env.ADMIN_PASSWORD;
   const sig = adminSignature();
   if (!pw || !sig || !same(password, pw)) return false;
-  cookies().set({ name: ADMIN_COOKIE, value: sig, httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 60 * 60 * 24 * 30 });
+  cookies().set({ name: ADMIN_COOKIE, value: sig, httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: YEAR });
   return true;
 }
 
