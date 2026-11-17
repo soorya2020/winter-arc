@@ -90,3 +90,38 @@ export function standings(people: { id: string; name: string }[], results: Resul
   });
   return rows.sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
 }
+
+/** Shared ranks: equal totals share a place (308, 250, 250, 187 -> 1, 2, 2, 4). */
+export function rankMap(rows: Standing[]): Map<string, number> {
+  const out = new Map<string, number>();
+  let rank = 0, last = Number.NaN;
+  rows.forEach((s, i) => { if (s.total !== last) { rank = i + 1; last = s.total; } out.set(s.id, rank); });
+  return out;
+}
+
+/** A scored entry with when it was saved (results.updated_at, bonus_points.created_at). */
+export type Dated = { at?: string | null };
+
+/** The calendar day (YYYY-MM-DD) an entry was saved, in the season's time zone. */
+export function scoringDay(at: string, tz = "Asia/Kolkata") {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(at));
+}
+
+/**
+ * Where everyone stood before the latest scoring day: the board rebuilt from only the results
+ * and bonus points saved before the most recent day anything was scored. Null when there is
+ * no earlier day to compare with (everything so far was entered on one day).
+ */
+export function previousRanks(
+  people: { id: string; name: string }[],
+  results: (ResultRow & Dated)[],
+  bonuses: (BonusRow & Dated)[] = [],
+  tz?: string,
+): { since: string; ranks: Map<string, number> } | null {
+  const day = (x: Dated) => (x.at ? scoringDay(x.at, tz) : "");
+  const counted = [...results.filter((r) => !r.baseline), ...bonuses];
+  const latest = counted.reduce((hi, x) => (day(x) > hi ? day(x) : hi), "");
+  if (!latest || !counted.some((x) => day(x) < latest)) return null;
+  const before = standings(people, results.filter((r) => r.baseline || day(r) < latest), bonuses.filter((b) => day(b) < latest));
+  return { since: latest, ranks: rankMap(before) };
+}

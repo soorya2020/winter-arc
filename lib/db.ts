@@ -55,10 +55,10 @@ export async function allParticipants() {
 }
 
 export async function allResults() {
-  const { data, error } = await db().from("results").select("participant_id, event_id, value, baseline");
+  const { data, error } = await db().from("results").select("participant_id, event_id, value, baseline, updated_at");
   if (error) throw error;
-  return (data ?? []).map((r) => ({ ...r, value: Number(r.value) })) as {
-    participant_id: string; event_id: string; value: number; baseline: boolean;
+  return (data ?? []).map(({ updated_at, ...r }) => ({ ...r, value: Number(r.value), at: updated_at as string | null })) as {
+    participant_id: string; event_id: string; value: number; baseline: boolean; at: string | null;
   }[];
 }
 
