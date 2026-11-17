@@ -717,6 +717,22 @@ button.wide, .cta.wide { width: 100%; justify-content: center; }
 .home .fun--rejected q { font-size: 2.6rem; }
 .home .stamp { font-size: 1.9rem; }
 
+/* One-time "What's new" sheet */
+.new-sheet h2 { font-size: 2.2rem; margin: -.4rem 0 0; }
+.new-demo { display: grid; border: 2px solid var(--ink); border-radius: 1rem; padding: .3rem .9rem; background: var(--surface, var(--paper)); }
+.new-demo div { display: grid; grid-template-columns: 2.4rem 1fr; align-items: center; gap: .8rem; padding: .55rem 0; font-weight: 700; font-size: .92rem; }
+.new-demo div + div { border-top: 1px dashed var(--line); }
+.new-demo .rk { font-family: var(--display); font-size: 1.6rem; color: var(--muted); display: grid; justify-items: center; line-height: 1; }
+.new-demo .mv { display: grid; justify-items: center; margin-top: .15rem; font-family: var(--body); }
+.new-demo .mv b { font-size: .75rem; font-weight: 900; }
+.new-demo .mv.up b { color: var(--good, #1a9e5a); } .new-demo .mv.down b { color: var(--bad, #d6453d); } .new-demo .mv.same b { color: var(--muted); }
+.new-why { margin: 0; color: var(--muted); font-weight: 600; }
+.new-you { margin: 0; padding: .7rem .9rem; border-radius: .8rem; background: var(--accent-soft); color: var(--accent); font-weight: 800; }
+.new-btns { display: grid; gap: .5rem; }
+.new-btns .cta { justify-self: stretch; justify-content: center; }
+.new-later { all: unset; cursor: pointer; text-align: center; padding: .7rem; font-weight: 800; font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.new-later:focus-visible { outline: 3px solid var(--accent); border-radius: 999px; }
+
 /* Saving spinner: any button with aria-busy shows its own, so only the thing you tapped waits. */
 @keyframes spin { to { transform: rotate(360deg); } }
 button[aria-busy="true"]::before { content: ""; display: inline-block; width: .85em; height: .85em; margin-right: .45em; vertical-align: -.1em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }

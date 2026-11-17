@@ -4,6 +4,7 @@ import type { BoardRow } from "@/lib/board";
 import Arena from "./Arena";
 import BoardLive from "./BoardLive";
 import StreakBoard from "./StreakBoard";
+import WhatsNew from "./WhatsNew";
 import type { StreakBoard as Streaks } from "@/lib/habits";
 import TabBar from "@/components/TabBar";
 
@@ -67,6 +68,7 @@ export default function AppTabs({ rows: first, meId, events, today, me, streaks 
         </div>
       )}
       <div className="tab" hidden={tab !== "me"}>{me}</div>
+      {meId && <WhatsNew mine={rows.find((r) => r.id === meId)} onSee={() => { setBoard("events"); go("ranks"); }} />}
       <TabBar active={tab} onPick={(t) => go(t as Tab)} />
     </>
   );
