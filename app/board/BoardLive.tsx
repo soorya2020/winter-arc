@@ -37,10 +37,19 @@ export default function BoardLive({ rows, at, meId, events }: { rows: BoardRow[]
         const x = Math.min(100, (r.total / finish) * 100);
         const me = r.id === meId;
         const color = me ? palette.accent : COLORS[i % COLORS.length];
+        // Places moved since the last scoring day: positive is up the board.
+        const moved = r.prevRank != null ? r.prevRank - r.rank : null;
         return (
           <details key={r.id} className={`lane r${r.rank}${me ? " me" : ""}`} style={{ ["--i" as string]: i, ["--c" as string]: color, ["--x" as string]: `${x}%` }}>
             <summary>
-              <span className="rk">{r.rank}</span>
+              <span className="rk" aria-label={moved == null ? `Rank ${r.rank}` : `Rank ${r.rank}, was ${r.prevRank}${moved ? `, ${moved > 0 ? "up" : "down"} ${Math.abs(moved)}` : ", no change"}`}>
+                {r.rank}
+                {moved != null && (
+                  <span className={`mv ${moved > 0 ? "up" : moved < 0 ? "down" : "same"}`} aria-hidden="true">
+                    <b>{moved > 0 ? `▲${moved}` : moved < 0 ? `▼${-moved}` : "="}</b>
+                  </span>
+                )}
+              </span>
               <span className="lane-track" aria-label={`${r.name}: ${r.total} of ${finish} points`}>
                 <span className="trail" />
                 <span className={`tok${x > 62 ? " flip" : ""}`}>
@@ -51,7 +60,7 @@ export default function BoardLive({ rows, at, meId, events }: { rows: BoardRow[]
               <span className="tot"><CountUp value={r.total} run={seen} /></span>
             </summary>
             <div className="lane-more">
-              <p className="sub">{r.name}{me ? " (you)" : ""} {CATEGORIES.map((c) => ` · ${c.name} ${r.byCategory[c.id]}`).join("")}{r.leap ? ` · ${r.leap > 0 ? "+" : ""}${r.leap} vs baseline` : ""} · {r.streak}-day streak</p>
+              <p className="sub">{r.name}{me ? " (you)" : ""} {CATEGORIES.map((c) => ` · ${c.name} ${r.byCategory[c.id]}`).join("")}{moved != null && r.prevSince ? ` · ${moved ? `${moved > 0 ? "Up" : "Down"} ${Math.abs(moved)}` : "Held"} since ${new Date(`${r.prevSince}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}{r.leap ? ` · ${r.leap > 0 ? "+" : ""}${r.leap} vs baseline` : ""} · {r.streak}-day streak</p>
               <div className="bars">
                 {events.map((e) => {
                   const p = r.perEvent[e.id];
@@ -67,7 +76,7 @@ export default function BoardLive({ rows, at, meId, events }: { rows: BoardRow[]
           </details>
         );
       })}
-      <p className="note">Tap a lane to see event scores.{at ? ` Updated ${new Date(at).toLocaleTimeString()}.` : ""}</p>
+      <p className="note">Tap a lane to see event scores.{rows[0]?.prevSince ? " ▲▼ show places moved since the last scoring day." : ""}{at ? ` Updated ${new Date(at).toLocaleTimeString()}.` : ""}</p>
     </div>
   );
 }

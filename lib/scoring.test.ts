@@ -105,3 +105,19 @@ test("friends get roasted with their honest answers", () => {
     assert.ok([...lines].some((l) => l.includes(bit)), bit);
   }
 });
+
+test("previous ranks come from entries saved before the latest scoring day", async () => {
+  const { previousRanks } = await import("./scoring.ts");
+  const people = [{ id: "a", name: "A" }, { id: "b", name: "B" }, { id: "c", name: "C" }];
+  const day1 = "2026-11-08T10:00:00Z", day2 = "2026-11-15T10:00:00Z";
+  const results = [
+    { participant_id: "a", event_id: "push-ups", value: 50, baseline: false, at: day1 },
+    { participant_id: "b", event_id: "push-ups", value: 40, baseline: false, at: day1 },
+    { participant_id: "c", event_id: "push-ups", value: 10, baseline: false, at: day1 },
+    { participant_id: "c", event_id: "long-run", value: 10, baseline: false, at: day2 },
+  ];
+  const prev = previousRanks(people, results, [], "Asia/Kolkata")!;
+  assert.equal(prev.since, "2026-11-15");
+  assert.deepEqual([...prev.ranks], [["a", 1], ["b", 2], ["c", 3]]);
+  assert.equal(previousRanks(people, results.slice(0, 3), [], "Asia/Kolkata"), null);
+});

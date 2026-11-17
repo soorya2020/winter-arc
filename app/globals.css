@@ -135,7 +135,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 /* leaderboard */
 /* table: race track, one lane per person */
 .race { border-top: 2px solid var(--ink); }
-.race-axis, .lane summary { display: grid; grid-template-columns: 2rem minmax(0, 1fr) 3.4rem; gap: .7rem; align-items: center; }
+.race-axis, .lane summary { display: grid; grid-template-columns: 2.2rem minmax(0, 1fr) 3.4rem; gap: .7rem; align-items: center; }
 .race-axis { font-size: .66rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: .5rem 0; border-bottom: 2px solid var(--ink); }
 .race-axis > span:last-child { text-align: right; }
 .race-axis .marks { position: relative; display: flex; justify-content: space-between; }
@@ -145,7 +145,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .lane summary::-webkit-details-marker { display: none; }
 .lane summary:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
 .lane.me summary { background: var(--accent-soft); border-radius: .5rem; }
-.lane .rk { font-family: var(--display); font-size: 1.4rem; color: var(--muted); text-align: center; }
+.lane .rk { font-family: var(--display); font-size: 1.4rem; color: var(--muted); text-align: center; display: grid; justify-items: center; line-height: 1; }
+.lane .mv { display: grid; justify-items: center; gap: .05rem; margin-top: .15rem; font-family: var(--body, inherit); line-height: 1.05; }
+.lane .mv b { font-size: .7rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+.lane .mv.up b { color: var(--good, #1a9e5a); }
+.lane .mv.down b { color: var(--bad, #d6453d); }
+.lane .mv.same b { color: var(--muted); }
 .lane.r1 .rk { color: var(--accent); }
 .lane-track { position: relative; height: 100%; background: repeating-linear-gradient(90deg, transparent 0 calc(20% - 1px), var(--line) calc(20% - 1px) 20%); border-right: 4px solid; border-image: repeating-linear-gradient(0deg, var(--ink) 0 6px, var(--surface) 6px 12px) 4; }
 .trail { position: absolute; top: 50%; left: 0; width: var(--x); translate: 0 -50%; height: .4rem; border-radius: 99px; background: linear-gradient(90deg, transparent, var(--c)); }
@@ -165,7 +170,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .lane-more .bars .track { height: .35rem; }
 .race > .note { margin-top: .6rem; }
 @media (max-width: 560px) {
-  .race-axis, .lane summary { grid-template-columns: 1.4rem minmax(0, 1fr) 2.8rem; gap: .45rem; }
+  .race-axis, .lane summary { grid-template-columns: 1.8rem minmax(0, 1fr) 2.8rem; gap: .45rem; }
   .race-axis .marks span[style] { display: none; }
   .lane .tot { font-size: 1.35rem; }
   .tok .av { width: 1.9rem; height: 1.9rem; font-size: .9rem; }
