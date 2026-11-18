@@ -305,6 +305,12 @@ async function Awards() {
         ))}
       </ul>
       <p className="note">Group poster for the chat: <a href="/api/poster/board">leaderboard poster</a>. Certificates open as a page you can print or save as PDF.</p>
+      <div className="adm-ev"><div><h2>Export</h2><p className="note">Every scored entry with member, event, points, date, running total and rank after it, plus the current ranks. For leaderboard race videos and spreadsheets.</p></div></div>
+      <div className="adm-actions">
+        <a className="btn ghost" href="/api/admin/export?what=log&format=csv" download>Points log (CSV)</a>
+        <a className="btn ghost" href="/api/admin/export?what=ranks&format=csv" download>Ranks (CSV)</a>
+        <a className="btn ghost" href="/api/admin/export?format=json" download>Both (JSON)</a>
+      </div>
 
       <div className="adm-ev"><div><h2>Streaks</h2><p className="note">Daily habits from members&apos; + button. Separate from event points. Longest is the best run so far; members see the same board in Ranks &gt; Streaks.</p></div></div>
       <div className="awards">
