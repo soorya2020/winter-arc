@@ -1,14 +1,14 @@
 "use client";
 import type { BoardRow } from "@/lib/board";
 import CountUp from "@/components/CountUp";
-import { CATEGORIES, MAX_PER_EVENT } from "@/lib/season.ts";
+import { BOARD_MAX, CATEGORIES } from "@/lib/season.ts";
 import { palette } from "@/lib/theme";
 import { useEffect, useRef, useState } from "react";
 
 const COLORS = palette.jerseys;
 
 // Race track: one lane per person, their token placed by points on the way to the finish
-// (every event maxed). Tap a lane for the event-by-event scores.
+// (BOARD_MAX points). Tap a lane for the event-by-event scores.
 export default function BoardLive({ rows, at, meId, events }: { rows: BoardRow[]; at: string | null; meId: string | null; events: { id: string; name: string; category: string; tba: boolean }[] }) {
   // Tokens run out from the start line the first time the board scrolls into view.
   const ref = useRef<HTMLDivElement>(null);
@@ -23,8 +23,7 @@ export default function BoardLive({ rows, at, meId, events }: { rows: BoardRow[]
 
   if (!rows.length) return <div className="panel"><p className="note">Nobody has accepted yet. The board fills up as invites are accepted.</p></div>;
 
-  // Events with points still TBA don't count toward the finish line yet.
-  const finish = events.filter((e) => !e.tba).length * MAX_PER_EVENT;
+  const finish = BOARD_MAX;
 
   return (
     <div ref={ref} className={`race${seen ? " in" : ""}`}>
