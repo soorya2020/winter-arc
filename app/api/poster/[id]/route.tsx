@@ -4,7 +4,7 @@ import { ImageResponse } from "next/og";
 import { NextResponse } from "next/server";
 import { currentParticipant, isAdmin } from "@/lib/auth";
 import { loadBoard } from "@/lib/board";
-import { EVENTS, SCORED_EVENTS, SEASON } from "@/lib/season.ts";
+import { BOARD_MAX, EVENTS, SEASON } from "@/lib/season.ts";
 import { palette } from "@/lib/theme";
 
 export const dynamic = "force-dynamic";
@@ -57,7 +57,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
           <div style={{ display: "flex", fontSize: 170, fontFamily: "Anton", lineHeight: 1, color: C.ink, marginTop: 12 }}>{r.name.toUpperCase()}</div>
           <div style={{ display: "flex", alignItems: "baseline", marginTop: 24 }}>
             <span style={{ fontSize: 260, fontFamily: "Anton", color: C.yellow, lineHeight: 1 }}>{r.total}</span>
-            <span style={{ fontSize: 48, color: C.muted, marginLeft: 20 }}>/ {SCORED_EVENTS.length * 100} pts</span>
+            <span style={{ fontSize: 48, color: C.muted, marginLeft: 20 }}>/ {BOARD_MAX} pts</span>
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
