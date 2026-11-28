@@ -31,7 +31,7 @@ export type SeasonEvent = {
 export const MAX_PER_EVENT = 100;
 
 /** Leaderboard total: the finish line on the board and the "/ N pts" on posters. */
-export const BOARD_MAX = 800;
+export const BOARD_MAX = 2000;
 
 export const EVENTS: SeasonEvent[] = [
   {
